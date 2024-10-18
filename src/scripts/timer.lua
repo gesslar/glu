@@ -27,12 +27,19 @@ function mod.new(parent)
   end
 
   --- timer.multi(name, def)
-  --- Creates nested timers and returns
-  --- @type function - Creates nested timers and returns
+  --- Creates nested timers and returns true if successful.
+  --- @type function - Creates nested timers and returns true if successful.
   --- @param name string - The name of the multi timer.
   --- @param def table - The definition of the multi timer.
   --- @param delay number - The delay between each timer.
   --- @return boolean - True if the multi timer was created, errors out if not.
+  --- @example glu.timer.multi("Greetings", {
+  --- { func = function() echo("hi\n") end },
+  --- { func = function() echo("there\n") end },
+  --- { func = function() echo("you\n") end },
+  --- { func = function() echo("amazing\n") end },
+  --- { func = function() echo("developer\n") end },
+  --- })
   function instance:multi(name, def, delay)
     self.parent.valid:type(name, "string", 1, false)
     self.parent.valid:type(def, "table", 2, false)
@@ -67,6 +74,7 @@ function mod.new(parent)
   --- @type function - Kills a multi timer
   --- @param name string - The name of the multi timer.
   --- @return boolean|nil - True if the multi timer was killed, nil if it doesn't exist.
+  --- @example glu.timer.kill_multi("Greetings")
   function instance:kill_multi(name)
     self.parent.valid:type(name, "string", 1, false)
     local timer_function = multi_timers[name]
