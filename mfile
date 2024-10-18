@@ -1,0 +1,9 @@
+{
+  "package": "Glu",
+  "title": "Utility functions for Lua",
+  "version": "1.4.0",
+  "author": "gesslar",
+  "icon": "liquid-glue.png",
+  "dependencies": "",
+  "outputFile": true
+}
