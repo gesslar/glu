@@ -46,5 +46,11 @@
     "isFolder": "no",
     "name": "timer",
     "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "regex",
+    "script": ""
   }
 ]

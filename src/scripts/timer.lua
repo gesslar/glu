@@ -86,6 +86,10 @@ function mod.new(parent)
     return killTimer(id)
   end
 
+  instance.parent.valid = instance.parent.valid or setmetatable({}, {
+    __index = function(_, k) return function(...) end end
+  })
+
   return instance
 end
 

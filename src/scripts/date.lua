@@ -50,6 +50,10 @@ function mod.new(parent)
     end
   end
 
+  instance.parent.valid = instance.parent.valid or setmetatable({}, {
+    __index = function(_, k) return function(...) end end
+  })
+
   return instance
 end
 

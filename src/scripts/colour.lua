@@ -22,7 +22,7 @@ function mod.new(parent)
     instance.parent.valid:rgb_table(rgb1, 1, false)
     instance.parent.valid:rgb_table(rgb2, 2, false)
     instance.parent.valid:type(step, "number", 3, false)
-    assert(step >= 0 and step <= 100, "Invalid step value")
+    assert(step >= 0 and step <= 100, "Invalid step value " .. step .. " given. Step value must be between 0 and 100.")
 
     local r1, g1, b1 = rgb1[1], rgb1[2], rgb1[3]
     local r2, g2, b2 = rgb2[1], rgb2[2], rgb2[3]

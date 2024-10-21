@@ -32,9 +32,8 @@ function mod.new(parent)
   --- @param argument_index number - The index of the argument.
   --- @param nil_allowed boolean - Whether nil is allowed (default false)
   function instance:type(value, expected_type, argument_index, nil_allowed)
-    if nil_allowed and value == nil then
-      return
-    end
+    if nil_allowed and value == nil then return end
+    if expected_type == "any" then return end
 
     local last = get_last_traceback_line()
 
@@ -100,6 +99,27 @@ function mod.new(parent)
     assert(self.parent.table.uniform_type(value, expected_type),
       "Invalid type to argument " .. argument_index .. ". Expected " .. expected_type .. ", got " .. type(value) .. " in\n" .. last)
   end
+
+  --- valid:regex(value, pattern, argument_index, nil_allowed)
+  --- Validates that the value matches the pattern using the rex library (PCRE)
+  --- @type function
+  --- @param value any - The value to validate.
+  --- @param pattern string - The pattern to match the value against.
+  --- @param argument_index number - The index of the argument.
+  --- @param nil_allowed boolean - Whether nil is allowed (default false)
+  function instance:regex(value, pattern, argument_index, nil_allowed)
+    if nil_allowed and value == nil then
+      return
+    end
+
+    local last = get_last_traceback_line()
+
+    assert(rex.match(value, pattern), "Invalid value to argument " .. argument_index .. ". Expected " .. pattern .. ", got " .. value .. " in\n" .. last)
+  end
+
+  instance.parent.valid = instance.parent.valid or setmetatable({}, {
+    __index = function(_, k) return function(...) end end
+  })
 
   return instance
 end

@@ -20,7 +20,7 @@ function mod.new(parent)
 
   --- string:capitalize(str)
   --- Capitalizes the first character of a string.
-  ---@param str string
+  ---@param str string - The string to capitalize.
   ---@return string
   function instance:capitalize(str)
     self.parent.valid:type(str, "string", 1, false)
@@ -33,7 +33,7 @@ function mod.new(parent)
   --- string:trim(str)
   --- Trims whitespace from the beginning and end of a string.
   --- @type function
-  --- @param str string
+  --- @param str string - The string to trim.
   --- @return string
   function instance:trim(str)
     self.parent.valid:type(str, "string", 1, false)
@@ -43,7 +43,7 @@ function mod.new(parent)
   --- string:ltrim(str)
   --- Trims whitespace from the left side of a string.
   --- @type function
-  --- @param str string
+  --- @param str string - The string to trim.
   --- @return string
   function instance:ltrim(str)
     self.parent.valid:type(str, "string", 1, false)
@@ -53,12 +53,26 @@ function mod.new(parent)
   --- string:rtrim(str)
   --- Trims whitespace from the right side of a string.
   --- @type function
-  --- @param str string
+  --- @param str string - The string to trim.
   --- @return string
   function instance:rtrim(str)
     self.parent.valid:type(str, "string", 1, false)
     return str:match("^.-%s*$")
   end
+
+  --- string:strip_linebreaks(str)
+  --- Strips line breaks from a string.
+  --- @type function
+  --- @param str string - The string to strip line breaks from.
+  --- @return string
+  function instance.strip_linebreaks(str)
+    local result, found, subbed = rex.gsub(str, "[\\r\\n]", "")
+    return result or str
+  end
+
+  instance.parent.valid = instance.parent.valid or setmetatable({}, {
+    __index = function(_, k) return function(...) end end
+  })
 
   return instance
 end

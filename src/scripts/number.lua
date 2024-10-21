@@ -20,6 +20,10 @@ function mod.new(parent)
     return math.floor(num * mult + 0.5) / mult
   end
 
+  instance.parent.valid = instance.parent.valid or setmetatable({}, {
+    __index = function(_, k) return function(...) end end
+  })
+
   return instance
 end
 
