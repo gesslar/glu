@@ -128,6 +128,75 @@ function mod.new(parent)
     return table.remove(t, 1)
   end
 
+  --- table.allocate(source, spec)
+  --- Allocates a new table based on the source and spec.
+  --- @type function - Allocates a new table based on the source and spec.
+  --- @param source table - The source table to allocate from.
+  --- @param spec any - The spec to allocate the new table with.
+  --- @return table - A new table allocated from the source and spec.
+  function instance:allocate(source, spec)
+    local spec_type = type(spec)
+    self.parent.valid:type(source, "table", 1, false)
+    self.parent.valid:not_empty(source, 1, false)
+    self.parent.valid:indexed_table(source, 1, false)
+    if spec_type == instance.parent.TYPE.TABLE then
+      self.parent.valid:indexed_table(spec, 2, false)
+      assert(#source == #spec, "Expected source and spec to have the same number of elements")
+    elseif spec_type == instance.parent.TYPE.FUNCTION then
+      self.parent.valid:type(spec, "function", 2, false)
+    end
+
+    local result = {}
+
+    if spec_type == instance.parent.TYPE.TABLE then
+      for i = 1, #spec do
+        result[source[i]] = spec[i]
+      end
+    elseif spec_type == instance.parent.TYPE.FUNCTION then
+      for i = 1, #source do
+        result[i] = spec(source[i])
+      end
+    else
+      for i = 1, #source do
+        result[i] = spec
+      end
+    end
+
+    return result
+  end
+
+  --- table.is_indexed(t)
+  --- Checks if a table is indexed (like an array).
+  --- @type function - Checks if a table is indexed (like an array).
+  --- @param t table - The table to check.
+  --- @return boolean - True if the table is indexed, false otherwise.
+  function instance:is_indexed(t)
+    if type(t) ~= "table" then return false end
+    local index = 1
+    for k in pairs(t) do
+      if k ~= index then
+          return false
+      end
+      index = index + 1
+    end
+    return true
+  end
+
+  --- table.is_associative(t)
+  --- Checks if a table is associative (has non-integer keys).
+  --- @type function - Checks if a table is associative (has non-integer keys).
+  --- @param t table - The table to check.
+  --- @return boolean - True if the table is associative, false otherwise.
+  function instance:is_associative(t)
+    if type(t) ~= "table" then return false end
+    for k, _ in pairs(t) do
+      if type(k) ~= "number" or k % 1 ~= 0 or k <= 0 then
+          return true
+      end
+    end
+    return false
+  end
+
   instance.parent.valid = instance.parent.valid or setmetatable({}, {
     __index = function(_, k) return function(...) end end
   })

@@ -58,7 +58,7 @@ function mod.new(parent)
       return
     end
 
-    tempTimer(0.25, process_queue)
+    process_queue()
   end
 
   --- dependency:load_dependency(pkg, dependency)
@@ -74,14 +74,13 @@ function mod.new(parent)
     end
 
     self.parent.valid:type(dependency, "table", 1, false)
-    self.parent.valid:not_empty(dependency.name, 1, false)
-    self.parent.valid:not_empty(dependency.url, 1, false)
+    self.parent.valid:type(dependency.name, "string", 1, false)
     self.parent.valid:regex(dependency.url, self.parent.regex.http_url, 1, false)
     self.parent.valid:type(cb, "function", 2, true)
 
     if queue == nil then
       queue = { dependency }
-      tempTimer(0.25, process_queue)
+      process_queue()
       return
     end
 
@@ -92,7 +91,7 @@ function mod.new(parent)
       cecho(f "<b>{pkg}</b> is installing a dependent package: <b>{dependency.name}</b>\n")
       installPackage(dependency.url)
     else
-      tempTimer(0.25, process_queue)
+      process_queue()
     end
   end
 
@@ -125,7 +124,7 @@ function mod.new(parent)
     requester = self
     registerNamedEventHandler("glu", handler_name_installed, "sysInstall", on_dependency_installed)
 
-    tempTimer(0.25, process_queue)
+    process_queue()
   end
 
   instance.parent.valid = instance.parent.valid or setmetatable({}, {

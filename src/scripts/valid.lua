@@ -32,13 +32,32 @@ function mod.new(parent)
   --- @param argument_index number - The index of the argument.
   --- @param nil_allowed boolean - Whether nil is allowed (default false)
   function instance:type(value, expected_type, argument_index, nil_allowed)
+    local last = get_last_traceback_line()
+
+    assert((nil_allowed == true and value == nil) or value ~= nil,
+      "value must not be nil for argument " .. argument_index .. " in\n" .. last)
+    assert(type(expected_type) == "string",
+      "expected_type must be a string for argument " .. argument_index .. " in\n" .. last)
+    assert(type(argument_index) == "number",
+      "argument_index must be a number for argument " .. argument_index .. " in\n" .. last)
+    assert(nil == nil_allowed or type(nil_allowed) == "boolean",
+      "nil_allowed must be a boolean for argument " .. argument_index .. " in\n" .. last)
+
     if nil_allowed and value == nil then return end
     if expected_type == "any" then return end
 
-    local last = get_last_traceback_line()
+    local expected_types = string.split(expected_type, "|") or { expected_type }
+    local invalid = table.n_filter(expected_types, function(t) return not instance.parent.TYPE[t] end)
 
-    assert(type(value) == expected_type,
-      "Invalid type to argument " .. argument_index .. ". Expected " .. expected_type .. ", got " .. type(value) .. " in\n" .. last)
+    if table.size(invalid) > 0 then
+      error("Invalid type to argument " .. argument_index .. ". Expected " .. table.concat(invalid, "|") .. ", got " .. type(value) .. " in\n" .. last)
+    end
+
+    for _, t in ipairs(expected_types) do
+      if type(value) == t then return end
+    end
+
+    error("Invalid type to argument " .. argument_index .. ". Expected " .. expected_type .. ", got " .. type(value) .. " in\n" .. last)
   end
 
   --- valid:rgb_table(colour, argument_index, nil_allowed)
@@ -74,12 +93,13 @@ function mod.new(parent)
   --- @param argument_index number - The index of the argument.
   --- @param nil_allowed boolean - Whether nil is allowed (default false)
   function instance:not_empty(value, argument_index, nil_allowed)
+    assert(type(value) == "table", "Invalid type to argument " .. argument_index .. ". Expected table, got " .. type(value) .. " in\n" .. get_last_traceback_line())
     if nil_allowed and value == nil then
       return
     end
 
     local last = get_last_traceback_line()
-    assert(#value > 0, "Invalid value to argument " .. argument_index .. ". Expected non-empty in\n" .. last)
+    assert(not table.is_empty(value), "Invalid value to argument " .. argument_index .. ". Expected non-empty in\n" .. last)
   end
 
   --- valid:uniform_type(value, expected_type, argument_index, nil_allowed)
@@ -115,6 +135,45 @@ function mod.new(parent)
     local last = get_last_traceback_line()
 
     assert(rex.match(value, pattern), "Invalid value to argument " .. argument_index .. ". Expected " .. pattern .. ", got " .. value .. " in\n" .. last)
+  end
+
+  --- valid:indexed_table(value, argument_index, nil_allowed)
+  --- Validates that the value is an indexed table.
+  --- @type function
+  --- @param value any - The value to validate.
+  --- @param argument_index number - The index of the argument.
+  --- @param nil_allowed boolean - Whether nil is allowed (default false)
+  function instance:indexed_table(value, argument_index, nil_allowed)
+    if nil_allowed and value == nil then
+      return
+    end
+
+    local last = get_last_traceback_line()
+    assert(self.parent.table:is_indexed(value), "Invalid value to argument " .. argument_index .. ". Expected indexed table, got " .. type(value) .. " in\n" .. last)
+  end
+
+  --- valid:associative_table(value, argument_index, nil_allowed)
+  --- Validates that the value is an associative table.
+  --- @type function
+  --- @param value any - The value to validate.
+  --- @param argument_index number - The index of the argument.
+  --- @param nil_allowed boolean - Whether nil is allowed (default false)
+  function instance:associative_table(value, argument_index, nil_allowed)
+    if nil_allowed and value == nil then
+      return
+    end
+
+    local last = get_last_traceback_line()
+    assert(self.parent.table:is_associative(value), "Invalid value to argument " .. argument_index .. ". Expected associative table, got " .. type(value) .. " in\n" .. last)
+  end
+
+  function instance:test(statement, value, argument_index, nil_allowed)
+    if nil_allowed and value == nil then
+      return
+    end
+
+    local last = get_last_traceback_line()
+    assert(statement, "Invalid value to argument " .. argument_index .. ". " .. value .. " in\n" .. last)
   end
 
   instance.parent.valid = instance.parent.valid or setmetatable({}, {

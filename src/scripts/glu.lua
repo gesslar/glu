@@ -3,6 +3,25 @@ local script_name = "glu"
 -- Define the class as a table
 Glu = Glu or {}
 
+local data_types = {
+  BOOLEAN = "boolean",
+  ["boolean"] = "boolean",
+  FUNCTION = "function",
+  ["function"] = "function",
+  NIL = "nil",
+  ["nil"] = "nil",
+  NUMBER = "number",
+  ["number"] = "number",
+  STRING = "string",
+  ["string"] = "string",
+  TABLE = "table",
+  ["table"] = "table",
+  THREAD = "thread",
+  ["thread"] = "thread",
+  USERDATA = "userdata",
+  ["userdata"] = "userdata",
+}
+
 -- In the event that we have Glu as a package loaded in Mudlet, each module
 -- must raise an event to let us know it's loaded.
 local glu_modules = {}
@@ -59,6 +78,10 @@ function Glu.new(pkg, module_dir_name)
     return self.package_name
   end
 
+  -- Constants
+  instance.TYPE = data_types
+
+  -- Return the instance
   return instance
 end
 
