@@ -167,6 +167,13 @@ function mod.new(parent)
     assert(self.parent.table:is_associative(value), "Invalid value to argument " .. argument_index .. ". Expected associative table, got " .. type(value) .. " in\n" .. last)
   end
 
+  --- valid:test(statement, value, argument_index, nil_allowed)
+  --- Validates that the statement is true.
+  --- @type function
+  --- @param statement boolean - The statement to validate.
+  --- @param value any - The value to validate.
+  --- @param argument_index number - The index of the argument.
+  --- @param nil_allowed boolean - Whether nil is allowed (default false)
   function instance:test(statement, value, argument_index, nil_allowed)
     if nil_allowed and value == nil then
       return
@@ -174,6 +181,26 @@ function mod.new(parent)
 
     local last = get_last_traceback_line()
     assert(statement, "Invalid value to argument " .. argument_index .. ". " .. value .. " in\n" .. last)
+  end
+
+  --- valid:same(one, two)
+  --- Validates that the two values are identical.
+  --- @type function
+  --- @param one any - The first value to validate.
+  --- @param two any - The second value to validate.
+  function instance:same(one, two)
+    local last = get_last_traceback_line()
+    assert(one == two, "Invalid value to arguments. Expected 1 and 2 to be identical in\n" .. get_last_traceback_line())
+  end
+
+  --- valid:same_type(one, two)
+  --- Validates that the two values are of the same type.
+  --- @type function
+  --- @param one any - The first value to validate.
+  --- @param two any - The second value to validate.
+  function instance:same_type(one, two)
+    local last = get_last_traceback_line()
+    assert(type(one) == type(two), "Invalid value to arguments. Expected 1 and 2 to be of the same type in\n" .. last)
   end
 
   instance.parent.valid = instance.parent.valid or setmetatable({}, {
