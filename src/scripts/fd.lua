@@ -1,11 +1,10 @@
 ---@diagnostic disable-next-line: undefined-global
 local mod = mod or {}
-local script_name = "fs"
+local script_name = "fd"
 function mod.new(parent)
   local instance = { parent = parent }
 
-
-  --- fs:dir_file(path)
+  --- fd:dir_file(path)
   --- Splits a path into a directory and file.
   --- @type function
   --- @param path string - The path to split.
@@ -27,7 +26,7 @@ function mod.new(parent)
     return dir, file
   end
 
-  --- fs:file_exists(path)
+  --- fd:file_exists(path)
   --- Checks if a file exists.
   --- @type function
   --- @param path string - The path to check.
@@ -41,7 +40,7 @@ function mod.new(parent)
     return attr.mode == "file"
   end
 
-  --- fs:dir_exists(path)
+  --- fd:dir_exists(path)
   --- Checks if a directory exists.
   --- @type function
   --- @param path string - The path to check.
@@ -55,7 +54,7 @@ function mod.new(parent)
     return attr.mode == "directory"
   end
 
-  --- fs:read_file(path, binary)
+  --- fd:read_file(path, binary)
   --- Reads a file.
   --- @type function
   --- @param path string - The path to the file.
@@ -71,7 +70,7 @@ function mod.new(parent)
     return data
   end
 
-  --- fs:write_file(path, data, overwrite, binary)
+  --- fd:write_file(path, data, overwrite, binary)
   --- Writes to a file.
   --- @type function
   --- @param path string - The path to the file.
