@@ -41,11 +41,8 @@ local function newHttp(parent, options)
     local ob_id = response.id
     local ob = requests[ob_id]
 
-    display(response)
-
     if self.options.saveTo and not response.error then
       local result = { write_file(self, self.options.saveTo, response.data) }
-      display(result)
     end
 
     local cb = self.options.cb
@@ -91,7 +88,6 @@ local function newHttp(parent, options)
         }
         local result
         arg = only_indexed(arg)
-        display(arg)
         if rex.match(e, "sys(?:\\w+)HttpError$") then
           result = parent.parent.table:allocate({ "error", "url", "server" }, arg)
         elseif rex.match(e, "sys(?:\\w+)HttpDone$") then
