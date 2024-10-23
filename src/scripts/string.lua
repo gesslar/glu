@@ -4,20 +4,6 @@ local script_name = "string"
 function mod.new(parent)
   local instance = { parent = parent }
 
-  --- string:split(str, delimiter)
-  --- Splits a string into a table of substrings based on a delimiter.
-  --- @type function
-  --- @param str string - The string to split.
-  --- @param delimiter string - The delimiter to split the string by.
-  --- @return table - A table of substrings.
-  function instance:split(str, delimiter)
-    local result = {}
-    for match in (str .. delimiter):gmatch("(.-)" .. delimiter) do
-      table.insert(result, match)
-    end
-    return result
-  end
-
   --- string:capitalize(str)
   --- Capitalizes the first character of a string.
   ---@param str string - The string to capitalize.
