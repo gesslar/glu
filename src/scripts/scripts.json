@@ -70,5 +70,11 @@
     "isFolder": "no",
     "name": "version",
     "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "geyser",
+    "script": ""
   }
 ]

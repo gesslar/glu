@@ -8,22 +8,29 @@ function mod.new(parent)
   local multi_timers = {}
   local function perform_multi_timer_function(self, name)
     local timer_function = multi_timers[name]
-    if not timer_function then return end
+    if not timer_function then
+      return false
+    end
 
     local defs = timer_function.def
     local def = defs[1]
     local ok, result = pcall(def.func, def.args)
+
     if not ok then
-      instance:kill_multi(name)
-      return
+      return false
     end
 
     table.remove(defs, 1)
     if #defs > 0 then
       local result2 = self:multi(name, defs)
+      if not result2 then
+        return false
+      end
     else
       multi_timers[name] = nil
     end
+
+    return true
   end
 
   --- Creates nested timers and returns true if successful.
@@ -62,24 +69,27 @@ function mod.new(parent)
     self.parent.valid:type(delay, "number", 3, true)
 
     if delay then
-      def = self.parent.table.map(def, function(_, element)
+      def = self.parent.table:map(def, function(_, element)
         element.delay = delay
         return element
       end)
     end
 
+    -- Record the initial information
+    multi_timers[name] = { def = def }
+
+    local timer_result
     local timer_id = tempTimer(def[1].delay, function()
-      perform_multi_timer_function(self, name)
+      timer_result = perform_multi_timer_function(self, name)
     end)
 
-    assert(timer_id, "Failed to create multi timer " .. name)
+    if not timer_id then
+      instance:kill_multi(name)
+      return false
+    end
 
-    local timer_function = {
-      id = timer_id,
-      def = def,
-    }
-
-    multi_timers[name] = timer_function
+    -- Record the timer id
+    multi_timers[name].id = timer_id
 
     return true
   end
@@ -99,7 +109,11 @@ function mod.new(parent)
     multi_timers[name] = nil
     local id = timer_function.id
 
-    return killTimer(id)
+    if id then
+      return killTimer(id)
+    end
+
+    return true
   end
 
   instance.parent.valid = instance.parent.valid or setmetatable({}, {
