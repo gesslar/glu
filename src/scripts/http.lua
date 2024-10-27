@@ -145,10 +145,20 @@ function mod.new(parent)
   end
 
   --- Downloads a file from the given URL and saves it to the specified path.
-  ---@type function
-  ---@param options table - The options for the request.
-  ---@param cb function - The callback function.
-  ---@return http_request - The HTTP request object.
+  --- You may certainly also use the `get` or `request` methods to download a
+  --- file, however, this is a bit more convenient as it does some checking
+  --- for you.
+  ---
+  --- @param options table - The options for the request.
+  --- @param cb function - The callback function.
+  --- @return table - The HTTP request object.
+  --- @example
+  --- ```lua
+  --- http:download({
+  ---   url = "http://example.com/file.txt",
+  ---   saveTo = "path/to/file.txt"
+  --- }, function(response) end)
+  --- ```
   function instance:download(options, cb)
     options.method = options.method or "GET"
     self.parent.valid:type(options.saveTo, "string", 1, false)
@@ -156,50 +166,107 @@ function mod.new(parent)
   end
 
   --- Makes a GET request to the given URL.
-  ---@type function
-  ---@param options table - The options for the request.
-  ---@param cb function - The callback function.
-  ---@return http_request - The HTTP request object.
+  ---
+  --- The options table may consist of the following keys:
+  ---
+  --- - `url` (`string`) - The URL to request.
+  --- - `headers` (`table`) - The headers to send with the request.
+  ---
+  --- @param options table - The options for the request.
+  --- @param cb function - The callback function.
+  --- @return table - The HTTP request object.
+  --- @example
+  --- ```lua
+  --- http:get({
+  ---   url = "http://example.com/file.txt"
+  --- }, function(response) end)
+  --- ```
   function instance:get(options, cb)
     options.method = "GET"
     return instance:request(options, cb)
   end
 
   --- Makes a POST request to the given URL.
-  ---@type function
-  ---@param options table - The options for the request.
-  ---@param cb function - The callback function.
-  ---@return http_request - The HTTP request object.
+  ---
+  --- The options table may consist of the following keys:
+  ---
+  --- - `url` (`string`) - The URL to request.
+  --- - `headers` (`table`) - The headers to send with the request.
+  ---
+  --- @param options table - The options for the request.
+  --- @param cb function - The callback function.
+  --- @return table - The HTTP request object.
+  --- @example
+  --- ```lua
+  --- http:post({
+  ---   url = "http://example.com/file.txt"
+  --- }, function(response) end)
+  --- ```
   function instance:post(options, cb)
     options.method = "POST"
     return instance:request(options, cb)
   end
 
   --- Makes a PUT request to the given URL.
-  ---@type function
-  ---@param options table - The options for the request.
-  ---@param cb function - The callback function.
-  ---@return http_request - The HTTP request object.
+  ---
+  --- The options table may consist of the following keys:
+  ---
+  --- - `url` (`string`) - The URL to request.
+  --- - `headers` (`table`) - The headers to send with the request.
+  ---
+  --- @param options table - The options for the request.
+  --- @param cb function - The callback function.
+  --- @return table - The HTTP request object.
+  --- @example
+  --- ```lua
+  --- http:put({
+  ---   url = "http://example.com/file.txt"
+  --- }, function(response) end)
+  --- ```
   function instance:put(options, cb)
     options.method = "PUT"
     return instance:request(options, cb)
   end
 
   --- Makes a DELETE request to the given URL.
-  ---@type function
-  ---@param options table - The options for the request.
-  ---@param cb function - The callback function.
-  ---@return http_request - The HTTP request object.
+  ---
+  --- The options table may consist of the following keys:
+  ---
+  --- - `url` (`string`) - The URL to request.
+  --- - `headers` (`table`) - The headers to send with the request.
+  ---
+  --- @param options table - The options for the request.
+  --- @param cb function - The callback function.
+  --- @return table - The HTTP request object.
+  --- @example
+  --- ```lua
+  --- http:delete({
+  ---   url = "http://example.com/file.txt"
+  --- }, function(response) end)
+  --- ```
   function instance:delete(options, cb)
     options.method = "DELETE"
     return instance:request(options, cb)
   end
 
-  --- Makes a request to the given URL.
-  ---@type function
-  ---@param options table - The options for the request.
-  ---@param cb function - The callback function.
-  ---@return http_request - The HTTP request object.
+  --- Makes a request to the given URL. Use this option for any HTTP method
+  --- that is not: `GET`, `POST`, `PUT`, or `DELETE`.
+  ---
+  --- The options table may consist of the following keys:
+  ---
+  --- - `url` (`string`) - The URL to request.
+  --- - `method` (`string`) - The HTTP method to use.
+  --- - `headers` (`table`) - The headers to send with the request.
+  ---
+  --- @param options table - The options for the request.
+  --- @param cb function - The callback function.
+  --- @return table - The HTTP request object.
+  --- @example
+  --- ```lua
+  --- http:request({
+  ---   url = "http://example.com/file.txt"
+  --- }, function(response) end)
+  --- ```
   function instance:request(options, cb)
     validate_options(self, options)
 

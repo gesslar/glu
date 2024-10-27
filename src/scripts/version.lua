@@ -20,12 +20,22 @@ function mod.new(parent)
     return one < two and -1 or 1
   end
 
-  --- Compares two version strings.
-  --- @param version1 string - The first version string.
-  --- @param version2 string - The second version string.
+  --- Compares two version strings. They can be a number, or a string. If a
+  --- string, then it can be a string representation of a number or a semver
+  --- string.
+  ---
+  --- @param version1 string|number - The first version string or number.
+  --- @param version2 string|number - The second version string or number.
   --- @return number - 1 if version1 is greater than version2, -1 if version1 is less than version2, and 0 if they are the same.
+  --- @example
+  --- ```lua
+  --- version:compare("1.0.0", "2.0.0")
+  --- -- -1
+  --- ```
   function instance:compare(version1, version2)
     -- The versions must be of the same type
+    self.parent.valid:test(type(version1) == "string" or type(version1) == "number", 1, "Invalid value to argument 1. Expected a string or number.")
+    self.parent.valid:test(type(version2) == "string" or type(version2) == "number", 2, "Invalid value to argument 2. Expected a string or number.")
     self.parent.valid:same_type(version1, version2)
 
     version1 = tostring(version1)

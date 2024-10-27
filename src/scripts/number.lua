@@ -5,9 +5,15 @@ function mod.new(parent)
   local instance = { parent = parent }
 
   --- Rounds a number to a specified number of decimal places.
+  ---
   --- @param num number - The number to round.
   --- @param digits number - The number of digits to round to. (Optional. Default is 0.)
   --- @return number - The rounded number.
+  --- @example
+  --- ```lua
+  --- number:round(3.14159, 2)
+  --- -- 3.14
+  --- ```
   function instance:round(num, digits)
     self.parent.valid:type(num, "number", 1, false)
     self.parent.valid:type(digits, "number", 2, true)

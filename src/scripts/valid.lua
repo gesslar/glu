@@ -28,10 +28,20 @@ function mod.new(parent)
   --- error is thrown if the assertion fails. No error is thrown if the value
   --- is nil and nil is allowed, or otherwise if the value is of the expected
   --- type.
+  ---
   --- @param value any - The value to validate.
   --- @param expected_type string - The expected type of the value.
   --- @param argument_index number - The index of the argument.
   --- @param nil_allowed boolean - Whether nil is allowed (default false)
+  --- @example
+  --- ```lua
+  --- function my_function(name, age)
+  ---   -- name must be a string (mandatory)
+  ---   valid:type(name, "string", 1, false)
+  ---   -- age must be a number or nil (optional)
+  ---   valid:type(age, "number", 2, true)
+  --- end
+  --- ```
   function instance:type(value, expected_type, argument_index, nil_allowed)
     local last = get_last_traceback_line()
 
@@ -64,9 +74,18 @@ function mod.new(parent)
   --- Asserts that the table is an RGB color table. No return value, but an
   --- error is thrown if the assertion fails. No error is thrown if the value
   --- is nil and nil is allowed.
+  ---
   --- @param colour table - The RGB color table to validate.
   --- @param argument_index number - The index of the argument.
   --- @param nil_allowed boolean - Whether nil is allowed (default false)
+  --- @example
+  --- ```lua
+  --- function my_function(colour)
+  ---   -- colour must be a table containing three numbers, each between 0 and
+  ---   -- 255 (mandatory)
+  ---   valid:rgb_table(colour, 1, false)
+  --- end
+  --- ```
   function instance:rgb_table(colour, argument_index, nil_allowed)
     local last = get_last_traceback_line()
 
@@ -86,12 +105,20 @@ function mod.new(parent)
       "Invalid value to argument " .. argument_index .. ". Expected number between 0 and 255, got " .. colour[3] .. " in\n" .. last)
   end
 
-  --- Asserts that the value is not empty. No return value, but an error is
+  --- Asserts that the table is not empty. No return value, but an error is
   --- thrown if the assertion fails. No error is thrown if the value is nil
   --- and nil is allowed.
-  --- @param value any - The value to validate.
+  ---
+  --- @param value table - The value to validate.
   --- @param argument_index number - The index of the argument.
   --- @param nil_allowed boolean - Whether nil is allowed (default false)
+  --- @example
+  --- ```lua
+  --- function my_function(name)
+  ---   -- name must not be empty (mandatory)
+  ---   valid:not_empty(name, 1, false)
+  --- end
+  --- ```
   function instance:not_empty(value, argument_index, nil_allowed)
     assert(type(value) == "table", "Invalid type to argument " .. argument_index .. ". Expected table, got " .. type(value) .. " in\n" .. get_last_traceback_line())
     if nil_allowed and value == nil then
@@ -105,10 +132,18 @@ function mod.new(parent)
   --- Asserts that all elements in the table are of the same type. No return
   --- value, but an error is thrown if the assertion fails. No error is thrown
   --- if the value is nil and nil is allowed.
-  --- @param value any - The value to validate.
+  ---
+  --- @param value table - The value to validate.
   --- @param expected_type string - The expected type of the value.
   --- @param argument_index number - The index of the argument.
   --- @param nil_allowed boolean - Whether nil is allowed (default false)
+  --- @example
+  --- ```lua
+  --- function my_function(values)
+  ---   -- values must be a table containing only numbers
+  ---   valid:uniform_type(values, "number", 1, false)
+  --- end
+  --- ```
   function instance:uniform_type(value, expected_type, argument_index, nil_allowed)
     if nil_allowed and value == nil then
       return
@@ -123,10 +158,18 @@ function mod.new(parent)
   --- Asserts that the value matches the pattern using the rex library (PCRE).
   --- No return value, but an error is thrown if the assertion fails. No error
   --- is thrown if the value is nil and nil is allowed.
+  ---
   --- @param value any - The value to validate.
   --- @param pattern string - The pattern to match the value against.
   --- @param argument_index number - The index of the argument.
   --- @param nil_allowed boolean - Whether nil is allowed (default false)
+  --- @example
+  --- ```lua
+  --- function my_function(name)
+  ---   -- name must match the pattern
+  ---   valid:regex(name, "^[A-Za-z]+$", 1, false)
+  --- end
+  --- ```
   function instance:regex(value, pattern, argument_index, nil_allowed)
     if nil_allowed and value == nil then
       return
@@ -140,9 +183,16 @@ function mod.new(parent)
   --- Asserts that the value is an indexed table. No return value, but an error
   --- is thrown if the assertion fails. No error is thrown if the value is nil
   --- and nil is allowed.
-  --- @param value any - The value to validate.
+  --- @param value table - The value to validate.
   --- @param argument_index number - The index of the argument.
   --- @param nil_allowed boolean - Whether nil is allowed (default false)
+  --- @example
+  --- ```lua
+  --- function my_function(values)
+  ---   -- values must be an indexed table
+  ---   valid:indexed_table(values, 1, false)
+  --- end
+  --- ```
   function instance:indexed_table(value, argument_index, nil_allowed)
     if nil_allowed and value == nil then
       return
@@ -155,9 +205,17 @@ function mod.new(parent)
   --- Asserts that the value is an associative table. No return value, but an
   --- error is thrown if the assertion fails. No error is thrown if the value
   --- is nil and nil is allowed.
-  --- @param value any - The value to validate.
+  ---
+  --- @param value table - The value to validate.
   --- @param argument_index number - The index of the argument.
   --- @param nil_allowed boolean - Whether nil is allowed (default false)
+  --- @example
+  --- ```lua
+  --- function my_function(values)
+  ---   -- values must be an associative table
+  ---   valid:associative_table(values, 1, false)
+  --- end
+  --- ```
   function instance:associative_table(value, argument_index, nil_allowed)
     if nil_allowed and value == nil then
       return
@@ -170,10 +228,18 @@ function mod.new(parent)
   --- Asserts that the statement is true. No return value, but an error is
   --- thrown if the assertion fails. No error is thrown if the value is nil
   --- and nil is allowed.
+  ---
   --- @param statement boolean - The statement to validate.
   --- @param value any - The value to validate.
   --- @param argument_index number - The index of the argument.
   --- @param nil_allowed boolean - Whether nil is allowed (default false)
+  --- @example
+  --- ```lua
+  --- function my_function(name)
+  ---   -- name must not be empty (mandatory)
+  ---   valid:test(not table.is_empty(name), name, 1, false)
+  --- end
+  --- ```
   function instance:test(statement, value, argument_index, nil_allowed)
     if nil_allowed and value == nil then
       return
@@ -186,8 +252,15 @@ function mod.new(parent)
   --- Asserts that the two values are identical. No return value, but an error
   --- is thrown if the assertion fails. No error is thrown if the value is nil
   --- and nil is allowed.
+  ---
   --- @param one any - The first value to validate.
   --- @param two any - The second value to validate.
+  --- @example
+  --- ```lua
+  --- function my_function(name)
+  ---   valid:same(name, "John")
+  --- end
+  --- ```
   function instance:same(one, two)
     local last = get_last_traceback_line()
     assert(one == two, "Invalid value to arguments. Expected 1 and 2 to be identical in\n" .. get_last_traceback_line())
@@ -196,8 +269,15 @@ function mod.new(parent)
   --- Asserts that the two values are of the same type. No return value, but an
   --- error is thrown if the assertion fails. No error is thrown if the value
   --- is nil and nil is allowed.
+  ---
   --- @param one any - The first value to validate.
   --- @param two any - The second value to validate.
+  --- @example
+  --- ```lua
+  --- function my_function(name)
+  ---   valid:same_type(name, "John")
+  --- end
+  --- ```
   function instance:same_type(one, two)
     local last = get_last_traceback_line()
     assert(type(one) == type(two), "Invalid value to arguments. Expected 1 and 2 to be of the same type in\n" .. last)

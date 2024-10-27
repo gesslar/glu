@@ -5,11 +5,15 @@ local script_name = "util"
 function mod.new(parent)
   local instance = { parent = parent }
 
-  --- Generates a UUID.
-  --- @return string - A UUID.
+  --- Generates a version 4 UUID based on random numbers.
+  ---
+  --- @return string - A version 4 UUID.
+  --- @example
+  --- ```lua
+  --- util:generate_uuid()
+  --- -- "89edaf15-d8c1-42ab-92fe-5e3ab0dd1722"
+  --- ```
   function instance:generate_uuid()
-    -- This is a "version 4" UUID. It's based on random numbers.
-    -- Supposed to use lower case, but can accept upper case for comparisons.
     local function random_hex(length)
       return string.format("%0" .. length .. "x", math.random(0, 16 ^ length - 1))
     end

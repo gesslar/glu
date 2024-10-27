@@ -23,10 +23,6 @@ function mod.new(parent)
     queue = {}
   end
 
-  local function is_installed(pkg)
-    return table.index_of(getPackages(), pkg)
-  end
-
   local function process_queue()
     if #queue == 0 then
       dependencies_done()
@@ -61,10 +57,33 @@ function mod.new(parent)
     process_queue()
   end
 
-  --- Loads a dependency.
-  ---@param dependency table - The dependency.
-  ---@param cb function - The callback function.
-  ---@return nil
+  --- Checks if a package is installed. Returns true if it is, false otherwise.
+  --- @example
+  --- ```lua
+  --- dependency:is_installed("generic_mapper")
+  --- -- true
+  --- ```
+  --- @param pkg string - The package name.
+  --- @return boolean - Whether the package is installed.
+  function instance:is_installed(pkg)
+    return table.index_of(getPackages(), pkg) > 0
+  end
+
+  --- Downloads and installs a dependency if it is not already installed.
+  ---
+  --- Packages are expected to be in the format:
+  --- ```lua
+  --- {
+  ---   name = "package_name",
+  ---   url = "http://example.com/package.mpackage"
+  --- }
+  --- ```
+  ---
+  --- If the callback function is provided, it will be called with two
+  --- arguments: a boolean indicating whether the dependency was installed, and
+  --- an error message if there was an error.
+  --- @param dependency table - The dependency.
+  --- @param cb function - The callback function (Optional).
   function instance:load_dependency(dependency, cb)
     if requester then
       if cb then
@@ -86,7 +105,7 @@ function mod.new(parent)
     if cb then call_back = cb end
 
     local pkg = package_name
-    if not is_installed(dependency.name) then
+    if not self:is_installed(dependency.name) then
       cecho(f "<b>{pkg}</b> is installing a dependent package: <b>{dependency.name}</b>\n")
       installPackage(dependency.url)
     else
@@ -94,10 +113,31 @@ function mod.new(parent)
     end
   end
 
-  --- Loads dependencies.
-  ---@param pkg string - The package name.
-  ---@param dependencies table - The dependencies.
-  ---@param cb function - The callback function.
+  --- Downloads and installs a list of dependencies.
+  ---
+  --- All dependencies are queued and processed in order.
+  ---
+  --- Dependencies are expected to be in the format:
+  --- ```lua
+  --- {
+  ---   {
+  ---     name = "package_name_1",
+  ---     url = "http://example.com/package_1.mpackage"
+  ---   },
+  ---   {
+  ---     name = "package_name_2",
+  ---     url = "http://example.com/package_2.mpackage"
+  ---   },
+  ---   ...
+  --- }
+  --- ```
+  ---
+  --- If the callback function is provided, it will be called with two
+  --- arguments: a boolean indicating whether the dependencies were installed,
+  --- and an error message if there was an error.
+  --- @param pkg string - The package name.
+  --- @param dependencies table - The dependencies.
+  --- @param cb function - The callback function (Optional).
   function instance:load_dependencies(pkg, dependencies, cb)
     if requester then
       if cb then
@@ -109,14 +149,13 @@ function mod.new(parent)
     handler_name_installed = f"dependency_{pkg}_installed"
     queue = dependencies
     queue = table.n_filter(queue, function(element)
-      return not is_installed(element.name)
+      return not self:is_installed(element.name)
     end)
 
     if not table.size(queue) then
       dependencies_done()
       return
     end
-
 
     call_back = cb
     requester = self
