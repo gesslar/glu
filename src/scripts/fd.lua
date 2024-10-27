@@ -4,9 +4,7 @@ local script_name = "fd"
 function mod.new(parent)
   local instance = { parent = parent }
 
-  --- fd:dir_file(path)
   --- Splits a path into a directory and file.
-  --- @type function
   --- @param path string - The path to split.
   --- @return string|nil,string|nil - A table with the directory and file, or nil if the path is invalid.
   function instance:dir_file(path, dir_required)
@@ -26,9 +24,7 @@ function mod.new(parent)
     return dir, file
   end
 
-  --- fd:file_exists(path)
   --- Checks if a file exists.
-  --- @type function
   --- @param path string - The path to check.
   --- @return boolean - Whether the file exists.
   function instance:file_exists(path)
@@ -40,9 +36,7 @@ function mod.new(parent)
     return attr.mode == "file"
   end
 
-  --- fd:dir_exists(path)
   --- Checks if a directory exists.
-  --- @type function
   --- @param path string - The path to check.
   --- @return boolean - Whether the directory exists.
   function instance:dir_exists(path)
@@ -54,9 +48,7 @@ function mod.new(parent)
     return attr.mode == "directory"
   end
 
-  --- fd:read_file(path, binary)
   --- Reads a file.
-  --- @type function
   --- @param path string - The path to the file.
   --- @param binary boolean - Whether the file is binary (default false).
   --- @return ... any - The contents of the file.
@@ -70,9 +62,7 @@ function mod.new(parent)
     return data
   end
 
-  --- fd:write_file(path, data, overwrite, binary)
   --- Writes to a file.
-  --- @type function
   --- @param path string - The path to the file.
   --- @param data string - The data to write to the file.
   --- @param overwrite boolean - Whether to overwrite the file (default false).

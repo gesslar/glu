@@ -3,6 +3,9 @@
 build/
 .output
 
+# Ignore docs directory, which would be the temporary output of the docs build
+/docs/
+
 # Ignore any file starting with "muddle" in the project root directory
 # This utility file is specific to individual developers and should not be
 # included in the repo

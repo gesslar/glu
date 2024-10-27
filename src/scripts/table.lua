@@ -6,10 +6,8 @@ function mod.new(parent)
     parent = parent or {}
   }
 
-  --- table.map(t, fn, ...)
   --- Takes a table and a function and returns a new table with the function
   --- applied to each element of the original table.
-  --- @type function - Applies a function to each element of a table.
   --- @param t table - The table to map over.
   --- @param fn function - The function to apply to each element of the table.
   --- @param ... any - Additional arguments to pass to the function.
@@ -25,9 +23,7 @@ function mod.new(parent)
     return result
   end
 
-  --- table.values(t)
   --- Takes a table and returns a new table with the values of the original table.
-  --- @type function - Returns a table of values from a given table.
   --- @param t table - The table to get the values from.
   --- @return table - A new table with the values of the original table.
   function instance:values(t)
@@ -40,9 +36,7 @@ function mod.new(parent)
     return result
   end
 
-  --- table.uniform_type(t, typ)
   --- Checks if all elements in the table are of the same type.
-  --- @type function - Checks if all elements in a table are of the same type.
   --- @param t table - The table to check.
   --- @param typ string - The type to check for.
   --- @return boolean - True if all elements are of the same type, false otherwise.
@@ -59,9 +53,7 @@ function mod.new(parent)
     return true
   end
 
-  --- table.distinct(t)
   --- Takes a table and returns a new table with the distinct elements of the original table.
-  --- @type function - Returns a table of distinct elements from a given table.
   --- @param t table - The table to get the distinct elements from.
   --- @return table - A new table with the distinct elements of the original table.
   function instance:distinct(t)
@@ -76,9 +68,7 @@ function mod.new(parent)
     return result
   end
 
-  --- table.pop(t)
   --- Removes and returns the last element of a table.
-  --- @type function - Removes and returns the last element of a table.
   --- @param t table - The table to pop the last element from.
   --- @return any - The last element of the table.
   function instance:pop(t)
@@ -87,9 +77,7 @@ function mod.new(parent)
     return table.remove(t, #t)
   end
 
-  --- table.push(t, v)
   --- Adds an element to the end of a table and returns the new length of the table.
-  --- @type function - Adds an element to the end of a table and returns the new length of the table.
   --- @param t table - The table to push the element to.
   --- @param v any - The element to push to the table.
   --- @return number - The new length of the table.
@@ -102,9 +90,7 @@ function mod.new(parent)
     return #t
   end
 
-  --- table.unshift(t, v)
   --- Adds an element to the beginning of a table and returns the new length of the table.
-  --- @type function - Adds an element to the beginning of a table and returns the new length of the table.
   --- @param t table - The table to unshift the element to.
   --- @param v any - The element to unshift to the table.
   --- @return number - The new length of the table.
@@ -117,9 +103,7 @@ function mod.new(parent)
     return #t
   end
 
-  --- table.shift(t)
   --- Removes and returns the first element of a table.
-  --- @type function - Removes and returns the first element of a table.
   --- @param t table - The table to shift the first element from.
   --- @return any - The first element of the table.
   function instance:shift(t)
@@ -128,9 +112,7 @@ function mod.new(parent)
     return table.remove(t, 1)
   end
 
-  --- table.allocate(source, spec)
   --- Allocates a new table based on the source and spec.
-  --- @type function - Allocates a new table based on the source and spec.
   --- @param source table - The source table to allocate from.
   --- @param spec any - The spec to allocate the new table with.
   --- @return table - A new table allocated from the source and spec.
@@ -165,9 +147,7 @@ function mod.new(parent)
     return result
   end
 
-  --- table.is_indexed(t)
   --- Checks if a table is indexed (like an array).
-  --- @type function - Checks if a table is indexed (like an array).
   --- @param t table - The table to check.
   --- @return boolean - True if the table is indexed, false otherwise.
   function instance:is_indexed(t)
@@ -182,9 +162,7 @@ function mod.new(parent)
     return true
   end
 
-  --- table.is_associative(t)
   --- Checks if a table is associative (has non-integer keys).
-  --- @type function - Checks if a table is associative (has non-integer keys).
   --- @param t table - The table to check.
   --- @return boolean - True if the table is associative, false otherwise.
   function instance:is_associative(t)

@@ -5,7 +5,6 @@ local script_name = "util"
 function mod.new(parent)
   local instance = { parent = parent }
 
-  --- util:generate_uuid()
   --- Generates a UUID.
   --- @return string - A UUID.
   function instance:generate_uuid()

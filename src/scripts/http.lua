@@ -144,32 +144,62 @@ function mod.new(parent)
     )
   end
 
+  --- Downloads a file from the given URL and saves it to the specified path.
+  ---@type function
+  ---@param options table - The options for the request.
+  ---@param cb function - The callback function.
+  ---@return http_request - The HTTP request object.
   function instance:download(options, cb)
     options.method = options.method or "GET"
     self.parent.valid:type(options.saveTo, "string", 1, false)
     return instance:request(options, cb)
   end
 
+  --- Makes a GET request to the given URL.
+  ---@type function
+  ---@param options table - The options for the request.
+  ---@param cb function - The callback function.
+  ---@return http_request - The HTTP request object.
   function instance:get(options, cb)
     options.method = "GET"
     return instance:request(options, cb)
   end
 
+  --- Makes a POST request to the given URL.
+  ---@type function
+  ---@param options table - The options for the request.
+  ---@param cb function - The callback function.
+  ---@return http_request - The HTTP request object.
   function instance:post(options, cb)
     options.method = "POST"
     return instance:request(options, cb)
   end
 
+  --- Makes a PUT request to the given URL.
+  ---@type function
+  ---@param options table - The options for the request.
+  ---@param cb function - The callback function.
+  ---@return http_request - The HTTP request object.
   function instance:put(options, cb)
     options.method = "PUT"
     return instance:request(options, cb)
   end
 
+  --- Makes a DELETE request to the given URL.
+  ---@type function
+  ---@param options table - The options for the request.
+  ---@param cb function - The callback function.
+  ---@return http_request - The HTTP request object.
   function instance:delete(options, cb)
     options.method = "DELETE"
     return instance:request(options, cb)
   end
 
+  --- Makes a request to the given URL.
+  ---@type function
+  ---@param options table - The options for the request.
+  ---@param cb function - The callback function.
+  ---@return http_request - The HTTP request object.
   function instance:request(options, cb)
     validate_options(self, options)
 

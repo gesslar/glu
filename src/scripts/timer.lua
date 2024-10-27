@@ -26,9 +26,7 @@ function mod.new(parent)
     end
   end
 
-  --- timer.multi(name, def)
   --- Creates nested timers and returns true if successful.
-  --- @type function - Creates nested timers and returns true if successful.
   --- @param name string - The name of the multi timer.
   --- @param def table - The definition of the multi timer.
   --- @param delay number - The delay between each timer.
@@ -69,9 +67,7 @@ function mod.new(parent)
     return true
   end
 
-  --- timer.kill_multi(name)
   --- Kills a multi timer
-  --- @type function - Kills a multi timer
   --- @param name string - The name of the multi timer.
   --- @return boolean|nil - True if the multi timer was killed, nil if it doesn't exist.
   --- @example glu.timer.kill_multi("Greetings")

@@ -45,9 +45,10 @@ local function detectModules(module_path, require_path)
   end
 end
 
--- Constructor function
----@param pkg string - The name of the package to which this module belongs.
----@param module_dir_name string - The directory name inside the package directory where the modules are located.
+--- Constructor for the Glu class.
+--- @param pkg string - The name of the package to which this module belongs.
+--- @param module_dir_name string - The directory name inside the package directory where the modules are located.
+--- @return table - The Glu instance.
 function Glu.new(pkg, module_dir_name)
 
   -- Create a new instance table

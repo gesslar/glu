@@ -1,0 +1,10 @@
+{
+  "excludePatterns": [
+    "**/test/**",
+    "**/spec/**",
+    "**/build/**"
+  ],
+  "modulePrefix": "",
+  "outputFormat": "markdown",
+  "outputPath": "docs"
+}

@@ -20,9 +20,7 @@ function mod.new(parent)
     return one < two and -1 or 1
   end
 
-  --- version:compare(version1, version2)
   --- Compares two version strings.
-  --- @type function
   --- @param version1 string - The first version string.
   --- @param version2 string - The second version string.
   --- @return number - 1 if version1 is greater than version2, -1 if version1 is less than version2, and 0 if they are the same.

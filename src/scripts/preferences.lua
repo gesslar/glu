@@ -4,7 +4,6 @@ local script_name = "preferences"
 function mod.new(parent)
   local instance = { parent = parent }
 
-  --- preferences:loadPrefs(pkg, file, defaults)
   --- Loads preferences from a file. If a package name is provided, it will be
   --- used to construct the path. Otherwise, the file will be loaded from the
   --- profile directory.
@@ -30,7 +29,6 @@ function mod.new(parent)
     return prefs or defaults
   end
 
-  --- preferences:savePrefs(pkg, file, prefs)
   --- Saves preferences to a file. If a package name is provided, it will be
   --- used to construct the path. Otherwise, the file will be saved to the
   --- profile directory.

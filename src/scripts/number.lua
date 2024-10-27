@@ -4,9 +4,7 @@ local script_name = "number"
 function mod.new(parent)
   local instance = { parent = parent }
 
-  --- number:round(num, digits)
   --- Rounds a number to a specified number of decimal places.
-  --- @type function
   --- @param num number - The number to round.
   --- @param digits number - The number of digits to round to. (Optional. Default is 0.)
   --- @return number - The rounded number.

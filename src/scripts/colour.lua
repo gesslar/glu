@@ -13,7 +13,6 @@ function mod.new(parent)
   --- Example:
   --- colour:interpolate({255, 0, 0}, {0, 0, 255}, 50)
   --- Returns: {127, 0, 127}
-  --- @type function
   --- @param rgb1 table - The first RGB colour as a table with three elements: red, green, and blue.
   --- @param rgb2 table - The second RGB colour as a table with three elements: red, green, and blue.
   --- @param step number - The step value between 1 and 100.
@@ -36,9 +35,7 @@ function mod.new(parent)
     return { r, g, b }
   end
 
-  --- colour:is_light(colour)
   --- Determines if a colour is a light colour.
-  --- @type function
   --- @param rgb table - The RGB colour as a table with three elements: red, green, and blue.
   --- @return boolean - True if the colour is light, false otherwise.
   function instance:is_light(rgb)
@@ -50,9 +47,7 @@ function mod.new(parent)
     return luminance > 0.5
   end
 
-  --- colour:lighten(colour, amount)
   --- Lightens a colour by a given amount.
-  --- @type function
   --- @param rgb table - The RGB colour as a table with three elements: red, green, and blue.
   --- @param amount number - The amount to lighten the colour by. (Optional, defaults to 30)
   --- @return table - The lightened RGB colour as a table with three elements: red, green, and blue.
@@ -69,9 +64,7 @@ function mod.new(parent)
     }
   end
 
-  --- colour:darken(colour, amount)
   --- Darkens a colour by a given amount.
-  --- @type function
   --- @param rgb table - The RGB colour as a table with three elements: red, green, and blue.
   --- @param amount number - The amount to darken the colour by.
   --- @return table - The darkened RGB colour as a table with three elements: red, green, and blue.
@@ -88,9 +81,7 @@ function mod.new(parent)
     }
   end
 
-  --- colour:lighten_or_darken(rgb1, rgb2, amount)
   --- Lightens or darkens the first colour by a given amount based on a comparison with the second colour.
-  --- @type function
   --- @param rgb_compare table - The first RGB colour as a table with three elements: red, green, and blue.
   --- @param rgb_colour table - The second RGB colour as a table with three elements: red, green, and blue.
   --- @param amount number - The amount to lighten or darken the colour by. (Optional, defaults to 85)
@@ -114,9 +105,7 @@ function mod.new(parent)
     return rgb_colour
   end
 
-  --- colour:complementary(colour)
   --- Returns the complementary colour of a given colour.
-  --- @type function
   --- @param rgb table - The RGB colour as a table with three elements: red, green, and blue.
   --- @return table - The complementary RGB colour as a table with three elements: red, green, and blue.
   function instance:complementary(rgb)
@@ -125,9 +114,7 @@ function mod.new(parent)
     return { 255 - rgb[1], 255 - rgb[2], 255 - rgb[3] }
   end
 
-  --- colour:to_grayscale(colour)
   --- Converts a colour to its grayscale equivalent.
-  --- @type function
   --- @param rgb table - The RGB colour as a table with three elements: red, green, and blue.
   --- @return table - The grayscale RGB colour as a table with three elements: red, green, and blue.
   function instance:grayscale(rgb)
@@ -137,9 +124,7 @@ function mod.new(parent)
     return { gray, gray, gray }
   end
 
-  --- colour:adjust_saturation(colour, factor)
   --- Adjusts the saturation of a colour by a given factor.
-  --- @type function
   --- @param rgb table - The RGB colour as a table with three elements: red, green, and blue.
   --- @param factor number - A factor between 0 (fully desaturated) and 1 (fully saturated).
   --- @return table - The adjusted RGB colour as a table with three elements: red, green, and blue.
@@ -155,17 +140,13 @@ function mod.new(parent)
     }
   end
 
-  --- colour:random()
   --- Generates a random RGB colour.
-  --- @type function
   --- @return table - A random RGB colour as a table with three elements: red, green, and blue.
   function instance:random()
     return { math.random(0, 255), math.random(0, 255), math.random(0, 255) }
   end
 
-  --- colour:random_shade(colour, range)
   --- Generates a random shade of a given colour within a range.
-  --- @type function
   --- @param rgb table - The RGB colour as a table with three elements: red, green, and blue.
   --- @param range number - The range to adjust the colour by (e.g., 50 means +/- 50 for R, G, and B). (Optional, defaults to 50)
   --- @return table - A random RGB colour that is a shade of the given colour.
@@ -181,9 +162,7 @@ function mod.new(parent)
     return { r, g, b }
   end
 
-  --- colour:generate_triad(colour)
   --- Generates the triad colours of a given colour.
-  --- @type function
   --- @param rgb table - The RGB colour as a table with three elements: red, green, and blue.
   --- @return table - A table of RGB colours that are the triad of the given colour.
   function instance:generate_triad(rgb)

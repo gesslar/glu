@@ -4,9 +4,7 @@ local script_name = "url"
 function mod.new(parent)
   local instance = { parent = parent }
 
-  --- url:decode(str)
   --- Decodes a URL-encoded string.
-  --- @type function
   --- @param str string - The URL-encoded string to decode.
   --- @return string - The decoded string.
   function instance:decode(str)
@@ -39,9 +37,7 @@ function mod.new(parent)
     return params
   end
 
-  --- url:parse(url)
   --- Parses a URL into its components.
-  --- @type function
   --- @param url string - The URL to parse.
   --- @return table - A table containing the parsed URL components.
   function instance:parse(url)

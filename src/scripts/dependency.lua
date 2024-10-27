@@ -61,7 +61,6 @@ function mod.new(parent)
     process_queue()
   end
 
-  --- dependency:load_dependency(pkg, dependency)
   --- Loads a dependency.
   ---@param dependency table - The dependency.
   ---@param cb function - The callback function.
@@ -95,7 +94,6 @@ function mod.new(parent)
     end
   end
 
-  --- dependency:load_dependencies(pkg, dependencies)
   --- Loads dependencies.
   ---@param pkg string - The package name.
   ---@param dependencies table - The dependencies.

@@ -24,9 +24,10 @@ function mod.new(parent)
     return trace
   end
 
-  --- valid:type(value, expected_type, argument_index, nil_allowed)
-  --- Validates the type of a value.
-  --- @type function
+  --- Asserts that the value is of the expected type. No return value, but an
+  --- error is thrown if the assertion fails. No error is thrown if the value
+  --- is nil and nil is allowed, or otherwise if the value is of the expected
+  --- type.
   --- @param value any - The value to validate.
   --- @param expected_type string - The expected type of the value.
   --- @param argument_index number - The index of the argument.
@@ -60,10 +61,9 @@ function mod.new(parent)
     error("Invalid type to argument " .. argument_index .. ". Expected " .. expected_type .. ", got " .. type(value) .. " in\n" .. last)
   end
 
-  --- valid:rgb_table(colour, argument_index, nil_allowed)
-  --- Validates an RGB color table.
-  --- Validates that the table has three elements, and that each element is a number between 0 and 255.
-  --- @type function
+  --- Asserts that the table is an RGB color table. No return value, but an
+  --- error is thrown if the assertion fails. No error is thrown if the value
+  --- is nil and nil is allowed.
   --- @param colour table - The RGB color table to validate.
   --- @param argument_index number - The index of the argument.
   --- @param nil_allowed boolean - Whether nil is allowed (default false)
@@ -86,9 +86,9 @@ function mod.new(parent)
       "Invalid value to argument " .. argument_index .. ". Expected number between 0 and 255, got " .. colour[3] .. " in\n" .. last)
   end
 
-  --- valid:not_empty(value, argument_index, nil_allowed)
-  --- Validates that the value is not empty.
-  --- @type function
+  --- Asserts that the value is not empty. No return value, but an error is
+  --- thrown if the assertion fails. No error is thrown if the value is nil
+  --- and nil is allowed.
   --- @param value any - The value to validate.
   --- @param argument_index number - The index of the argument.
   --- @param nil_allowed boolean - Whether nil is allowed (default false)
@@ -102,9 +102,9 @@ function mod.new(parent)
     assert(not table.is_empty(value), "Invalid value to argument " .. argument_index .. ". Expected non-empty in\n" .. last)
   end
 
-  --- valid:uniform_type(value, expected_type, argument_index, nil_allowed)
-  --- Validates that all elements in the table are of the same type.
-  --- @type function
+  --- Asserts that all elements in the table are of the same type. No return
+  --- value, but an error is thrown if the assertion fails. No error is thrown
+  --- if the value is nil and nil is allowed.
   --- @param value any - The value to validate.
   --- @param expected_type string - The expected type of the value.
   --- @param argument_index number - The index of the argument.
@@ -120,9 +120,9 @@ function mod.new(parent)
       "Invalid type to argument " .. argument_index .. ". Expected " .. expected_type .. ", got " .. type(value) .. " in\n" .. last)
   end
 
-  --- valid:regex(value, pattern, argument_index, nil_allowed)
-  --- Validates that the value matches the pattern using the rex library (PCRE)
-  --- @type function
+  --- Asserts that the value matches the pattern using the rex library (PCRE).
+  --- No return value, but an error is thrown if the assertion fails. No error
+  --- is thrown if the value is nil and nil is allowed.
   --- @param value any - The value to validate.
   --- @param pattern string - The pattern to match the value against.
   --- @param argument_index number - The index of the argument.
@@ -137,9 +137,9 @@ function mod.new(parent)
     assert(rex.match(value, pattern), "Invalid value to argument " .. argument_index .. ". Expected " .. pattern .. ", got " .. value .. " in\n" .. last)
   end
 
-  --- valid:indexed_table(value, argument_index, nil_allowed)
-  --- Validates that the value is an indexed table.
-  --- @type function
+  --- Asserts that the value is an indexed table. No return value, but an error
+  --- is thrown if the assertion fails. No error is thrown if the value is nil
+  --- and nil is allowed.
   --- @param value any - The value to validate.
   --- @param argument_index number - The index of the argument.
   --- @param nil_allowed boolean - Whether nil is allowed (default false)
@@ -152,9 +152,9 @@ function mod.new(parent)
     assert(self.parent.table:is_indexed(value), "Invalid value to argument " .. argument_index .. ". Expected indexed table, got " .. type(value) .. " in\n" .. last)
   end
 
-  --- valid:associative_table(value, argument_index, nil_allowed)
-  --- Validates that the value is an associative table.
-  --- @type function
+  --- Asserts that the value is an associative table. No return value, but an
+  --- error is thrown if the assertion fails. No error is thrown if the value
+  --- is nil and nil is allowed.
   --- @param value any - The value to validate.
   --- @param argument_index number - The index of the argument.
   --- @param nil_allowed boolean - Whether nil is allowed (default false)
@@ -167,9 +167,9 @@ function mod.new(parent)
     assert(self.parent.table:is_associative(value), "Invalid value to argument " .. argument_index .. ". Expected associative table, got " .. type(value) .. " in\n" .. last)
   end
 
-  --- valid:test(statement, value, argument_index, nil_allowed)
-  --- Validates that the statement is true.
-  --- @type function
+  --- Asserts that the statement is true. No return value, but an error is
+  --- thrown if the assertion fails. No error is thrown if the value is nil
+  --- and nil is allowed.
   --- @param statement boolean - The statement to validate.
   --- @param value any - The value to validate.
   --- @param argument_index number - The index of the argument.
@@ -183,9 +183,9 @@ function mod.new(parent)
     assert(statement, "Invalid value to argument " .. argument_index .. ". " .. value .. " in\n" .. last)
   end
 
-  --- valid:same(one, two)
-  --- Validates that the two values are identical.
-  --- @type function
+  --- Asserts that the two values are identical. No return value, but an error
+  --- is thrown if the assertion fails. No error is thrown if the value is nil
+  --- and nil is allowed.
   --- @param one any - The first value to validate.
   --- @param two any - The second value to validate.
   function instance:same(one, two)
@@ -193,9 +193,9 @@ function mod.new(parent)
     assert(one == two, "Invalid value to arguments. Expected 1 and 2 to be identical in\n" .. get_last_traceback_line())
   end
 
-  --- valid:same_type(one, two)
-  --- Validates that the two values are of the same type.
-  --- @type function
+  --- Asserts that the two values are of the same type. No return value, but an
+  --- error is thrown if the assertion fails. No error is thrown if the value
+  --- is nil and nil is allowed.
   --- @param one any - The first value to validate.
   --- @param two any - The second value to validate.
   function instance:same_type(one, two)
