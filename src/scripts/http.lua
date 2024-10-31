@@ -3,22 +3,16 @@ local script_name = "http"
 local requests = {}
 local http_types = { "GET", "PUT", "POST", "DELETE" }
 
-local function newResponse(parent, err, url)
-  return {
-    type = "response",
-    id = parent.parent.util.generate_uuid(),
-    parent = parent,
-    err = err,
-    url = url,
-  }
-end
-
 local function newHttp(parent, options)
-  local id = parent.parent.util.generate_uuid()
+  local id = parent.___.util.generate_uuid()
   local instance = {
     id = id,
     parent = parent,
     options = options,
+    ___ = (function(p)
+      while p.parent do p = p.parent end
+      return p
+    end)(parent)
   }
 
   -- Headers
@@ -29,9 +23,9 @@ local function newHttp(parent, options)
   instance.headers = options.headers
 
   local function write_file(self, filepath, data)
-    local dir, file = self.parent.parent.fd:dir_file(filepath, true)
+    local dir, file = self.___.fd:dir_file(filepath, true)
     if dir and file then
-      return self.parent.parent.fd:write_file(filepath, data, true)
+      return self.___.fd:write_file(filepath, data, true)
     else
       return nil, "Invalid file path."
     end
@@ -59,7 +53,7 @@ local function newHttp(parent, options)
   local lc = table.index_of(http_types, options.method) and
     string.lower(options.method) or
     "custom"
-  local uc = string.title(parent.parent.string:capitalize(lc))
+  local uc = string.title(instance.___.string:capitalize(lc))
 
   for _, event in ipairs({"Done", "Error"}) do
     local event_mod = string.format("sys%sHttp%s", uc, event)
@@ -89,9 +83,9 @@ local function newHttp(parent, options)
         local result
         arg = only_indexed(arg)
         if rex.match(e, "sys(?:\\w+)HttpError$") then
-          result = parent.parent.table:allocate({ "error", "url", "server" }, arg)
+          result = instance.___.table:allocate({ "error", "url", "server" }, arg)
         elseif rex.match(e, "sys(?:\\w+)HttpDone$") then
-          result = parent.parent.table:allocate({ "url", "data", "server" }, arg)
+          result = instance.___.table:allocate({ "url", "data", "server" }, arg)
         else
           error("Unknown event: " .. e)
         end
@@ -131,17 +125,22 @@ end
 ---@diagnostic disable-next-line: undefined-global
 local mod = mod or {}
 function mod.new(parent)
-  local instance = { parent = parent, type = "http" }
+  local instance = {
+    parent = parent,
+    type = "http",
+    ___ = (function(p)
+      while p.parent do p = p.parent end
+      return p
+    end)(parent)
+  }
 
   local function validate_options(self, options)
-    self.parent.valid:type(options, "table", 1, false)
-    self.parent.valid:not_empty(options, 1, false)
-    self.parent.valid:type(options.method, "string", 2, false)
+    self.___.valid:type(options, "table", 1, false)
+    self.___.valid:not_empty(options, 1, false)
+    self.___.valid:type(options.method, "string", 2, false)
 
     -- We must have a URL
-    self.parent.valid:regex(options.url, self.parent.regex.http_url, "url", 1,
-      false
-    )
+    self.___.valid:regex(options.url, self.___.regex.http_url, "url", 1, false)
   end
 
   --- Downloads a file from the given URL and saves it to the specified path.
@@ -161,7 +160,7 @@ function mod.new(parent)
   --- ```
   function instance:download(options, cb)
     options.method = options.method or "GET"
-    self.parent.valid:type(options.saveTo, "string", 1, false)
+    self.___.valid:type(options.saveTo, "string", 1, false)
     return instance:request(options, cb)
   end
 
@@ -183,7 +182,7 @@ function mod.new(parent)
   --- ```
   function instance:get(options, cb)
     options.method = "GET"
-    return instance:request(options, cb)
+    return self:request(options, cb)
   end
 
   --- Makes a POST request to the given URL.
@@ -204,7 +203,7 @@ function mod.new(parent)
   --- ```
   function instance:post(options, cb)
     options.method = "POST"
-    return instance:request(options, cb)
+    return self:request(options, cb)
   end
 
   --- Makes a PUT request to the given URL.
@@ -225,7 +224,7 @@ function mod.new(parent)
   --- ```
   function instance:put(options, cb)
     options.method = "PUT"
-    return instance:request(options, cb)
+    return self:request(options, cb)
   end
 
   --- Makes a DELETE request to the given URL.
@@ -246,7 +245,7 @@ function mod.new(parent)
   --- ```
   function instance:delete(options, cb)
     options.method = "DELETE"
-    return instance:request(options, cb)
+    return self:request(options, cb)
   end
 
   --- Makes a request to the given URL. Use this option for any HTTP method
@@ -274,7 +273,7 @@ function mod.new(parent)
     options.method = string.upper(options.method)
 
     -- We must have a callback
-    self.parent.valid:type(cb, "function", 2, false)
+    self.___.valid:type(cb, "function", 2, false)
     options.cb = cb
 
     -- Get a new http object
@@ -283,7 +282,7 @@ function mod.new(parent)
     return request
   end
 
-  instance.parent.valid = instance.parent.valid or setmetatable({}, {
+  instance.___.valid = instance.___.valid or setmetatable({}, {
     __index = function(_, k) return function(...) end end
   })
 

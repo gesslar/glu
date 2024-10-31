@@ -3,7 +3,13 @@ local mod = mod or {}
 local script_name = "util"
 
 function mod.new(parent)
-  local instance = { parent = parent }
+  local instance = {
+    parent = parent,
+    ___ = (function(p)
+      while p.parent do p = p.parent end
+      return p
+    end)(parent)
+  }
 
   --- Generates a version 4 UUID based on random numbers.
   ---
@@ -33,7 +39,7 @@ function mod.new(parent)
     return result
   end
 
-  instance.parent.valid = instance.parent.valid or setmetatable({}, {
+  instance.___.valid = instance.___.valid or setmetatable({}, {
     __index = function(_, k) return function(...) end end
   })
 

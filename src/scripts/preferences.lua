@@ -2,7 +2,13 @@
 local mod = mod or {}
 local script_name = "preferences"
 function mod.new(parent)
-  local instance = { parent = parent }
+  local instance = {
+    parent = parent,
+    ___ = (function(p)
+      while p.parent do p = p.parent end
+      return p
+    end)(parent)
+  }
 
   --- Loads preferences from a file. If a package name is provided, it will be
   --- used to construct the path. Otherwise, the file will be loaded from the
@@ -20,9 +26,9 @@ function mod.new(parent)
   --- })
   --- ```
   function instance:load_prefs(pkg, file, defaults)
-    self.parent.valid:type(pkg, "string", 1, true)
-    self.parent.valid:type(file, "string", 2, false)
-    self.parent.valid:type(defaults, "table", 3, false)
+    self.___.valid:type(pkg, "string", 1, true)
+    self.___.valid:type(file, "string", 2, false)
+    self.___.valid:type(defaults, "table", 3, false)
 
     local path = getMudletHomeDir() .. "/" .. (pkg and pkg .. "/" or "") .. file
 
@@ -51,16 +57,16 @@ function mod.new(parent)
   --- })
   --- ```
   function instance:save_prefs(pkg, file, prefs)
-    self.parent.valid:type(pkg, "string", 1, true)
-    self.parent.valid:type(file, "string", 2, false)
-    self.parent.valid:type(prefs, "table", 3, false)
+    self.___.valid:type(pkg, "string", 1, true)
+    self.___.valid:type(file, "string", 2, false)
+    self.___.valid:type(prefs, "table", 3, false)
 
     local path = getMudletHomeDir() .. "/" .. (pkg and pkg .. "/" or "") .. file
 
     table.save(path, prefs)
   end
 
-  instance.parent.valid = instance.parent.valid or setmetatable({}, {
+  instance.___.valid = instance.___.valid or setmetatable({}, {
     __index = function(_, k) return function(...) end end
   })
 

@@ -3,7 +3,13 @@ local mod = mod or {}
 local script_name = "timer"
 
 function mod.new(parent)
-  local instance = { parent = parent }
+  local instance = {
+    parent = parent,
+    ___ = (function(p)
+      while p.parent do p = p.parent end
+      return p
+    end)(parent)
+  }
 
   local multi_timers = {}
   local function perform_multi_timer_function(self, name)
@@ -63,13 +69,13 @@ function mod.new(parent)
   --- })
   --- ```
   function instance:multi(name, def, delay)
-    self.parent.valid:type(name, "string", 1, false)
-    self.parent.valid:type(def, "table", 2, false)
-    self.parent.valid:not_empty(def, 2, false)
-    self.parent.valid:type(delay, "number", 3, true)
+    self.___.valid:type(name, "string", 1, false)
+    self.___.valid:type(def, "table", 2, false)
+    self.___.valid:not_empty(def, 2, false)
+    self.___.valid:type(delay, "number", 3, true)
 
     if delay then
-      def = self.parent.table:map(def, function(_, element)
+      def = self.___.table:map(def, function(_, element)
         element.delay = delay
         return element
       end)
@@ -84,7 +90,7 @@ function mod.new(parent)
     end)
 
     if not timer_id then
-      instance:kill_multi(name)
+      self:kill_multi(name)
       return false
     end
 
@@ -102,7 +108,7 @@ function mod.new(parent)
   --- timer.kill_multi("Greetings")
   --- ```
   function instance:kill_multi(name)
-    self.parent.valid:type(name, "string", 1, false)
+    self.___.valid:type(name, "string", 1, false)
     local timer_function = multi_timers[name]
     if not timer_function then return nil end
 
@@ -116,7 +122,7 @@ function mod.new(parent)
     return true
   end
 
-  instance.parent.valid = instance.parent.valid or setmetatable({}, {
+  instance.___.valid = instance.___.valid or setmetatable({}, {
     __index = function(_, k) return function(...) end end
   })
 

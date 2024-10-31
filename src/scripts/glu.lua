@@ -56,6 +56,8 @@ function Glu.new(pkg, module_dir_name)
 
   assert(type(pkg) == "string", "Package name must be a string")
 
+  instance.package_name = pkg
+
   if #glu_modules == 0 then
     local pkg_path = getMudletHomeDir() .. "/" .. pkg
     local module_path = pkg_path .. "/" .. module_dir_name
@@ -64,6 +66,15 @@ function Glu.new(pkg, module_dir_name)
     assert(lfs.attributes(pkg_path), "Package directory " .. pkg .. " does not exist")
     assert(lfs.attributes(module_path), "Module directory " .. module_dir_name .. " does not exist in package " .. pkg)
     detectModules(module_path, require_path)
+
+    -- Trap events for uninstalling the package and clean ourselves up.
+    local handler_name = "glu_sysUninstall_" .. pkg
+    registerNamedEventHandler("glu", handler_name, "sysUninstall", function(event, p)
+      if p == instance.package_name then
+        deleteNamedEventHandler("glu", handler_name)
+        instance = nil
+      end
+    end)
   end
 
   assert(table.size(glu_modules) > 0, "No modules found in " .. pkg)

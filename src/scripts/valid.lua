@@ -3,7 +3,14 @@ local mod = mod or {}
 local script_name = "valid"
 
 function mod.new(parent)
-  local instance = { parent = parent }
+  local instance = {
+    parent = parent,
+    ___ = (function(p)
+      while p.parent do p = p.parent end
+      return p
+    end)(parent)
+  }
+
   -- Ignore the current script in tracebacks
   local trace_ignore = debug.getinfo(1).source
 
@@ -58,7 +65,7 @@ function mod.new(parent)
     if expected_type == "any" then return end
 
     local expected_types = string.split(expected_type, "|") or { expected_type }
-    local invalid = table.n_filter(expected_types, function(t) return not instance.parent.TYPE[t] end)
+    local invalid = table.n_filter(expected_types, function(t) return not instance.___.TYPE[t] end)
 
     if table.size(invalid) > 0 then
       error("Invalid type to argument " .. argument_index .. ". Expected " .. table.concat(invalid, "|") .. ", got " .. type(value) .. " in\n" .. last)
@@ -69,6 +76,17 @@ function mod.new(parent)
     end
 
     error("Invalid type to argument " .. argument_index .. ". Expected " .. expected_type .. ", got " .. type(value) .. " in\n" .. last)
+  end
+
+  --- Asserts that the value is of the expected type or nil. No return value,
+  --- but an error is thrown if the assertion fails. No error is thrown if the
+  --- value is nil and nil is allowed.
+  ---
+  --- @param value any - The value to validate.
+  --- @param expected_type string - The expected type of the value.
+  --- @param argument_index number - The index of the argument.
+  function instance:type_or_nil(value, expected_type, argument_index)
+    self:type(value, expected_type, argument_index, true)
   end
 
   --- Asserts that the table is an RGB color table. No return value, but an
@@ -141,18 +159,17 @@ function mod.new(parent)
   --- ```lua
   --- function my_function(values)
   ---   -- values must be a table containing only numbers
-  ---   valid:uniform_type(values, "number", 1, false)
+  ---   valid:n_uniform(values, "number", 1, false)
   --- end
   --- ```
-  function instance:uniform_type(value, expected_type, argument_index, nil_allowed)
+  function instance:n_uniform(value, expected_type, argument_index, nil_allowed)
     if nil_allowed and value == nil then
       return
     end
 
     local last = get_last_traceback_line()
-
-    assert(self.parent.table.uniform_type(value, expected_type),
-      "Invalid type to argument " .. argument_index .. ". Expected " .. expected_type .. ", got " .. type(value) .. " in\n" .. last)
+    assert(self.___.table:n_uniform(value, expected_type),
+      "Invalid type to argument " .. argument_index .. ". Expected an indexed table of " .. expected_type .. " in\n" .. last)
   end
 
   --- Asserts that the value matches the pattern using the rex library (PCRE).
@@ -190,16 +207,16 @@ function mod.new(parent)
   --- ```lua
   --- function my_function(values)
   ---   -- values must be an indexed table
-  ---   valid:indexed_table(values, 1, false)
+  ---   valid:indexed(values, 1, false)
   --- end
   --- ```
-  function instance:indexed_table(value, argument_index, nil_allowed)
+  function instance:indexed(value, argument_index, nil_allowed)
     if nil_allowed and value == nil then
       return
     end
 
     local last = get_last_traceback_line()
-    assert(self.parent.table:is_indexed(value), "Invalid value to argument " .. argument_index .. ". Expected indexed table, got " .. type(value) .. " in\n" .. last)
+    assert(self.___.table:indexed(value), "Invalid value to argument " .. argument_index .. ". Expected indexed table, got " .. type(value) .. " in\n" .. last)
   end
 
   --- Asserts that the value is an associative table. No return value, but an
@@ -213,18 +230,18 @@ function mod.new(parent)
   --- ```lua
   --- function my_function(values)
   ---   -- values must be an associative table
-  ---   valid:associative_table(values, 1, false)
+  ---   valid:associative(values, 1, false)
   --- end
   --- ```
-  function instance:associative_table(value, argument_index, nil_allowed)
+  function instance:associative(value, argument_index, nil_allowed)
     if nil_allowed and value == nil then
       return
     end
 
     local last = get_last_traceback_line()
-    assert(self.parent.table:is_associative(value), "Invalid value to argument " .. argument_index .. ". Expected associative table, got " .. type(value) .. " in\n" .. last)
+    assert(self.___.table:associative(value),
+      "Invalid value to argument " .. argument_index .. ". Expected associative table, got " .. type(value) .. " in\n" .. last)
   end
-
   --- Asserts that the statement is true. No return value, but an error is
   --- thrown if the assertion fails. No error is thrown if the value is nil
   --- and nil is allowed.
@@ -246,7 +263,7 @@ function mod.new(parent)
     end
 
     local last = get_last_traceback_line()
-    assert(statement, "Invalid value to argument " .. argument_index .. ". " .. value .. " in\n" .. last)
+    assert(statement, "Invalid value to argument " .. argument_index .. ". " .. tostring(value) .. " in\n" .. last)
   end
 
   --- Asserts that the two values are identical. No return value, but an error
@@ -283,7 +300,21 @@ function mod.new(parent)
     assert(type(one) == type(two), "Invalid value to arguments. Expected 1 and 2 to be of the same type in\n" .. last)
   end
 
-  instance.parent.valid = instance.parent.valid or setmetatable({}, {
+  --- Asserts that the value is an object. No return value, but an error is
+  --- thrown if the assertion fails. No error is thrown if the value is nil
+  --- and nil is allowed.
+  ---
+  --- @param value any - The value to validate.
+  function instance:object(value, argument_index, nil_allowed)
+    if nil_allowed and value == nil then
+      return
+    end
+
+    local last = get_last_traceback_line()
+    assert(self.___.table:object(value), "Invalid value to argument " .. argument_index .. ". Expected object, got " .. type(value) .. " in\n" .. last)
+  end
+
+  instance.___.valid = instance.___.valid or setmetatable({}, {
     __index = function(_, k) return function(...) end end
   })
 

@@ -2,7 +2,13 @@
 local mod = mod or {}
 local script_name = "string"
 function mod.new(parent)
-  local instance = { parent = parent }
+  local instance = {
+    parent = parent,
+    ___ = (function(p)
+      while p.parent do p = p.parent end
+      return p
+    end)(parent)
+  }
 
   --- Capitalizes the first character of a string.
   ---
@@ -14,7 +20,7 @@ function mod.new(parent)
   --- -- "Hello"
   --- ```
   function instance:capitalize(str)
-    self.parent.valid:type(str, "string", 1, false)
+    self.___.valid:type(str, "string", 1, false)
     assert(str ~= "", "Expected a non-empty string")
 
     local result = str:gsub("^%l", string.upper)
@@ -31,7 +37,7 @@ function mod.new(parent)
   --- -- "hello"
   --- ```
   function instance:trim(str)
-    self.parent.valid:type(str, "string", 1, false)
+    self.___.valid:type(str, "string", 1, false)
     return str:match("^%s*(.-)%s*$")
   end
 
@@ -45,7 +51,7 @@ function mod.new(parent)
   --- -- "hello  "
   --- ```
   function instance:ltrim(str)
-    self.parent.valid:type(str, "string", 1, false)
+    self.___.valid:type(str, "string", 1, false)
     return str:match("^%s*(.-)$")
   end
 
@@ -59,7 +65,7 @@ function mod.new(parent)
   --- -- "  hello"
   --- ```
   function instance:rtrim(str)
-    self.parent.valid:type(str, "string", 1, false)
+    self.___.valid:type(str, "string", 1, false)
     return str:match("^.-%s*$")
   end
 
@@ -77,7 +83,7 @@ function mod.new(parent)
     return result or str
   end
 
-  instance.parent.valid = instance.parent.valid or setmetatable({}, {
+  instance.___.valid = instance.___.valid or setmetatable({}, {
     __index = function(_, k) return function(...) end end
   })
 

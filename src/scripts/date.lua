@@ -2,7 +2,13 @@
 local mod = mod or {}
 local script_name = "date"
 function mod.new(parent)
-  local instance = { parent = parent }
+  local instance = {
+    parent = parent,
+    ___ = (function(p)
+      while p.parent do p = p.parent end
+      return p
+    end)(parent)
+  }
 
   --- Converts the number of seconds to a human-readable strings of hours,
   --- minutes, and seconds.
@@ -28,8 +34,8 @@ function mod.new(parent)
   --- @param as_string boolean|nil - Whether to return a string instead of three separate values. (Optional. Default is false.)
   --- @return string,string,string|string - If `as_string` is false or not provided, returns hours, minutes, and seconds as strings, otherwise returns a single formatted string.
   function instance:shms(seconds, as_string)
-    self.parent.valid:type(seconds, "number", 1, false)
-    self.parent.valid:type(as_string, "boolean", 2, true)
+    self.___.valid:type(seconds, "number", 1, false)
+    self.___.valid:type(as_string, "boolean", 2, true)
 
     local s = seconds or 0
 
@@ -61,7 +67,7 @@ function mod.new(parent)
     end
   end
 
-  instance.parent.valid = instance.parent.valid or setmetatable({}, {
+  instance.___.valid = instance.___.valid or setmetatable({}, {
     __index = function(_, k) return function(...) end end
   })
 

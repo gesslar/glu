@@ -2,7 +2,13 @@
 local mod = mod or {}
 local script_name = "fd"
 function mod.new(parent)
-  local instance = { parent = parent }
+  local instance = {
+    parent = parent,
+    ___ = (function(p)
+      while p.parent do p = p.parent end
+      return p
+    end)(parent)
+  }
 
   --- Splits a path into a directory and file.
   ---
@@ -26,7 +32,7 @@ function mod.new(parent)
     end
 
     if dir_required and dir then
-      if not instance:dir_exists(dir) then
+      if not self:dir_exists(dir) then
         return nil, nil
       end
     end
@@ -101,7 +107,7 @@ function mod.new(parent)
   function instance:write_file(path, data, overwrite, binary)
     if not path then return end
 
-    path = instance:fix_path(path)
+    path = self:fix_path(path)
 
     local flag = overwrite and "w" or "a"
     local mode = binary and "b" or ""
@@ -124,10 +130,10 @@ function mod.new(parent)
   --- -- "path/to/file.txt"
   --- ```
   function instance:fix_path(path)
-    return path:gsub("\\", "/")
+    return path:gsub("\\", "/") or path
   end
 
-  instance.parent.valid = instance.parent.valid or setmetatable({}, {
+  instance.___.valid = instance.___.valid or setmetatable({}, {
     __index = function(_, k) return function(...) end end
   })
 

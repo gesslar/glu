@@ -2,7 +2,13 @@
 local mod = mod or {}
 local script_name = "url"
 function mod.new(parent)
-  local instance = { parent = parent }
+  local instance = {
+    parent = parent,
+    ___ = (function(p)
+      while p.parent do p = p.parent end
+      return p
+    end)(parent)
+  }
 
   --- Decodes a string that has been URL-encoded. Useful for decoding query
   --- parameters into a more readable format.
@@ -15,12 +21,12 @@ function mod.new(parent)
   --- -- "This string is now readable!!!"
   --- ```
   function instance:decode(str)
-    self.parent.valid:type(str, "string", 1, false)
+    self.___.valid:type(str, "string", 1, false)
 
-    str = string.gsub(str, '+', ' ')
-    str = string.gsub(str, '%%(%x%x)', function(h)
+    str = (string.gsub(str, '+', ' ') or str)
+    str = (string.gsub(str, '%%(%x%x)', function(h)
       return string.char(tonumber(h, 16))
-    end)
+    end) or str)
     return str
   end
 
@@ -35,11 +41,11 @@ function mod.new(parent)
   --- -- "This%20string%20is%20now%20usable%20in%20a%20URL%2E"
   --- ```
   function instance:encode(str)
-    self.parent.valid:type(str, "string", 1, false)
+    self.___.valid:type(str, "string", 1, false)
 
-    str = string.gsub(str, "([^%w])", function(c)
+    str = (string.gsub(str, "([^%w])", function(c)
       return string.format("%%%02X", string.byte(c))
-    end)
+    end) or str)
     return str
   end
 
@@ -77,7 +83,7 @@ function mod.new(parent)
     for key, value in pairs(params) do
       table.insert(encoded, self:encode(key) .. "=" .. self:encode(value))
     end
-    return table.concat(encoded, "&")
+    return table.concat(encoded, "&") or ""
   end
 
   --- Parses a URL into its components.
@@ -100,11 +106,11 @@ function mod.new(parent)
   --- -- }
   --- ```
   function instance:parse(url)
-    self.parent.valid:type(url, "string", 1, false)
+    self.___.valid:type(url, "string", 1, false)
 
     local protocol, host, port, path, query_string = rex.match(url, "^(https?)://([^/:]+)(?::(\\d+))?/([^?]*)\\??(.*)")
-    local file = rex.match(path, "([^/]+)$")
-    local params = self:decode_params(query_string)
+    local file = (rex.match(path, "([^/]+)$") or path)
+    local params = self:decode_params(query_string or "")
 
     protocol = protocol and protocol or "http"
     port = port and tonumber(port) or
@@ -122,7 +128,7 @@ function mod.new(parent)
     return parsed
   end
 
-  instance.parent.valid = instance.parent.valid or setmetatable({}, {
+  instance.___.valid = instance.___.valid or setmetatable({}, {
     __index = function(_, k) return function(...) end end
   })
 
