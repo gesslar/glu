@@ -1,15 +1,14 @@
----@diagnostic disable-next-line: undefined-global
-local mod = mod or {}
 local script_name = "table"
-function mod.new(parent)
-  local instance = {
-    parent = parent,
-    ___ = (function(p)
-      while p.parent do p = p.parent end
-      return p
-    end)(parent)
-  }
+local class_name = script_name:title() .. "Class"
+local deps = { "valid" }
 
+local mod = Glu.registerClass({
+  class_name = class_name,
+  script_name = script_name,
+  dependencies = deps,
+})
+
+function mod.setup(___, self)
   --- Casts a value to an indexed table if it is not already one.
   ---
   --- @param ...any - The value to cast.
@@ -17,34 +16,33 @@ function mod.new(parent)
   ---
   --- @example
   --- ```lua
-  --- table:n_cast(1)
+  --- table.n_cast(1)
   --- -- {1}
   --- ```
-  function instance:n_cast(...)
-    if type(...) == "table" and self:indexed(...) then
+  function self.n_cast(...)
+    if type(...) == "table" and self.indexed(...) then
       return ...
     end
 
     return { ... }
   end
 
-  instance.assure_indexed = instance.n_cast
+  self.assure_indexed = self.n_cast
 
   --- Takes a table and a function and returns a new table with the function
   --- applied to each element of the original table.
-  ---
   --- @param t table - The table to map over.
   --- @param fn function - The function to apply to each element of the table.
   --- @param ... any - Additional arguments to pass to the function.
   --- @return table - A new table with the function applied to each element.
   --- @example
   --- ```lua
-  --- table:map({1, 2, 3}, function(k, v) return v * 2 end)
-  --- -- {2, 4, 6}
+  --- table.map({1, 2, 3}, function(k, v) return v * 2 end)
+    --- -- {2, 4, 6}
   --- ```
-  function instance:map(t, fn, ...)
-    self.___.valid:type(t, "table", 1, false)
-    self.___.valid:type(fn, "function", 2, false)
+  function self.map(t, fn, ...)
+    ___.valid.type(t, "table", 1, false)
+    ___.valid.type(fn, "function", 2, false)
 
     local result = {}
     for k, v in pairs(t) do
@@ -58,33 +56,37 @@ function mod.new(parent)
   --- @return table - A new table with the values of the original table.
   --- @example
   --- ```lua
-  --- table:values({a = 1, b = 2, c = 3})
+  --- table.values({a = 1, b = 2, c = 3})
   --- -- {1, 2, 3}
   --- ```
-  function instance:values(t)
-    self.___.valid:type(t, "table", 1, false)
+  function self.values(t)
+    ___.valid.type(t, "table", 1, false)
 
     local result = {}
-    for _, v in pairs(t) do
-      result[#result + 1] = v
+      for _, v in pairs(t) do
+        result[#result + 1] = v
+      end
+      return result
     end
-    return result
-  end
 
-  --- Checks if all elements in the table are of the same type.
+  --- Checks if all elements in the table are of the same type. If type is not
+  --- provided, it will check if all elements are of the same type as the first
+  --- element in the table.
   --- @param t table - The table to check.
-  --- @param typ string - The type to check for.
+  --- @param typ string|nil - The type to check for. (Optional)
   --- @return boolean - True if all elements are of the same type, false otherwise.
   --- @example
   --- ```lua
-  --- table:n_uniform({1, 2, 3}, "number")
+  --- table.n_uniform({1, 2, 3}, "number")
   --- -- true
   --- ```
-  function instance:n_uniform(t, typ)
-    self.___.valid:type(t, "table", 1, false)
-    self.___.valid:not_empty(t, 1, false)
-    self.___.valid:indexed(t, 1, false)
-    self.___.valid:type(typ, "string", 2, false)
+  function self.n_uniform(t, typ)
+    ___.valid.type(t, "table", 1, false)
+    ___.valid.not_empty(t, 1, false)
+    ___.valid.indexed(t, 1, false)
+    ___.valid.type(typ, "string", 2, true)
+
+    typ = typ or type(t[1])
 
     for _, v in pairs(t) do
       if type(v) ~= typ then
@@ -100,11 +102,11 @@ function mod.new(parent)
   --- @return table - A new table with the distinct elements of the original table.
   --- @example
   --- ```lua
-  --- table:n_distinct({1, 2, 2, 3, 4, 4, 5})
+  --- table.n_distinct({1, 2, 2, 3, 4, 4, 5})
   --- -- {1, 2, 3, 4, 5}
   --- ```
-  function instance:n_distinct(t)
-    self.___.valid:indexed(t, 1, false)
+  function self.n_distinct(t)
+    ___.valid.indexed(t, 1, false)
 
     local result, seen = {}, {}
     for _, v in ipairs(t) do
@@ -121,12 +123,12 @@ function mod.new(parent)
   --- @return any - The last element of the table.
   --- @example
   --- ```lua
-  --- table:pop({1, 2, 3})
+  --- table.pop({1, 2, 3})
   --- -- 3
   --- ```
-  function instance:pop(t)
-    self.___.valid:type(t, "table", 1, false)
-    self.___.valid:indexed(t, 1, false)
+  function self.pop(t)
+    ___.valid.type(t, "table", 1, false)
+    ___.valid.indexed(t, 1, false)
     return table.remove(t, #t)
   end
 
@@ -136,13 +138,13 @@ function mod.new(parent)
   --- @return number - The new length of the table.
   --- @example
   --- ```lua
-  --- table:push({1, 2, 3}, 4)
+  --- table.push({1, 2, 3}, 4)
   --- -- 4
   --- ```
-  function instance:push(t, v)
-    self.___.valid:type(t, "table", 1, false)
-    self.___.valid:type(v, "any", 2, false)
-    self.___.valid:indexed(t, 1, false)
+  function self.push(t, v)
+    ___.valid.type(t, "table", 1, false)
+    ___.valid.type(v, "any", 2, false)
+    ___.valid.indexed(t, 1, false)
     table.insert(t, v)
 
     return #t
@@ -154,13 +156,13 @@ function mod.new(parent)
   --- @return number - The new length of the table.
   --- @example
   --- ```lua
-  --- table:unshift({2, 3, 4}, 1)
+  --- table.unshift({2, 3, 4}, 1)
   --- -- 4
   --- ```
-  function instance:unshift(t, v)
-    self.___.valid:type(t, "table", 1, false)
-    self.___.valid:type(v, "any", 2, false)
-    self.___.valid:indexed(t, 1, false)
+  function self.unshift(t, v)
+    ___.valid.type(t, "table", 1, false)
+    ___.valid.type(v, "any", 2, false)
+    ___.valid.indexed(t, 1, false)
     table.insert(t, 1, v)
 
     return #t
@@ -171,12 +173,12 @@ function mod.new(parent)
   --- @return any - The first element of the table.
   --- @example
   --- ```lua
-  --- table:shift({1, 2, 3})
+  --- table.shift({1, 2, 3})
   --- -- 1
   --- ```
-  function instance:shift(t)
-    self.___.valid:type(t, "table", 1, false)
-    self.___.valid:indexed(t, 1, false)
+  function self.shift(t)
+    ___.valid.type(t, "table", 1, false)
+    ___.valid.indexed(t, 1, false)
     return table.remove(t, 1)
   end
 
@@ -197,38 +199,38 @@ function mod.new(parent)
   --- @return table - A new table allocated from the source and spec.
   --- @example
   --- ```lua
-  --- table:allocate({"a", "b", "c"}, "x")
+  --- table.allocate({"a", "b", "c"}, "x")
   --- -- {a = "x", b = "x", c = "x"}
   --- ```
   --- ```lua
-  --- table:allocate({"a","b","c"}, {1, 2, 3})
+  --- table.allocate({"a","b","c"}, {1, 2, 3})
   --- -- {a = 1, b = 2, c = 3}
   --- ```
   --- ```lua
-  --- table:allocate({ "a", "b", "c" }, function(k, v)
+  --- table.allocate({ "a", "b", "c" }, function(k, v)
   ---   return string.byte(v)
   --- end)
   --- -- {a = 97, b = 98, c = 99}
   --- ```
-  function instance:allocate(source, spec)
+  function self.allocate(source, spec)
     local spec_type = type(spec)
-    self.___.valid:type(source, "table", 1, false)
-    self.___.valid:not_empty(source, 1, false)
-    self.___.valid:indexed(source, 1, false)
-    if spec_type == instance.___.TYPE.TABLE then
-      self.___.valid:indexed(spec, 2, false)
+    ___.valid.type(source, "table", 1, false)
+    ___.valid.not_empty(source, 1, false)
+    ___.valid.indexed(source, 1, false)
+    if spec_type == ___.TYPE.TABLE then
+      ___.valid.indexed(spec, 2, false)
       assert(#source == #spec, "Expected source and spec to have the same number of elements")
-    elseif spec_type == instance.___.TYPE.FUNCTION then
-      self.___.valid:type(spec, "function", 2, false)
+    elseif spec_type == ___.TYPE.FUNCTION then
+      ___.valid.type(spec, "function", 2, false)
     end
 
     local result = {}
 
-    if spec_type == instance.___.TYPE.TABLE then
+    if spec_type == ___.TYPE.TABLE then
       for i = 1, #spec do
         result[source[i]] = spec[i]
       end
-    elseif spec_type == instance.___.TYPE.FUNCTION then
+    elseif spec_type == ___.TYPE.FUNCTION then
       for i = 1, #source do
         result[source[i]] = spec(i, source[i])
       end
@@ -249,16 +251,16 @@ function mod.new(parent)
   --- @return boolean - True if the table is indexed, false otherwise.
   --- @example
   --- ```lua
-  --- table:indexed({1, 2, 3})
+  --- table.indexed({1, 2, 3})
   --- -- true
   --- ```
-  function instance:indexed(t)
-    self.___.valid:type(t, "table", 1, false)
+  function self.indexed(t)
+    ___.valid.type(t, "table", 1, false)
 
     local index = 1
     for k in pairs(t) do
       if k ~= index then
-          return false
+        return false
       end
       index = index + 1
     end
@@ -273,11 +275,11 @@ function mod.new(parent)
   --- @return boolean - True if the table is associative, false otherwise.
   --- @example
   --- ```lua
-  --- table:associative({a = 1, b = 2, c = 3})
+  --- table.associative({a = 1, b = 2, c = 3})
   --- -- true
   --- ```
-  function instance:associative(t)
-    self.___.valid:type(t, "table", 1, false)
+  function self.associative(t)
+    ___.valid.type(t, "table", 1, false)
 
     for k, _ in pairs(t) do
       if type(k) ~= "number" or k % 1 ~= 0 or k <= 0 then
@@ -294,13 +296,13 @@ function mod.new(parent)
   --- @return any - The reduced value.
   --- @example
   --- ```lua
-  --- table:reduce({1, 2, 3}, function(acc, v) return acc + v end, 0)
+  --- table.reduce({1, 2, 3}, function(acc, v) return acc + v end, 0)
   --- -- 6
   --- ```
-  function instance:n_reduce(t, fn, initial)
-    self.___.valid:indexed(t, 1, false)
-    self.___.valid:type(fn, "function", 2, false)
-    self.___.valid:type(initial, "any", 3, false)
+  function self.reduce(t, fn, initial)
+    ___.valid.indexed(t, 1, false)
+    ___.valid.type(fn, "function", 2, false)
+    ___.valid.type(initial, "any", 3, false)
 
     local acc = initial
     for k, v in pairs(t) do
@@ -318,20 +320,20 @@ function mod.new(parent)
   --- @return table - A new table containing the slice of the original table.
   --- @example
   --- ```lua
-  --- table:slice({1, 2, 3, 4, 5}, 2, 4)
+  --- table.slice({1, 2, 3, 4, 5}, 2, 4)
   --- -- {2, 3, 4}
   --- ```
   --- ```lua
-  --- table:slice({1, 2, 3, 4, 5}, 2)
+  --- table.slice({1, 2, 3, 4, 5}, 2)
   --- -- {2, 3, 4, 5}
   --- ```
-  function instance:slice(t, start, stop)
-    self.___.valid:indexed(t, 1, false)
-    self.___.valid:type(start, "number", 2, false)
-    self.___.valid:type(stop, "number", 3, true)
-    self.___.valid:test(start >= 1, 2, false)
-    self.___.valid:test(table.size(t) >= start, 2, false)
-    self.___.valid:test(stop and stop >= start, 3, true)
+  function self.slice(t, start, stop)
+    ___.valid.indexed(t, 1, false)
+    ___.valid.type(start, "number", 2, false)
+    ___.valid.type(stop, "number", 3, true)
+    ___.valid.test(start >= 1, 2, false)
+    ___.valid.test(table.size(t) >= start, 2, false)
+    ___.valid.test(stop and stop >= start, 3, true)
 
     if not stop then
       stop = #t
@@ -355,22 +357,22 @@ function mod.new(parent)
   --- @return table - A new table containing the removed slice.
   --- @example
   --- ```lua
-  --- table:remove({1, 2, 3, 4, 5}, 2, 4)
+  --- table.remove({1, 2, 3, 4, 5}, 2, 4)
   --- -- {1, 5}
   --- -- {2, 3, 4}
   --- ```
   --- ```lua
-  --- table:remove({1, 2, 3, 4, 5}, 2)
+  --- table.remove({1, 2, 3, 4, 5}, 2)
   --- -- {1, 3, 4, 5}
   --- -- {2}
   --- ```
-  function instance:remove(t, start, stop)
-    self.___.valid:indexed(t, 1, false)
-    self.___.valid:type(start, "number", 2, false)
-    self.___.valid:type(stop, "number", 3, true)
-    self.___.valid:test(start >= 1, 2, false)
-    self.___.valid:test(table.size(t) >= start, 2, false)
-    self.___.valid:test(stop and stop >= start, 3, true)
+  function self.remove(t, start, stop)
+    ___.valid.indexed(t, 1, false)
+    ___.valid.type(start, "number", 2, false)
+    ___.valid.type(stop, "number", 3, true)
+    ___.valid.test(start >= 1, 2, false)
+    ___.valid.test(table.size(t) >= start, 2, false)
+    ___.valid.test(stop and stop >= start, 3, true)
 
     local snipped = {}
     if not stop then stop = start end
@@ -389,16 +391,16 @@ function mod.new(parent)
   --- @return table - A table of tables, each containing a slice of the original table.
   --- @example
   --- ```lua
-  --- table:chunk({1, 2, 3, 4, 5}, 2)
+  --- table.chunk({1, 2, 3, 4, 5}, 2)
   --- -- {{1, 2}, {3, 4}, {5}}
   --- ```
-  function instance:chunk(t, size)
-    self.___.valid:indexed(t, 1, false)
-    self.___.valid:type(size, "number", 2, false)
+  function self.chunk(t, size)
+    ___.valid.indexed(t, 1, false)
+    ___.valid.type(size, "number", 2, false)
 
     local result = {}
     for i = 1, #t, size do
-      result[#result + 1] = self:slice(t, i, i + size - 1)
+      result[#result + 1] = mod.slice(___, t, i, i + size - 1)
     end
     return result
   end
@@ -412,11 +414,11 @@ function mod.new(parent)
   --- @return table - A new table containing the concatenated tables.
   --- @example
   --- ```lua
-  --- table:concat({1}, 2, {3}, {{4}})
+  --- table.concat({1}, 2, {3}, {{4}})
   --- -- {1, 2, 3, {4}}
   --- ```
-  function instance:concat(tbl, ...)
-    self.___.valid:indexed(tbl, 1, false)
+  function self.concat(tbl, ...)
+    ___.valid.indexed(tbl, 1, false)
 
     local args = { ... }
 
@@ -439,14 +441,14 @@ function mod.new(parent)
   --- @return table - A new table with the first n elements removed.
   --- @example
   --- ```lua
-  --- table:drop({1, 2, 3, 4, 5}, 3)
+  --- table.drop({1, 2, 3, 4, 5}, 3)
   --- -- {4, 5}
   --- ```
-  function instance:drop(tbl, n)
-    self.___.valid:indexed(tbl, 1, false)
-    self.___.valid:type(n, "number", 2, false)
-    self.___.valid:test(n >= 1, 2, false)
-    return self:slice(tbl, n + 1)
+  function self.drop(tbl, n)
+    ___.valid.indexed(tbl, 1, false)
+    ___.valid.type(n, "number", 2, false)
+    ___.valid.test(n >= 1, 2, false)
+    return self.slice(___, tbl, n + 1)
   end
 
   --- Returns a new table with the last n elements removed.
@@ -455,14 +457,14 @@ function mod.new(parent)
   --- @return table - A new table with the last n elements removed.
   --- @example
   --- ```lua
-  --- table:dropRight({1, 2, 3, 4, 5}, 3)
+  --- table.dropRight({1, 2, 3, 4, 5}, 3)
   --- -- {1, 2}
   --- ```
-  function instance:dropRight(tbl, n)
-    self.___.valid:indexed(tbl, 1, false)
-    self.___.valid:type(n, "number", 2, false)
-    self.___.valid:test(n >= 1, 2, false)
-    return self:slice(tbl, 1, #tbl - n)
+  function self.dropRight(tbl, n)
+    ___.valid.indexed(tbl, 1, false)
+    ___.valid.type(n, "number", 2, false)
+    ___.valid.test(n >= 1, 2, false)
+    return self.slice(___, tbl, 1, #tbl - n)
   end
 
   --- Fills a table with a value from the start index to the stop index. If the
@@ -478,16 +480,16 @@ function mod.new(parent)
   --- @return table - The filled table.
   --- @example
   --- ```lua
-  --- table:fill({1, 2, 3, 4, 5}, "x")
+  --- table.fill({1, 2, 3, 4, 5}, "x")
   --- -- {"x", "x", "x", "x", "x"}
   --- ```
-  function instance:fill(tbl, value, start, stop)
-    self.___.valid:indexed(tbl, 1, false)
-    self.___.valid:type(value, "any", 2, false)
-    self.___.valid:type(start, "number", 3, true)
-    self.___.valid:type(stop, "number", 4, true)
-    self.___.valid:test(start and start >= 1, value, 3, true)
-    self.___.valid:test(stop and stop >= start, value, 4, true)
+  function self.fill(tbl, value, start, stop)
+    ___.valid.indexed(tbl, 1, false)
+    ___.valid.type(value, "any", 2, false)
+    ___.valid.type(start, "number", 3, true)
+    ___.valid.type(stop, "number", 4, true)
+    ___.valid.test(start and start >= 1, value, 3, true)
+    ___.valid.test(stop and stop >= start, value, 4, true)
 
     for i = start or 1, stop or #tbl do
       tbl[i] = value
@@ -502,12 +504,12 @@ function mod.new(parent)
   --- @return number|nil - The index of the first element that satisfies the predicate function, or nil if no element satisfies the predicate.
   --- @example
   --- ```lua
-  --- table:findIndex({1, 2, 3, 4, 5}, function(i, v) return v > 3 end)
+  --- table.findIndex({1, 2, 3, 4, 5}, function(i, v) return v > 3 end)
   --- -- 4
   --- ```
-  function instance:findIndex(tbl, fn)
-    self.___.valid:indexed(tbl, 1, false)
-    self.___.valid:type(fn, "function", 2, false)
+  function self.find(tbl, fn)
+    ___.valid.indexed(tbl, 1, false)
+    ___.valid.type(fn, "function", 2, false)
 
     for i = 1, #tbl do
       if fn(i, tbl[i]) then
@@ -524,12 +526,12 @@ function mod.new(parent)
   --- @return number|nil - The index of the last element that satisfies the predicate function, or nil if no element satisfies the predicate.
   --- @example
   --- ```lua
-  --- table:findLastIndex({1, 2, 3, 4, 5}, function(i, v) return v > 3 end)
+  --- table.findLastIndex({1, 2, 3, 4, 5}, function(i, v) return v > 3 end)
   --- -- 4
   --- ```
-  function instance:findLastIndex(tbl, fn)
-    self.___.valid:indexed(tbl, 1, false)
-    self.___.valid:type(fn, "function", 2, false)
+  function self.findLast(tbl, fn)
+    ___.valid.indexed(tbl, 1, false)
+    ___.valid.type(fn, "function", 2, false)
 
     for i = #tbl, 1, -1 do
       if fn(i, tbl[i]) then
@@ -544,16 +546,16 @@ function mod.new(parent)
   --- @return table - A new table containing the flattened table.
   --- @example
   --- ```lua
-  --- table:flatten({1, {2, {3, {4}}, 5}})
+  --- table.flatten({1, {2, {3, {4}}, 5}})
   --- -- {1, 2, 3, 4, 5}
   --- ```
-  function instance:flatten(tbl)
-    self.___.valid:indexed(tbl, 1, false)
+  function self.flatten(tbl)
+    ___.valid.indexed(tbl, 1, false)
 
     local result = {}
     for _, v in ipairs(tbl) do
       if type(v) == "table" then
-        self:concat(result, v)
+        mod.concat(___, result, v)
       else
         table.insert(result, v)
       end
@@ -567,16 +569,16 @@ function mod.new(parent)
   --- @return table - A new table containing the flattened table.
   --- @example
   --- ```lua
-  --- table:flattenDeep({1, {2, {3, {4}}, 5}})
+  --- table.flatten_deep({1, {2, {3, {4}}, 5}})
   --- -- {1, 2, 3, 4, 5}
   --- ```
-  function instance:flattenDeep(tbl)
-    self.___.valid:indexed(tbl, 1, false)
+  function self.flattenDeep(tbl)
+    ___.valid.indexed(tbl, 1, false)
 
     local result = {}
     for _, v in ipairs(tbl) do
       if type(v) == "table" then
-        self:concat(result, self:flattenDeep(v))
+        mod.concat(___, result, mod.flatten_deep(___, v))
       else
         table.insert(result, v)
       end
@@ -590,12 +592,12 @@ function mod.new(parent)
   --- @return table - A new table with the last element removed.
   --- @example
   --- ```lua
-  --- table:initial({1, 2, 3, 4, 5})
+  --- table.initial({1, 2, 3, 4, 5})
   --- -- {1, 2, 3, 4}
   --- ```
-  function instance:initial(tbl)
-    self.___.valid:indexed(tbl, 1, false)
-    return self:slice(tbl, 1, #tbl - 1)
+  function self.initial(tbl)
+    ___.valid.indexed(tbl, 1, false)
+    return self.slice(___, tbl, 1, #tbl - 1)
   end
 
   --- Returns a table with all of the specified values removed. This operation
@@ -606,11 +608,11 @@ function mod.new(parent)
   --- @return table - A table with the specified values removed.
   --- @example
   --- ```lua
-  --- table:pull({ 1, 5, 2, 4, 5, 2, 3, 4, 5, 1 }, 2, 5)
+  --- table.pull({ 1, 5, 2, 4, 5, 2, 3, 4, 5, 1 }, 2, 5)
   --- -- { 1, 4, 3, 4, 1 }
   --- ```
-  function instance:pull(tbl, ...)
-    self.___.valid:indexed(tbl, 1, false)
+  function self.pull(tbl, ...)
+    ___.valid.indexed(tbl, 1, false)
 
     local args = { ... }
     if #args == 0 then return tbl end
@@ -636,11 +638,11 @@ function mod.new(parent)
   --- @return table - The reversed table.
   --- @example
   --- ```lua
-  --- table:reverse({1, 2, 3, 4, 5})
+  --- table.reverse({1, 2, 3, 4, 5})
   --- -- {5, 4, 3, 2, 1}
   --- ```
-  function instance:reverse(tbl)
-    self.___.valid:indexed(tbl, 1, false)
+  function self.reverse(tbl)
+    ___.valid.indexed(tbl, 1, false)
 
     local len, midpoint = #tbl, math.floor(#tbl / 2)
     for i = 1, midpoint do
@@ -657,11 +659,11 @@ function mod.new(parent)
   --- @return table - A new table with duplicates removed.
   --- @example
   --- ```lua
-  --- table:uniq({1, 2, 3, 4, 5, 1, 2, 3})
+  --- table.uniq({1, 2, 3, 4, 5, 1, 2, 3})
   --- -- {1, 2, 3, 4, 5}
   --- ```
-  function instance:uniq(tbl)
-    self.___.valid:indexed(tbl, 1, false)
+  function self.uniq(tbl)
+    ___.valid.indexed(tbl, 1, false)
 
     local seen = {}
     local writeIndex = 1
@@ -683,13 +685,21 @@ function mod.new(parent)
     return tbl
   end
 
-  function instance:unzip(tbl)
-    self.___.valid:indexed(tbl, 1, false)
+  --- Unzips a table of tables into a table of tables.
+  --- @param tbl table - The table to unzip.
+  --- @return table - A table of tables.
+  --- @example
+  --- ```lua
+  --- table.unzip({{1, 2}, {3, 4}, {5, 6}})
+  --- -- {{1, 3, 5}, {2, 4, 6}}
+  --- ```
+  function self.unzip(tbl)
+    ___.valid.indexed(tbl, 1, false)
 
     local size_of_table = #tbl
     -- Ensure that all sub-tables are of the same length
     local size_of_elements = #tbl[1]
-    for _, t in ipairs(tbl) do self.___.valid:test(size_of_elements == #t, t, 1, false) end
+    for _, t in ipairs(tbl) do ___.valid.test(size_of_elements == #t, t, 1, false) end
 
     local num_new_sub_tables = size_of_elements -- yes, this is redundant, but it's more readable
     local new_sub_table_size = size_of_table -- this is the size of the sub-tables
@@ -715,11 +725,11 @@ function mod.new(parent)
   --- @return table - A new table with weak references.
   --- @example
   --- ```lua
-  --- table:new_weak("v")
+  --- table.new_weak("v")
   --- -- A table with weak value references
   --- ```
-  function instance:new_weak(opt)
-    self.___.valid:test(rex.match(opt, "^(k?v?|v?k?)$"), opt, 1, true)
+  function self.newWeak(opt)
+    ___.valid.test(rex.match(opt, "^(k?v?|v?k?)$"), opt, 1, true)
 
     opt = opt or "v"
 
@@ -731,11 +741,11 @@ function mod.new(parent)
   --- @return boolean - Whether the table has weak references.
   --- @example
   --- ```lua
-  --- table:weak(table:new_weak("v"))
+  --- table.weak(table.new_weak("v"))
   --- -- true
   --- ```
-  function instance:weak(tbl)
-    self.___.valid:type(tbl, "table", 1, false)
+  function self.weak(tbl)
+    ___.valid.type(tbl, "table", 1, false)
     return getmetatable(tbl) and getmetatable(tbl).__mode ~= nil
   end
 
@@ -744,15 +754,15 @@ function mod.new(parent)
   --- @return table - A new table containing the zipped tables.
   --- @example
   --- ```lua
-  --- table:zip({1, 2, 3}, {4, 5, 6}, {7, 8, 9})
+  --- table.zip({1, 2, 3}, {4, 5, 6}, {7, 8, 9})
   --- -- {{1, 4, 7}, {2, 5, 8}, {3, 6, 9}}
   --- ```
-  function instance:zip(...)
+  function self.zip(...)
     local tbls = { ... }
     local results = {}
 
     local size = #tbls[1]
-    for _, t in ipairs(tbls) do self.___.valid:test(size == #t, t, 1, false) end
+    for _, t in ipairs(tbls) do ___.valid:test(size == #t, t, 1, false) end
 
     for i = 1, size do
       results[i] = {}
@@ -763,16 +773,25 @@ function mod.new(parent)
     return results
   end
 
-  function instance:includes(tbl, value)
-    self.___.valid:indexed(tbl, 1, false)
-    self.___.valid:type(value, "any", 2, false)
+  --- Checks if a table includes a value.
+  --- @param tbl table - The table to check.
+  --- @param value any - The value to check for.
+  --- @return boolean - Whether the table includes the value.
+  --- @example
+  --- ```lua
+  --- table.includes({1, 2, 3}, 2)
+  --- -- true
+  --- ```
+  function self.includes(tbl, value)
+    ___.valid.indexed(tbl, 1, false)
+    ___.valid.type(value, "any", 2, false)
     return table.index_of(tbl, value) ~= nil
   end
 
-  local function collect_tables(self, tbl, inherited)
+  local function collect_tables(tbl, inherited)
     -- Check if the table is a valid object with a metatable and an __index field
-    self.___.valid:object(tbl, 1, false)
-    self.___.valid:type(inherited, "boolean", 2, true)
+    ___.valid.object(tbl, 1, false)
+    ___.valid.type(inherited, "boolean", 2, true)
 
     -- Set-like table to track visited tables
     local visited = {}
@@ -802,21 +821,21 @@ function mod.new(parent)
     return tables
   end
 
-  local function get_types(self, tbl, test)
-    self.___.valid:type(tbl, "table", 1, false)
-    self.___.valid:type(test, "function", 2, false)
+  local function get_types(tbl, test)
+    ___.valid.type(tbl, "table", 1, false)
+    ___.valid.type(test, "function", 2, false)
 
     local keys = table.keys(tbl)
     keys = table.n_filter(keys, function(k) return test(tbl, k) end) or {}
     return keys
   end
 
-  local function assemble_results(self, tables, test)
+  local function assemble_results(tables, test)
     local result = {}
     for _, t in ipairs(tables) do
-      local keys = get_types(self, t, test) or {}
+      local keys = get_types(t, test) or {}
       for _, k in ipairs(keys) do
-        if not self:includes(result, k) then
+        if not mod.includes(___, result, k) then
           table.insert(result, k)
         end
       end
@@ -833,29 +852,29 @@ function mod.new(parent)
   --- @return table - A table of the string names of the methods.
   --- @example
   --- ```lua
-  --- table:methods(object, true)
+  --- table.methods(object, true)
   --- -- {"method1", "method2"}
   --- ```
-  function instance:functions(tbl, inherited)
-    self.___.valid:object(tbl, 1, false)
-    self.___.valid:type(inherited, "boolean", 2, true)
+  function self.functions(tbl, inherited)
+    ___.valid.object(tbl, 1, false)
+    ___.valid.type(inherited, "boolean", 2, true)
 
-    local tables = collect_tables(self, tbl, inherited) or {}
+    local tables = collect_tables(tbl, inherited) or {}
     local test = function(t, k) return type(t[k]) == "function" end
 
-    return assemble_results(self, tables, test)
+    return assemble_results(tables, test)
   end
   -- Alias for functions
-  instance.methods = instance.functions
+  self.methods = self.functions
 
-  function instance:properties(tbl, inherited)
-    self.___.valid:object(tbl, 1, false)
-    self.___.valid:type(inherited, "boolean", 2, true)
+  function self.properties(tbl, inherited)
+    ___.valid.object(tbl, 1, false)
+    ___.valid.type(inherited, "boolean", 2, true)
 
-    local tables = collect_tables(self, tbl, inherited) or {}
+    local tables = collect_tables(tbl, inherited) or {}
     local test = function(t, k) return type(t[k]) ~= "function" end
 
-    return assemble_results(self, tables, test)
+    return assemble_results(tables, test)
   end
 
   --- Checks if a table is an object.
@@ -867,25 +886,101 @@ function mod.new(parent)
   --- local object2 = {}
   --- setmetatable(object2, { __index = object1 })
   ---
-  --- table:object(object1)
+  --- table.object(object1)
   --- -- false
-  --- table:object(object2)
+  --- table.object(object2)
   --- -- true
   --- ```
-  function instance:object(tbl)
-    self.___.valid:type(tbl, "table", 1, false)
+  function self.object(tbl)
+    ___.valid.type(tbl, "table", 1, false)
     local mt = getmetatable(tbl)
     return mt and mt.__index ~= nil
   end
 
-  instance.___.valid = instance.___.valid or setmetatable({}, {
-    __index = function(_, k) return function(...) end end
-  })
+  --- Adds two associative tables together, merging the second table into the
+  --- first. Keys in the second table that already exist in the first table
+  --- will overwrite the value in the first table.
+  ---
+  --- This operation is destructive and modifies the original table,
+  --- consequently, it is not necessary to capture the return value.
+  ---
+  --- @param tbl table - The table to add the value to.
+  --- @param value table - The table to add to the first table.
+  --- @return table - The first table with the second table added.
+  --- @example
+  --- ```lua
+  --- table.add({a = 1, b = 2}, {c = 3, d = 4})
+  --- -- {a = 1, b = 2, c = 3, d = 4}
+  ---
+  --- table.add({a = 1, b = 2}, {c = 3, d = 4}, 1)
+  --- -- {a = 1, c = 3, d = 4, b = 2}
+  --- ```
+  function self.add(tbl, value)
+    ___.valid.associative(tbl, 1, false)
+    ___.valid.associative(value, 2, false)
 
-  return instance
+    for k, v in pairs(value) do
+      tbl[k] = v
+    end
+
+    return tbl
+  end
+
+  --- Merge a second indexed table into a first indexed table. At a given
+  --- index, the second table is inserted into the first table. Effectively,
+  --- the second table is expanded and then inserted into the first table.
+  ---
+  --- If an index is provided, the second table will be inserted at that index.
+  --- Otherwise, the second table will be inserted at the end of the first
+  --- table.
+  ---
+  --- This operation is destructive and modifies the original table,
+  --- consequently, it is not necessary to capture the return value.
+  ---
+  --- @param tbl1 table - The table to add the value to.
+  --- @param tbl2 table - The table to add to the indexed table.
+  --- @param index number - The index to add the value to.
+  --- @return table - The indexed table with the value added.
+  --- @example
+  --- ```lua
+  --- table.n_add({"a", "b", "c"}, {"d", "e", "f"})
+  --- -- {"a", "b", "c", "d", "e", "f"}
+  ---
+  --- table.n_add({{a = 1}, {b = 2}, {c = 3}}, {{d = 4}, {e = 5}, {f = 6}}, 2)
+  --- -- {{a = 1}, {b = 2}, {d = 4}, {e = 5}, {f = 6}, {c = 3}}
+  --- ```
+  function self.n_add(tbl1, tbl2, index)
+    ___.valid.indexed(tbl1, 1, false)
+    ___.valid.indexed(tbl2, 2, false)
+    ___.valid.range(index, 1, #tbl1 + 1, 3, true)
+
+    -- We are not adding +1 to the end index because we will be doing +1
+    -- in the loop below
+    index = index or #tbl1 + 1
+
+    for i = 1, #tbl2 do
+      table.insert(tbl1, index + i - 1, tbl2[i])
+    end
+
+    return tbl1
+  end
+
+  --- Walks over a table, returning an iterator.
+  --- @param tbl table - The table to walk over.
+  --- @return function - The iterator function.
+  --- @example
+  --- ```lua
+  --- for i, v in table.walk({1, 2, 3, 4, 5}) do
+  ---   print(i, v) -- prints 1=1, 2=2, 3=3, 4=4, 5=5
+  --- end
+  --- ```
+  function self.walk(tbl)
+    ___.valid.indexed(tbl, 1, false)
+
+    local i = 0
+    return function()
+      i = i + 1
+      if tbl[i] then return i, tbl[i] end
+    end
+  end
 end
-
--- Let Glu know we're here
-raiseEvent("glu_module_loaded", script_name, mod)
-
-return mod

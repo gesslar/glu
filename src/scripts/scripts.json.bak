@@ -74,6 +74,12 @@
   {
     "isActive": "yes",
     "isFolder": "no",
+    "name": "dependency",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
     "name": "queue",
     "script": ""
   },
@@ -99,12 +105,6 @@
     "isActive": "yes",
     "isFolder": "no",
     "name": "fd",
-    "script": ""
-  },
-  {
-    "isActive": "yes",
-    "isFolder": "no",
-    "name": "conditions",
     "script": ""
   }
 ]

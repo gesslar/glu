@@ -1,17 +1,16 @@
----@diagnostic disable-next-line: undefined-global
-local mod = mod or {}
+-- The script name
 local script_name = "version"
+local class_name = script_name:title() .. "Class"
+local deps = { "table", "valid" }
 
-function mod.new(parent)
-  local instance = {
-    parent = parent,
-    ___ = (function(p)
-      while p.parent do p = p.parent end
-      return p
-    end)(parent)
-  }
+local mod = Glu.registerClass({
+  class_name = class_name,
+  script_name = script_name,
+  dependencies = deps,
+})
 
-  -- Returns 1 if one is greater than two, -1 if one is less than two, and 0 if they are the same
+function mod.setup(___, self)
+  --- Returns 1 if one is greater than two, -1 if one is less than two, and 0 if they are the same
   local function _compare(one, two)
     if one == two then
       return 0
@@ -35,14 +34,14 @@ function mod.new(parent)
   --- @return number - 1 if version1 is greater than version2, -1 if version1 is less than version2, and 0 if they are the same.
   --- @example
   --- ```lua
-  --- version:compare("1.0.0", "2.0.0")
+  --- version.compare("1.0.0", "2.0.0")
   --- -- -1
   --- ```
-  function instance:compare(version1, version2)
+  function self.compare(version1, version2)
     -- The versions must be of the same type
-    self.___.valid:test(type(version1) == "string" or type(version1) == "number", 1, "Invalid value to argument 1. Expected a string or number.")
-    self.___.valid:test(type(version2) == "string" or type(version2) == "number", 2, "Invalid value to argument 2. Expected a string or number.")
-    self.___.valid:same_type(version1, version2)
+    ___.valid.test(type(version1) == "string" or type(version1) == "number", 1, "Invalid value to argument 1. Expected a string or number.")
+    ___.valid.test(type(version2) == "string" or type(version2) == "number", 2, "Invalid value to argument 2. Expected a string or number.")
+    ___.valid.same_type(version1, version2)
 
     version1 = tostring(version1)
     version2 = tostring(version2)
@@ -51,10 +50,10 @@ function mod.new(parent)
     local version1_parts = version1:split("%.") or {}
     local version2_parts = version2:split("%.") or {}
 
-    self.___.valid:test(type(version1_parts) == "table", 1, "Invalid value to argument 1. Expected a string.")
-    self.___.valid:test(type(version2_parts) == "table", 2, "Invalid value to argument 2. Expected a string.")
+    ___.valid.test(type(version1_parts) == "table", 1, "Invalid value to argument 1. Expected a string.")
+    ___.valid.test(type(version2_parts) == "table", 2, "Invalid value to argument 2. Expected a string.")
 
-    self.___.valid:test(#version1_parts == #version2_parts, 1, "Invalid value to arguments. Expected 1 and 2 to have the same number of parts.")
+    ___.valid.test(#version1_parts == #version2_parts, 1, "Invalid value to arguments. Expected 1 and 2 to have the same number of parts.")
 
     for i = 1, #version1_parts do
       local result = _compare(version1_parts[i], version2_parts[i])
@@ -65,15 +64,4 @@ function mod.new(parent)
 
     return 0
   end
-
-  instance.___.valid = instance.___.valid or setmetatable({}, {
-    __index = function(_, k) return function(...) end end
-  })
-
-  return instance
 end
-
--- Let Glu know we're here
-raiseEvent("glu_module_loaded", script_name, mod)
-
-return mod

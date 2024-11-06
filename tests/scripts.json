@@ -1,0 +1,14 @@
+[
+  {
+    "isActive" : "yes",
+    "isFolder" : "no",
+    "name" : "_date",
+    "script" : ""
+  },
+  {
+    "isActive" : "yes",
+    "isFolder" : "no",
+    "name" : "_colour",
+    "script" : ""
+  }
+]

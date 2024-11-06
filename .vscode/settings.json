@@ -4,5 +4,7 @@
     "gmod",
     "mudlet",
     "_g"
-  ]
+  ],
+  "editor.tabSize": 2,
+  "editor.indentSize": "tabSize",
 }

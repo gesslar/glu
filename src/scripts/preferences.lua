@@ -1,15 +1,14 @@
----@diagnostic disable-next-line: undefined-global
-local mod = mod or {}
 local script_name = "preferences"
-function mod.new(parent)
-  local instance = {
-    parent = parent,
-    ___ = (function(p)
-      while p.parent do p = p.parent end
-      return p
-    end)(parent)
-  }
+local class_name = script_name:title() .. "Class"
+local deps = { "table", "valid" }
 
+local mod = Glu.registerClass({
+  class_name = class_name,
+  script_name = script_name,
+  dependencies = deps,
+})
+
+function mod.setup(___, self)
   --- Loads preferences from a file. If a package name is provided, it will be
   --- used to construct the path. Otherwise, the file will be loaded from the
   --- profile directory.
@@ -20,15 +19,15 @@ function mod.new(parent)
   --- @example
   --- ```lua
   --- -- Load preferences from the "my_package" package
-  --- preferences:load_prefs("my_package", "settings.json", {
+  --- preferences.load_prefs("my_package", "settings.json", {
   ---   default_value = 1,
   ---   another_value = "hello"
   --- })
   --- ```
-  function instance:load_prefs(pkg, file, defaults)
-    self.___.valid:type(pkg, "string", 1, true)
-    self.___.valid:type(file, "string", 2, false)
-    self.___.valid:type(defaults, "table", 3, false)
+  function self.load(pkg, file, defaults)
+    ___.valid.type(pkg, "string", 1, true)
+    ___.valid.type(file, "string", 2, false)
+    ___.valid.type(defaults, "table", 3, false)
 
     local path = getMudletHomeDir() .. "/" .. (pkg and pkg .. "/" or "") .. file
 
@@ -51,29 +50,18 @@ function mod.new(parent)
   --- @param prefs table - The preferences to save.
   --- @example
   --- ```lua
-  --- preferences:save_prefs("my_package", "settings.json", {
+  --- preferences.save_prefs("my_package", "settings.json", {
   ---   default_value = 1,
   ---   another_value = "hello"
   --- })
   --- ```
-  function instance:save_prefs(pkg, file, prefs)
-    self.___.valid:type(pkg, "string", 1, true)
-    self.___.valid:type(file, "string", 2, false)
-    self.___.valid:type(prefs, "table", 3, false)
+  function self.save(pkg, file, prefs)
+    ___.valid.type(pkg, "string", 1, true)
+    ___.valid.type(file, "string", 2, false)
+    ___.valid.type(prefs, "table", 3, false)
 
     local path = getMudletHomeDir() .. "/" .. (pkg and pkg .. "/" or "") .. file
 
     table.save(path, prefs)
   end
-
-  instance.___.valid = instance.___.valid or setmetatable({}, {
-    __index = function(_, k) return function(...) end end
-  })
-
-  return instance
 end
-
--- Let Glu know we're here
-raiseEvent("glu_module_loaded", script_name, mod)
-
-return mod

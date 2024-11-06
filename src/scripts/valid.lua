@@ -1,24 +1,24 @@
----@diagnostic disable-next-line: undefined-global
-local mod = mod or {}
 local script_name = "valid"
+local class_name = script_name:title() .. "Class"
+local deps = { "table", "string" }
 
-function mod.new(parent)
-  local instance = {
-    parent = parent,
-    ___ = (function(p)
-      while p.parent do p = p.parent end
-      return p
-    end)(parent)
-  }
+local mod = Glu.registerClass({
+  class_name = class_name,
+  script_name = script_name,
+  dependencies = deps,
+})
 
-  -- Ignore the current script in tracebacks
-  local trace_ignore = debug.getinfo(1).source
+function mod.setup(___, self)
+    -- Ignore the current script in tracebacks
+    local trace_ignore = debug.getinfo(1).source
 
   local function get_last_traceback_line()
     local it, trace = 1, ""
     while debug.getinfo(it) do
       if debug.getinfo(it).source ~= trace_ignore then
-        local line = debug.getinfo(it).source .. ":" .. debug.getinfo(it).currentline
+        local line = debug.getinfo(it).source ..
+          ":" ..
+          debug.getinfo(it).currentline
         trace = trace .. line .. "\n"
       end
       it = it + 1
@@ -44,12 +44,12 @@ function mod.new(parent)
   --- ```lua
   --- function my_function(name, age)
   ---   -- name must be a string (mandatory)
-  ---   valid:type(name, "string", 1, false)
+  ---   valid.type(name, "string", 1, false)
   ---   -- age must be a number or nil (optional)
-  ---   valid:type(age, "number", 2, true)
+  ---   valid.type(age, "number", 2, true)
   --- end
   --- ```
-  function instance:type(value, expected_type, argument_index, nil_allowed)
+  function self.type(value, expected_type, argument_index, nil_allowed)
     local last = get_last_traceback_line()
 
     assert((nil_allowed == true and value == nil) or value ~= nil,
@@ -65,7 +65,7 @@ function mod.new(parent)
     if expected_type == "any" then return end
 
     local expected_types = string.split(expected_type, "|") or { expected_type }
-    local invalid = table.n_filter(expected_types, function(t) return not instance.___.TYPE[t] end)
+    local invalid = table.n_filter(expected_types, function(t) return not ___.TYPE[t] end)
 
     if table.size(invalid) > 0 then
       error("Invalid type to argument " .. argument_index .. ". Expected " .. table.concat(invalid, "|") .. ", got " .. type(value) .. " in\n" .. last)
@@ -85,8 +85,16 @@ function mod.new(parent)
   --- @param value any - The value to validate.
   --- @param expected_type string - The expected type of the value.
   --- @param argument_index number - The index of the argument.
-  function instance:type_or_nil(value, expected_type, argument_index)
-    self:type(value, expected_type, argument_index, true)
+  --- @param nil_allowed boolean - Whether nil is allowed (default true)
+  --- @example
+  --- ```lua
+  --- function my_function(name, age)
+  ---   valid.type_or_nil(name, "string", 1, false)
+  ---   valid.type_or_nil(age, "number", 2, true)
+  --- end
+  --- ```
+  function self.type_or_nil(value, expected_type, argument_index, nil_allowed)
+    self.type(value, expected_type, argument_index, nil_allowed)
   end
 
   --- Asserts that the table is an RGB color table. No return value, but an
@@ -101,13 +109,13 @@ function mod.new(parent)
   --- function my_function(colour)
   ---   -- colour must be a table containing three numbers, each between 0 and
   ---   -- 255 (mandatory)
-  ---   valid:rgb_table(colour, 1, false)
+  ---   valid.rgb_table(colour, 1, false)
   --- end
   --- ```
-  function instance:rgb_table(colour, argument_index, nil_allowed)
+  function self.rgb_table(colour, argument_index, nil_allowed)
     local last = get_last_traceback_line()
 
-    self:type(colour, "table", argument_index, nil_allowed)
+    self.type(colour, "table", argument_index, nil_allowed)
     assert(#colour == 3, "Invalid number of elements to argument " .. argument_index .. ". Expected 3, got " .. #colour .. " in\n" .. last)
     assert(type(colour[1]) == "number",
       "Invalid type to argument " .. argument_index .. ". Expected number, got " .. type(colour[1]) .. " in\n" .. last)
@@ -134,10 +142,10 @@ function mod.new(parent)
   --- ```lua
   --- function my_function(name)
   ---   -- name must not be empty (mandatory)
-  ---   valid:not_empty(name, 1, false)
+  ---   valid.not_empty(name, 1, false)
   --- end
   --- ```
-  function instance:not_empty(value, argument_index, nil_allowed)
+  function self.not_empty(value, argument_index, nil_allowed)
     assert(type(value) == "table", "Invalid type to argument " .. argument_index .. ". Expected table, got " .. type(value) .. " in\n" .. get_last_traceback_line())
     if nil_allowed and value == nil then
       return
@@ -159,16 +167,16 @@ function mod.new(parent)
   --- ```lua
   --- function my_function(values)
   ---   -- values must be a table containing only numbers
-  ---   valid:n_uniform(values, "number", 1, false)
+  ---   valid.n_uniform(values, "number", 1, false)
   --- end
   --- ```
-  function instance:n_uniform(value, expected_type, argument_index, nil_allowed)
+  function self.n_uniform(value, expected_type, argument_index, nil_allowed)
     if nil_allowed and value == nil then
       return
     end
 
     local last = get_last_traceback_line()
-    assert(self.___.table:n_uniform(value, expected_type),
+    assert(___.table.n_uniform(value, expected_type),
       "Invalid type to argument " .. argument_index .. ". Expected an indexed table of " .. expected_type .. " in\n" .. last)
   end
 
@@ -184,10 +192,10 @@ function mod.new(parent)
   --- ```lua
   --- function my_function(name)
   ---   -- name must match the pattern
-  ---   valid:regex(name, "^[A-Za-z]+$", 1, false)
+  ---   valid.regex(name, "^[A-Za-z]+$", 1, false)
   --- end
   --- ```
-  function instance:regex(value, pattern, argument_index, nil_allowed)
+  function self.regex(value, pattern, argument_index, nil_allowed)
     if nil_allowed and value == nil then
       return
     end
@@ -207,16 +215,16 @@ function mod.new(parent)
   --- ```lua
   --- function my_function(values)
   ---   -- values must be an indexed table
-  ---   valid:indexed(values, 1, false)
+  ---   valid.indexed(values, 1, false)
   --- end
   --- ```
-  function instance:indexed(value, argument_index, nil_allowed)
+  function self.indexed(value, argument_index, nil_allowed)
     if nil_allowed and value == nil then
       return
     end
 
     local last = get_last_traceback_line()
-    assert(self.___.table:indexed(value), "Invalid value to argument " .. argument_index .. ". Expected indexed table, got " .. type(value) .. " in\n" .. last)
+    assert(___.table.indexed(value), "Invalid value to argument " .. argument_index .. ". Expected indexed table, got " .. type(value) .. " in\n" .. last)
   end
 
   --- Asserts that the value is an associative table. No return value, but an
@@ -230,16 +238,16 @@ function mod.new(parent)
   --- ```lua
   --- function my_function(values)
   ---   -- values must be an associative table
-  ---   valid:associative(values, 1, false)
+  ---   valid.associative(values, 1, false)
   --- end
   --- ```
-  function instance:associative(value, argument_index, nil_allowed)
+  function self.associative(value, argument_index, nil_allowed)
     if nil_allowed and value == nil then
       return
     end
 
     local last = get_last_traceback_line()
-    assert(self.___.table:associative(value),
+    assert(___.table.associative(value),
       "Invalid value to argument " .. argument_index .. ". Expected associative table, got " .. type(value) .. " in\n" .. last)
   end
   --- Asserts that the statement is true. No return value, but an error is
@@ -254,10 +262,10 @@ function mod.new(parent)
   --- ```lua
   --- function my_function(name)
   ---   -- name must not be empty (mandatory)
-  ---   valid:test(not table.is_empty(name), name, 1, false)
+  ---   valid.test(not table.is_empty(name), name, 1, false)
   --- end
   --- ```
-  function instance:test(statement, value, argument_index, nil_allowed)
+  function self.test(statement, value, argument_index, nil_allowed)
     if nil_allowed and value == nil then
       return
     end
@@ -275,10 +283,10 @@ function mod.new(parent)
   --- @example
   --- ```lua
   --- function my_function(name)
-  ---   valid:same(name, "John")
+  ---   valid.same(name, "John")
   --- end
   --- ```
-  function instance:same(one, two)
+  function self.same(one, two)
     local last = get_last_traceback_line()
     assert(one == two, "Invalid value to arguments. Expected 1 and 2 to be identical in\n" .. get_last_traceback_line())
   end
@@ -292,10 +300,10 @@ function mod.new(parent)
   --- @example
   --- ```lua
   --- function my_function(name)
-  ---   valid:same_type(name, "John")
+  ---   valid.same_type(name, "John")
   --- end
   --- ```
-  function instance:same_type(one, two)
+  function self.same_type(one, two)
     local last = get_last_traceback_line()
     assert(type(one) == type(two), "Invalid value to arguments. Expected 1 and 2 to be of the same type in\n" .. last)
   end
@@ -305,23 +313,59 @@ function mod.new(parent)
   --- and nil is allowed.
   ---
   --- @param value any - The value to validate.
-  function instance:object(value, argument_index, nil_allowed)
+  --- @param argument_index number - The index of the argument.
+  --- @param nil_allowed boolean - Whether nil is allowed (default false)
+  --- @example
+  --- ```lua
+  --- function my_function(name)
+  ---   valid.object(name, 1, false)
+  --- end
+  --- ```
+  function self.object(value, argument_index, nil_allowed)
     if nil_allowed and value == nil then
       return
     end
 
     local last = get_last_traceback_line()
-    assert(self.___.table:object(value), "Invalid value to argument " .. argument_index .. ". Expected object, got " .. type(value) .. " in\n" .. last)
+    assert(___.table.object(value), "Invalid value to argument " .. argument_index .. ". Expected object, got " .. type(value) .. " in\n" .. last)
   end
 
-  instance.___.valid = instance.___.valid or setmetatable({}, {
-    __index = function(_, k) return function(...) end end
-  })
+  --- Asserts that the value is within the range. No return value, but an error
+  --- is thrown if the assertion fails. No error is thrown if the value is nil
+  --- and nil is allowed.
+  ---
+  --- @param value any - The value to validate.
+  --- @param min number - The minimum value.
+  --- @param max number - The maximum value.
+  --- @param argument_index number - The index of the argument.
+  --- @param nil_allowed boolean - Whether nil is allowed (default false)
+  function self.range(value, min, max, argument_index, nil_allowed)
+    if nil_allowed and value == nil then
+      return
+    end
 
-  return instance
+    local last = get_last_traceback_line()
+    assert(value >= min and value <= max, "Invalid value to argument " .. argument_index .. ". Expected " .. min .. " to " .. max .. ", got " .. value .. " in\n" .. last)
+  end
+
+  function self.file(path, argument_index)
+    self.type(path, "string", argument_index, false)
+    self.type(argument_index, "number", 2, false)
+
+    local attr = lfs.attributes(path)
+
+    local last = get_last_traceback_line()
+    assert(attr ~= nil and attr.mode == "file", "Invalid value. Expected file, got " .. path .. " in\n" .. last)
+  end
+
+  function self.dir(path, argument_index)
+    self.type(path, "string", argument_index, false)
+    self.type(argument_index, "number", 2, false)
+
+    print("valid.dir", path, argument_index)
+    local attr = lfs.attributes(path)
+    display(attr)
+    local last = get_last_traceback_line()
+    assert(attr ~= nil and attr.mode == "directory", "Invalid value. Expected directory, got " .. path .. " in\n" .. last)
+  end
 end
-
--- Let Glu know we're here
-raiseEvent("glu_module_loaded", script_name, mod)
-
-return mod

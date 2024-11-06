@@ -1,52 +1,34 @@
 -- The script name
 local script_name = "queue"
+local class_name = script_name:title() .. "Class"
 local deps = { "table", "valid" }
 
-local QueueClass = {}
-function QueueClass.new(parent, funcs)
-  local instance = {
-    parent = parent,
-    ___ = (function(p)
-      while p.parent do p = p.parent end
-      return p
-    end)(parent)
-  }
+local QueueStack = Glu.registerClass({
+  class_name = class_name,
+  script_name = script_name,
+  dependencies = deps,
+})
 
-  instance.___.valid:type(funcs, "table", 2, false)
+function QueueStack.setup(___, self, funcs)
   funcs = funcs or {}
-  funcs = instance.___.table:n_cast(funcs)
-  instance.___.valid:n_uniform(funcs, "function", 2, false)
-  instance.stack = funcs
+  funcs = ___.table.n_cast(funcs)
+  ___.valid:n_uniform(funcs, "function", 2, false)
 
-  setmetatable({
-    parent = parent,
-    id = instance.___.util:generate_uuid(),
-    stack = funcs,
-  }, instance)
+  self.stack = funcs
+  self.id = ___.id()
 
-  function instance:push(f)
-    self.___.valid:type(f, "function", 1, false)
-    return self.___.table:push(self.stack, f)
+  function self.push(f)
+    ___.valid.type(f, "function", 1, false)
+    return ___.table.push(self.stack, f)
   end
 
-  function instance:shift()
-    return self.___.table:shift(self.stack)
+  function self.shift()
+    return ___.table.shift(self.stack)
   end
 
-  function instance:next()
-    local index = 0
-
-    return function()
-      index = index + 1
-      if index <= #self.stack then
-        return self.stack[index]
-      end
-    end
-  end
-
-  function instance:execute(...)
+  function self.execute(...)
     -- Shift the next task off the queue
-    local task = self:shift()
+    local task = self.shift()
     if not task then
       return self, nil -- Queue is empty, return nil for remaining count
     end
@@ -58,46 +40,50 @@ function QueueClass.new(parent, funcs)
     local count = #self.stack
     return self, count > 0 and count or nil, unpack(result)
   end
-
-  return instance
 end
 
 ---@diagnostic disable-next-line: undefined-global
-local mod = mod or {}
-function mod.new(parent)
-  local instance = setmetatable({
-    parent = parent,
-    queue = QueueClass,
-    queues = {},
-    ___ = (function(p)
-      while p.parent do p = p.parent end
-      return p
-    end)(parent)
-  }, { __index = mod })
+local mod = Glu.registerClass({
+  class_name = class_name,
+  script_name = script_name,
+  dependencies = deps,
+})
 
-  --- Instantiates a new queue object and adds it to the list of queues
+function mod.setup(___, self)
+  self.queues = {}
+
+  --- Instantiates a new queue object and adds it to the list of queues.
+  --- The object will contain a property that is the ID may be used to
+  --- manipulate the queue. The same functionality to manipulate the queue
+  --- is available both through the queue object and the functions from
+  --- this module. The ID is in the form of a v4 UUID.
   ---
   --- @param funcs table - A table of functions to be added to the queue
   --- @return table - The new queue object
   ---
   --- @example
   --- ```lua
-  --- local queue = mod.new(parent).new({})
+  --- local queue = queue.new(parent).new({})
   --- ```
-  function instance.new(funcs)
-    instance.___.valid:type(funcs, "table", 1, true)
-    instance.___.valid:n_uniform(funcs, "function", 1, false)
+  function self.new(funcs)
+    ___.valid.type(funcs, "table", 1, true)
+    ___.valid:n_uniform(funcs, "function", 1, false)
 
     funcs = funcs or {}
-    local queue = instance.queue.new(instance, funcs)
+    local queue = QueueStack(funcs, self)
+    ___.table.push(self.queues, queue)
 
-    instance.___.table:push(instance.queues, queue)
     ---@diagnostic disable-next-line: return-type-mismatch
     return queue
   end
 
-  function instance:get(id)
-    self.___.valid:type(id, "string", 1, false)
+  --- Retrieves a queue object by its identifier. If no queue is found, nil is
+  --- returned, otherwise the queue object is returned.
+  ---
+  --- @param id string - The identifier of the queue to retrieve
+  --- @return table|nil - The queue object or nil if not found
+  function self.get(id)
+    ___.valid.type(id, "string", 1, false)
 
     for _, q in pairs(self.queues) do
       if q.id == id then return q end
@@ -105,68 +91,32 @@ function mod.new(parent)
     return nil, f"Queue not found for id `{id}`."
   end
 
-  function instance:push(id, f)
-    self.___.valid:type(id, "string", 1, false)
-    self.___.valid:type(f, "function", 2, false)
+  --- Add a function to the end of a queue by its identifier.
+  ---
+  --- @param id string - The identifier of the queue to add the function to
+  --- @param f function - The function to add to the queue
+  --- @example
+  --- ```lua
+  --- queue:push("2ce02d6a-36a8-45ab-a78e-7f909427e1d1",
+  ---   function() print("Hello, world!")
+  --- end)
+  --- ```
+  function self.push(id, f)
+    ___.valid.type(id, "string", 1, false)
+    ___.valid.type(f, "function", 2, false)
 
     local q, err = self:get(id)
     if not q then return nil, err end
 
-    return q:push(f)
+    return q.push(f)
   end
 
-  function instance:shift(id)
-    self.___.valid:type(id, "string", 1, false)
+  function self.shift(id)
+    ___.valid.type(id, "string", 1, false)
 
-    local q, err = self:get(id)
+    local q, err = self.get(id)
     if not q then return nil, err end
 
-    return q:shift()
+    return q.shift()
   end
-
-  function instance:next()
-    local index = 0
-
-    return function()
-      index = index + 1
-      if index <= #self.queues then
-        return self.queues[index]
-      end
-    end
-  end
-
-  function instance:processQueueById(queueId)
-    self.___.valid:type(queueId, "string", 1, false)
-    local queue, err = self:get(queueId)
-    self.___.valid:test(queue, err, 1, false)
-
-    if not queue then
-      print(err)
-      return
-    end
-
-    -- Start or resume the queue's coroutine
-    queue:processQueue()
-  end
-
-  function instance:processAllQueues()
-    for queue in self:next() do
-      queue:processQueue()
-    end
-  end
-
-  -- Ensure that there is at least something to avoid errors until
-  -- the modules this module depends upon are loaded.
-  local f = function(_, k) return function(...) end end
-  for _, d in ipairs(deps) do
-    instance.___[d] = instance.___[d] or
-      setmetatable({}, { __index = f })
-  end
-
-  return instance
 end
-
--- Let Glu know we're here
-raiseEvent("glu_module_loaded", script_name, mod)
-
-return mod

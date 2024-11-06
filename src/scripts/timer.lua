@@ -1,19 +1,18 @@
----@diagnostic disable-next-line: undefined-global
-local mod = mod or {}
 local script_name = "timer"
+local class_name = script_name:title() .. "Class"
+local deps = { "table", "valid" }
 
-function mod.new(parent)
-  local instance = {
-    parent = parent,
-    ___ = (function(p)
-      while p.parent do p = p.parent end
-      return p
-    end)(parent)
-  }
+local mod = Glu.registerClass({
+  class_name = class_name,
+  script_name = script_name,
+  dependencies = deps,
+})
 
-  local multi_timers = {}
-  local function perform_multi_timer_function(self, name)
-    local timer_function = multi_timers[name]
+function mod.setup(___, self)
+    self.multi_timers = {}
+
+  local function perform_multi_timer_function(name)
+    local timer_function = mod.multi_timers[name]
     if not timer_function then
       return false
     end
@@ -28,12 +27,12 @@ function mod.new(parent)
 
     table.remove(defs, 1)
     if #defs > 0 then
-      local result2 = self:multi(name, defs)
+      local result2 = ___.timer.multi(name, defs)
       if not result2 then
         return false
       end
     else
-      multi_timers[name] = nil
+      ___.timer.kill_multi(name)
     end
 
     return true
@@ -68,34 +67,33 @@ function mod.new(parent)
   ---   { delay = 5, func = function() echo("developer\n") end },
   --- })
   --- ```
-  function instance:multi(name, def, delay)
-    self.___.valid:type(name, "string", 1, false)
-    self.___.valid:type(def, "table", 2, false)
-    self.___.valid:not_empty(def, 2, false)
-    self.___.valid:type(delay, "number", 3, true)
+  function self.multi(name, def, delay)
+    ___.valid.type(name, "string", 1, false)
+    ___.valid.not_empty(def, 2, false)
+    ___.valid.type(delay, "number", 3, true)
 
     if delay then
-      def = self.___.table:map(def, function(_, element)
+      def = ___.table.map(def, function(_, element)
         element.delay = delay
         return element
       end)
     end
 
     -- Record the initial information
-    multi_timers[name] = { def = def }
+    mod.multi_timers[name] = { def = def }
 
     local timer_result
     local timer_id = tempTimer(def[1].delay, function()
-      timer_result = perform_multi_timer_function(self, name)
+      timer_result = perform_multi_timer_function(name)
     end)
 
     if not timer_id then
-      self:kill_multi(name)
+      ___.timer.kill_multi(name)
       return false
     end
 
     -- Record the timer id
-    multi_timers[name].id = timer_id
+    mod.multi_timers[name].id = timer_id
 
     return true
   end
@@ -107,12 +105,13 @@ function mod.new(parent)
   --- ```lua
   --- timer.kill_multi("Greetings")
   --- ```
-  function instance:kill_multi(name)
-    self.___.valid:type(name, "string", 1, false)
-    local timer_function = multi_timers[name]
+  function self.kill_multi(name)
+    ___.valid.type(name, "string", 1, false)
+
+    local timer_function = mod.multi_timers[name]
     if not timer_function then return nil end
 
-    multi_timers[name] = nil
+    mod.multi_timers[name] = nil
     local id = timer_function.id
 
     if id then
@@ -121,15 +120,4 @@ function mod.new(parent)
 
     return true
   end
-
-  instance.___.valid = instance.___.valid or setmetatable({}, {
-    __index = function(_, k) return function(...) end end
-  })
-
-  return instance
 end
-
--- Let Glu know we're here
-raiseEvent("glu_module_loaded", script_name, mod)
-
-return mod

@@ -1,15 +1,14 @@
----@diagnostic disable-next-line: undefined-global
-local mod = mod or {}
 local script_name = "url"
-function mod.new(parent)
-  local instance = {
-    parent = parent,
-    ___ = (function(p)
-      while p.parent do p = p.parent end
-      return p
-    end)(parent)
-  }
+local class_name = script_name:title() .. "Class"
+local deps = { "table", "valid" }
 
+local mod = Glu.registerClass({
+  class_name = class_name,
+  script_name = script_name,
+  dependencies = deps,
+})
+
+function mod.setup(___, self)
   --- Decodes a string that has been URL-encoded. Useful for decoding query
   --- parameters into a more readable format.
   ---
@@ -20,8 +19,8 @@ function mod.new(parent)
   --- url:decode("This%20string%20is%20now%20readable%21%21%21")
   --- -- "This string is now readable!!!"
   --- ```
-  function instance:decode(str)
-    self.___.valid:type(str, "string", 1, false)
+  function self.decode(str)
+    ___.valid.type(str, "string", 1, false)
 
     str = (string.gsub(str, '+', ' ') or str)
     str = (string.gsub(str, '%%(%x%x)', function(h)
@@ -40,8 +39,8 @@ function mod.new(parent)
   --- url:encode("This string is now usable in a URL.")
   --- -- "This%20string%20is%20now%20usable%20in%20a%20URL%2E"
   --- ```
-  function instance:encode(str)
-    self.___.valid:type(str, "string", 1, false)
+  function self.encode(str)
+    ___.valid.type(str, "string", 1, false)
 
     str = (string.gsub(str, "([^%w])", function(c)
       return string.format("%%%02X", string.byte(c))
@@ -58,12 +57,12 @@ function mod.new(parent)
   --- url:decode_params("name=John&age=30")
   --- -- { name = "John", age = "30" }
   --- ```
-  function instance:decode_params(query_string)
+  function self.decode_params(query_string)
     local params = {}
     for key_value in rex.gmatch(query_string, "([^&]+)") do
       local key, value = rex.match(key_value, "([^=]+)=([^=]+)")
       if key and value then
-        params[self:decode(key)] = self:decode(value)
+        params[self.decode(key)] = self.decode(value)
       end
     end
     return params
@@ -78,10 +77,10 @@ function mod.new(parent)
   --- url:encode_params({ name = "John", age = "30" })
   --- -- "name=John&age=30"
   --- ```
-  function instance:encode_params(params)
+  function self.encode_params(params)
     local encoded = {}
     for key, value in pairs(params) do
-      table.insert(encoded, self:encode(key) .. "=" .. self:encode(value))
+      table.insert(encoded, self.encode(key) .. "=" .. self.encode(value))
     end
     return table.concat(encoded, "&") or ""
   end
@@ -105,12 +104,12 @@ function mod.new(parent)
   --- --   }
   --- -- }
   --- ```
-  function instance:parse(url)
-    self.___.valid:type(url, "string", 1, false)
+  function self.parse(url)
+    ___.valid.type(url, "string", 1, false)
 
     local protocol, host, port, path, query_string = rex.match(url, "^(https?)://([^/:]+)(?::(\\d+))?/([^?]*)\\??(.*)")
     local file = (rex.match(path, "([^/]+)$") or path)
-    local params = self:decode_params(query_string or "")
+    local params = self.decode_params(query_string or "")
 
     protocol = protocol and protocol or "http"
     port = port and tonumber(port) or
@@ -127,15 +126,4 @@ function mod.new(parent)
 
     return parsed
   end
-
-  instance.___.valid = instance.___.valid or setmetatable({}, {
-    __index = function(_, k) return function(...) end end
-  })
-
-  return instance
 end
-
--- Let Glu know we're here
-raiseEvent("glu_module_loaded", script_name, mod)
-
-return mod
