@@ -62,12 +62,6 @@
   {
     "isActive": "yes",
     "isFolder": "no",
-    "name": "util",
-    "script": ""
-  },
-  {
-    "isActive": "yes",
-    "isFolder": "no",
     "name": "version",
     "script": ""
   },

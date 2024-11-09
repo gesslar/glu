@@ -1,123 +1,118 @@
-local script_name = "timer"
-local class_name = script_name:title() .. "Class"
-local deps = { "table", "valid" }
-
-local mod = Glu.registerClass({
-  class_name = class_name,
-  script_name = script_name,
-  dependencies = deps,
-})
-
-function mod.setup(___, self)
+local TimerClass = Glu.glass.register({
+  name = "timer",
+  class_name = "TimerClass",
+  dependencies = { "table", "valid" },
+  setup = function(___, self)
     self.multi_timers = {}
 
-  local function perform_multi_timer_function(name)
-    local timer_function = mod.multi_timers[name]
-    if not timer_function then
-      return false
-    end
-
-    local defs = timer_function.def
-    local def = defs[1]
-    local ok, result = pcall(def.func, def.args)
-
-    if not ok then
-      return false
-    end
-
-    table.remove(defs, 1)
-    if #defs > 0 then
-      local result2 = ___.timer.multi(name, defs)
-      if not result2 then
+    local function perform_multi_timer_function(name)
+      local timer_function = mod.multi_timers[name]
+      if not timer_function then
         return false
       end
-    else
-      ___.timer.kill_multi(name)
+
+      local defs = timer_function.def
+      local def = defs[1]
+      local ok, result = pcall(def.func, def.args)
+
+      if not ok then
+        return false
+      end
+
+      table.remove(defs, 1)
+      if #defs > 0 then
+        local result2 = ___.timer.multi(name, defs)
+        if not result2 then
+          return false
+        end
+      else
+        ___.timer.kill_multi(name)
+      end
+
+      return true
     end
 
-    return true
-  end
+    --- Creates nested timers and returns true if successful.
+    --- @param name string - The name of the multi timer.
+    --- @param def table - The definition of the multi timer.
+    --- @param delay number - The delay between each timer.
+    --- @return boolean - True if the multi timer was created, errors out if not.
+    --- @example
+    --- ```lua
+    --- -- At intervals of 5 seconds, print "hi", "there", "you", "amazing", and
+    --- -- "developer"
+    --- timer.multi("Greetings", {
+    ---   { func = function() echo("hi\n") end },
+    ---   { func = function() echo("there\n") end },
+    ---   { func = function() echo("you\n") end },
+    ---   { func = function() echo("amazing\n") end },
+    ---   { func = function() echo("developer\n") end },
+    --- }, 5)
+    --- ```
+    ---
+    --- ```lua
+    --- -- After 1s, print "hi", after 3s, print "there", after 6s, print "you",
+    --- -- after 10s, print "amazing", and after 15s, print "developer"
+    --- timer.multi("Greetings", {
+    ---   { delay = 1, func = function() echo("hi\n") end },
+    ---   { delay = 2, func = function() echo("there\n") end },
+    ---   { delay = 3, func = function() echo("you\n") end },
+    ---   { delay = 4, func = function() echo("amazing\n") end },
+    ---   { delay = 5, func = function() echo("developer\n") end },
+    --- })
+    --- ```
+    function self.multi(name, def, delay)
+      ___.valid.type(name, "string", 1, false)
+      ___.valid.not_empty(def, 2, false)
+      ___.valid.type(delay, "number", 3, true)
 
-  --- Creates nested timers and returns true if successful.
-  --- @param name string - The name of the multi timer.
-  --- @param def table - The definition of the multi timer.
-  --- @param delay number - The delay between each timer.
-  --- @return boolean - True if the multi timer was created, errors out if not.
-  --- @example
-  --- ```lua
-  --- -- At intervals of 5 seconds, print "hi", "there", "you", "amazing", and
-  --- -- "developer"
-  --- timer.multi("Greetings", {
-  ---   { func = function() echo("hi\n") end },
-  ---   { func = function() echo("there\n") end },
-  ---   { func = function() echo("you\n") end },
-  ---   { func = function() echo("amazing\n") end },
-  ---   { func = function() echo("developer\n") end },
-  --- }, 5)
-  --- ```
-  ---
-  --- ```lua
-  --- -- After 1s, print "hi", after 3s, print "there", after 6s, print "you",
-  --- -- after 10s, print "amazing", and after 15s, print "developer"
-  --- timer.multi("Greetings", {
-  ---   { delay = 1, func = function() echo("hi\n") end },
-  ---   { delay = 2, func = function() echo("there\n") end },
-  ---   { delay = 3, func = function() echo("you\n") end },
-  ---   { delay = 4, func = function() echo("amazing\n") end },
-  ---   { delay = 5, func = function() echo("developer\n") end },
-  --- })
-  --- ```
-  function self.multi(name, def, delay)
-    ___.valid.type(name, "string", 1, false)
-    ___.valid.not_empty(def, 2, false)
-    ___.valid.type(delay, "number", 3, true)
+      if delay then
+        def = ___.table.map(def, function(_, element)
+          element.delay = delay
+          return element
+        end)
+      end
 
-    if delay then
-      def = ___.table.map(def, function(_, element)
-        element.delay = delay
-        return element
+      -- Record the initial information
+      self.multi_timers[name] = { def = def }
+
+      local timer_result
+      local timer_id = tempTimer(def[1].delay, function()
+        timer_result = perform_multi_timer_function(name)
       end)
+
+      if not timer_id then
+        ___.timer.kill_multi(name)
+        return false
+      end
+
+      -- Record the timer id
+      self.multi_timers[name].id = timer_id
+
+      return true
     end
 
-    -- Record the initial information
-    mod.multi_timers[name] = { def = def }
+    --- Kills a multi timer by name.
+    --- @param name string - The name of the multi timer.
+    --- @return boolean|nil - True if the multi timer was killed, nil if it doesn't exist.
+    --- @example
+    --- ```lua
+    --- timer.kill_multi("Greetings")
+    --- ```
+    function self.kill_multi(name)
+      ___.valid.type(name, "string", 1, false)
 
-    local timer_result
-    local timer_id = tempTimer(def[1].delay, function()
-      timer_result = perform_multi_timer_function(name)
-    end)
+      local timer_function = self.multi_timers[name]
+      if not timer_function then return nil end
 
-    if not timer_id then
-      ___.timer.kill_multi(name)
-      return false
+      self.multi_timers[name] = nil
+      local id = timer_function.id
+
+      if id then
+        return killTimer(id)
+      end
+
+      return true
     end
-
-    -- Record the timer id
-    mod.multi_timers[name].id = timer_id
-
-    return true
   end
-
-  --- Kills a multi timer by name.
-  --- @param name string - The name of the multi timer.
-  --- @return boolean|nil - True if the multi timer was killed, nil if it doesn't exist.
-  --- @example
-  --- ```lua
-  --- timer.kill_multi("Greetings")
-  --- ```
-  function self.kill_multi(name)
-    ___.valid.type(name, "string", 1, false)
-
-    local timer_function = mod.multi_timers[name]
-    if not timer_function then return nil end
-
-    mod.multi_timers[name] = nil
-    local id = timer_function.id
-
-    if id then
-      return killTimer(id)
-    end
-
-    return true
-  end
-end
+})

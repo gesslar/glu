@@ -1,129 +1,124 @@
-local script_name = "url"
-local class_name = script_name:title() .. "Class"
-local deps = { "table", "valid" }
+local UrlClass = Glu.glass.register({
+  name = "url",
+  class_name = "UrlClass",
+  dependencies = { "table", "valid" },
+  setup = function(___, self)
+    --- Decodes a string that has been URL-encoded. Useful for decoding query
+    --- parameters into a more readable format.
+    ---
+    --- @param str string - The URL-encoded string to decode.
+    --- @return string - The decoded string.
+    --- @example
+    --- ```lua
+    --- url:decode("This%20string%20is%20now%20readable%21%21%21")
+    --- -- "This string is now readable!!!"
+    --- ```
+    function self.decode(str)
+      ___.valid.type(str, "string", 1, false)
 
-local mod = Glu.registerClass({
-  class_name = class_name,
-  script_name = script_name,
-  dependencies = deps,
-})
+      str = (string.gsub(str, '+', ' ') or str)
+      str = (string.gsub(str, '%%(%x%x)', function(h)
+        return string.char(tonumber(h, 16))
+      end) or str)
+      return str
+    end
 
-function mod.setup(___, self)
-  --- Decodes a string that has been URL-encoded. Useful for decoding query
-  --- parameters into a more readable format.
-  ---
-  --- @param str string - The URL-encoded string to decode.
-  --- @return string - The decoded string.
-  --- @example
-  --- ```lua
-  --- url:decode("This%20string%20is%20now%20readable%21%21%21")
-  --- -- "This string is now readable!!!"
-  --- ```
-  function self.decode(str)
-    ___.valid.type(str, "string", 1, false)
+    --- Encodes a string into a URL-encoded string. Useful for encoding query
+    --- parameters into a URL before sending it to a server.
+    ---
+    --- @param str string - The string to encode.
+    --- @return string - The URL-encoded string.
+    --- @example
+    --- ```lua
+    --- url:encode("This string is now usable in a URL.")
+    --- -- "This%20string%20is%20now%20usable%20in%20a%20URL%2E"
+    --- ```
+    function self.encode(str)
+      ___.valid.type(str, "string", 1, false)
 
-    str = (string.gsub(str, '+', ' ') or str)
-    str = (string.gsub(str, '%%(%x%x)', function(h)
-      return string.char(tonumber(h, 16))
-    end) or str)
-    return str
-  end
+      str = (string.gsub(str, "([^%w])", function(c)
+        return string.format("%%%02X", string.byte(c))
+      end) or str)
+      return str
+    end
 
-  --- Encodes a string into a URL-encoded string. Useful for encoding query
-  --- parameters into a URL before sending it to a server.
-  ---
-  --- @param str string - The string to encode.
-  --- @return string - The URL-encoded string.
-  --- @example
-  --- ```lua
-  --- url:encode("This string is now usable in a URL.")
-  --- -- "This%20string%20is%20now%20usable%20in%20a%20URL%2E"
-  --- ```
-  function self.encode(str)
-    ___.valid.type(str, "string", 1, false)
-
-    str = (string.gsub(str, "([^%w])", function(c)
-      return string.format("%%%02X", string.byte(c))
-    end) or str)
-    return str
-  end
-
-  --- Parses a query string into a table of key-value pairs.
-  ---
-  --- @param query_string string - The query string to parse.
-  --- @return table - A table containing the parsed key-value pairs.
-  --- @example
-  --- ```lua
-  --- url:decode_params("name=John&age=30")
-  --- -- { name = "John", age = "30" }
-  --- ```
-  function self.decode_params(query_string)
-    local params = {}
-    for key_value in rex.gmatch(query_string, "([^&]+)") do
-      local key, value = rex.match(key_value, "([^=]+)=([^=]+)")
-      if key and value then
-        params[self.decode(key)] = self.decode(value)
+    --- Parses a query string into a table of key-value pairs.
+    ---
+    --- @param query_string string - The query string to parse.
+    --- @return table - A table containing the parsed key-value pairs.
+    --- @example
+    --- ```lua
+    --- url:decode_params("name=John&age=30")
+    --- -- { name = "John", age = "30" }
+    --- ```
+    function self.decode_params(query_string)
+      local params = {}
+      for key_value in rex.gmatch(query_string, "([^&]+)") do
+        local key, value = rex.match(key_value, "([^=]+)=([^=]+)")
+        if key and value then
+          params[self.decode(key)] = self.decode(value)
+        end
       end
+      return params
     end
-    return params
-  end
 
-  --- Encodes a table of key-value pairs into a query string.
-  ---
-  --- @param params table - The table of key-value pairs to encode.
-  --- @return string - The encoded query string.
-  --- @example
-  --- ```lua
-  --- url:encode_params({ name = "John", age = "30" })
-  --- -- "name=John&age=30"
-  --- ```
-  function self.encode_params(params)
-    local encoded = {}
-    for key, value in pairs(params) do
-      table.insert(encoded, self.encode(key) .. "=" .. self.encode(value))
+    --- Encodes a table of key-value pairs into a query string.
+    ---
+    --- @param params table - The table of key-value pairs to encode.
+    --- @return string - The encoded query string.
+    --- @example
+    --- ```lua
+    --- url:encode_params({ name = "John", age = "30" })
+    --- -- "name=John&age=30"
+    --- ```
+    function self.encode_params(params)
+      local encoded = {}
+      for key, value in pairs(params) do
+        table.insert(encoded, self.encode(key) .. "=" .. self.encode(value))
+      end
+      return table.concat(encoded, "&") or ""
     end
-    return table.concat(encoded, "&") or ""
+
+    --- Parses a URL into its components.
+    ---
+    --- @param url string - The URL to parse.
+    --- @return table - A table containing the parsed URL components.
+    --- @example
+    --- ```lua
+    --- url:parse("https://example.com/path/dosomething?name=John&age=30")
+    --- -- {
+    --- --   protocol = "https",
+    --- --   host = "example.com",
+    --- --   port = 443,
+    --- --   path = "path/dosomething",
+    --- --   file = "dosomething",
+    --- --   params = {
+    --- --     age = "30",
+    --- --     name = "John"
+    --- --   }
+    --- -- }
+    --- ```
+    function self.parse(url)
+      ___.valid.type(url, "string", 1, false)
+
+      local protocol, host, port, path, query_string = rex.match(url, "^(https?)://([^/:]+)(?::(\\d+))?/([^?]*)\\??(.*)")
+      local file = (rex.match(path, "([^/]+)$") or path)
+      local params = self.decode_params(query_string or "")
+
+      protocol = protocol and protocol or "http"
+      port = port and tonumber(port) or
+        protocol and (protocol == "http" and 80 or 443)
+
+      local parsed = {
+        protocol = protocol,
+        host = host,
+        port = port,
+        path = path,
+        file = file,
+        params = params
+      }
+
+      return parsed
+    end
   end
-
-  --- Parses a URL into its components.
-  ---
-  --- @param url string - The URL to parse.
-  --- @return table - A table containing the parsed URL components.
-  --- @example
-  --- ```lua
-  --- url:parse("https://example.com/path/dosomething?name=John&age=30")
-  --- -- {
-  --- --   protocol = "https",
-  --- --   host = "example.com",
-  --- --   port = 443,
-  --- --   path = "path/dosomething",
-  --- --   file = "dosomething",
-  --- --   params = {
-  --- --     age = "30",
-  --- --     name = "John"
-  --- --   }
-  --- -- }
-  --- ```
-  function self.parse(url)
-    ___.valid.type(url, "string", 1, false)
-
-    local protocol, host, port, path, query_string = rex.match(url, "^(https?)://([^/:]+)(?::(\\d+))?/([^?]*)\\??(.*)")
-    local file = (rex.match(path, "([^/]+)$") or path)
-    local params = self.decode_params(query_string or "")
-
-    protocol = protocol and protocol or "http"
-    port = port and tonumber(port) or
-      protocol and (protocol == "http" and 80 or 443)
-
-    local parsed = {
-      protocol = protocol,
-      host = host,
-      port = port,
-      path = path,
-      file = file,
-      params = params
-    }
-
-    return parsed
-  end
-end
+})

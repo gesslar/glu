@@ -10,5 +10,11 @@
     "isFolder" : "no",
     "name" : "_colour",
     "script" : ""
+  },
+  {
+    "isActive" : "yes",
+    "isFolder" : "no",
+    "name" : "_fd",
+    "script" : ""
   }
 ]
