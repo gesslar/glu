@@ -32,8 +32,8 @@ jobs:
 
       - name: Build Concatenated and Minified Versions
         run: |
-          python mini.py src/scripts mini/Glu.min-${{ env.mfile_version }}.lua
-          python mini.py src/scripts mini/Glu.single-${{ env.mfile_version }}.lua --no-minify
+          python mini.py src/scripts mini/Glu.min.lua
+          python mini.py src/scripts mini/Glu.single.lua --no-minify
 
       - name: Build With Muddler
         uses: demonnic/build-with-muddler@main
