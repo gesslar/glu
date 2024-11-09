@@ -2,6 +2,7 @@
 # in the repo
 build/
 .output
+/min/
 
 # Ignore docs directory, which would be the temporary output of the docs build
 /docs/

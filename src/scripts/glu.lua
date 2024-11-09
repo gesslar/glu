@@ -7,6 +7,7 @@ if not _G["Glu"] then
   table.unpack = table.unpack or unpack
 
   local registeredGlasses = {}
+
   function Glu.getGlasses() return registeredGlasses end
   function Glu.getGlassNames()
     local names = {}
