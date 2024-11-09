@@ -42,7 +42,7 @@ jobs:
 
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "build/${{ env.mfile_package }}.mpackage,mini/Glu.min-${{ env.mfile_version }}.lua,mini/Glu.single-${{ env.mfile_version }}.lua,${{ env.filename }}"
+          artifacts: "build/${{ env.mfile_package }}.mpackage,mini/Glu.min.lua,mini/Glu.single.lua,${{ env.filename }}"
           allowUpdates: true
           bodyFile: "./README.md"
           tag: ${{ env.mfile_version }}
