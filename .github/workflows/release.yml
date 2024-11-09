@@ -32,7 +32,7 @@ jobs:
 
       - name: Build Concatenated and Minified Versions
         run: |
-          python mini.py src/scripts build/glu.min-${{ env.mfile_version }}.lua --minify
+          python mini.py src/scripts build/glu.min-${{ env.mfile_version }}.lua
           python mini.py src/scripts build/glu.single-${{ env.mfile_version }}.lua --no-minify
 
       - name: Build With Muddler
