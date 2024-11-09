@@ -98,6 +98,12 @@
   {
     "isActive": "yes",
     "isFolder": "no",
+    "name": "http",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
     "name": "conditions",
     "script": ""
   }

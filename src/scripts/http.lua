@@ -2,9 +2,9 @@ local HttpResponseClass = Glu.glass.register({
   name = "http_response",
   class_name = "HttpResponseClass",
   dependencies = { "table", "valid" },
-  setup = function(___, self, request)
-    self.id = request.id
-    -- other stuff
+  setup = function(___, self, response)
+    self.id = response.id
+    self.result = response
   end
 })
 
@@ -13,109 +13,115 @@ local HttpRequestClass = Glu.glass.register({
   class_name = "HttpRequestClass",
   dependencies = { "table", "valid" },
   setup = function(___, self, options)
-    local requests = {}
+    self.options = options
 
-    -- Headers
-    if not options.headers then options.headers = {} end
-    if type(options.headers) ~= "table" then
-      error("headers must be a table")
-    end
+    function self.execute()
+      local owner = self.container
 
-    self.headers = options.headers
+      self.id = ___.id()
 
-    local function write_file(filepath, data)
-      local dir, file = ___.fd.dir_file(filepath, true)
-      if dir and file then
-      return ___.fd.write_file(filepath, data, true)
-    else
-        return nil, "Invalid file path."
-      end
-    end
-
-    local function done(response_data)
-      local ob_id = response_data.id
-      local ob = requests[ob_id]
-
-      if self.options.saveTo and not response_data.error then
-        local result = { write_file(self.options.saveTo, response_data.data) }
+      -- Headers
+      if not self.options.headers then self.options.headers = {} end
+      if type(self.options.headers) ~= "table" then
+        error("headers must be a table")
       end
 
-      local cb = self.options.callback
-      local response = HttpResponseClass(response_data, self)
+      self.headers = self.options.headers
 
-      cb(response)
-      deleteAllNamedEventHandlers(ob_id)
-      requests[ob_id] = nil
-      ob = nil
-    end
-
-    -- Events to listen for
-    local events = {}
-    local lc = ___.table.index_of(http_types, options.method) and
-      ___.string.lower(options.method) or
-      "custom"
-    local uc = ___.string.title(___.string.capitalize(lc))
-
-    for _, event in ipairs({"Done", "Error"}) do
-      local event_mod = ___.string.format("sys%sHttp%s", uc, event)
-      ___.table.insert(events, { event, event_mod })
-    end
-
-    local function only_indexed(t)
-      local tmp = {}
-      for i = 1, #t do
-        tmp[i] = t[i]
-      end
-      return tmp
-    end
-
-    for _, event in ipairs(events) do
-      local event_type, event_name = unpack(event)
-      registerNamedEventHandler(
-        self.id,
-        event_name,
-        event_name,
-        function(e, ...)
-          local response = {
-            event = e,
-            id = self.id,
-            parent = self,
-          }
-          local result
-          arg = only_indexed(arg)
-          if ___.rex.match(e, "sys(?:\\w+)HttpError$") then
-            result = ___.table.allocate({ "error", "url", "server" }, arg)
-          elseif rex.match(e, "sys(?:\\w+)HttpDone$") then
-            result = ___.table.allocate({ "url", "data", "server" }, arg)
-          else
-            error("Unknown event: " .. e)
-          end
-
-          ___.table.add(response, result)
-
-          done(response)
+      local function write_file(filepath, data)
+        local dir, file = ___.fd.dir_file(filepath, true)
+        if dir and file then
+          return ___.fd.write_file(filepath, data, true)
+        else
+          return nil, "Invalid file path."
         end
+      end
+
+      local function done(response_data)
+        local ob_id = response_data.id
+        local ob = owner.find_request(ob_id)
+
+        if self.options.saveTo and not response_data.error then
+          local result = { write_file(self.options.saveTo, response_data.data) }
+        end
+
+        local cb = self.options.callback
+        local response = HttpResponseClass(response_data, owner)
+
+        cb(response)
+        deleteAllNamedEventHandlers(ob_id)
+        owner.delete_request(ob_id)
+        ob = nil
+      end
+
+      -- Events to listen for
+      local events = {}
+      local lc = table.index_of(owner.http_types, self.options.method) and
+      string.lower(self.options.method) or "custom"
+      local uc = string.title(___.string.capitalize(lc))
+
+      for _, event in ipairs({"Done", "Error"}) do
+        local event_mod = string.format("sys%sHttp%s", uc, event)
+        table.insert(events, { event, event_mod })
+      end
+
+      local function only_indexed(t)
+        local tmp = {}
+        for i = 1, #t do
+          tmp[i] = t[i]
+        end
+        return tmp
+      end
+
+      for _, event in ipairs(events) do
+        local event_type, event_name = unpack(event)
+        registerNamedEventHandler(
+          self.id,
+          event_name,
+          event_name,
+          function(e, ...)
+            local response = {
+              event = e,
+              id = self.id,
+            }
+            local result
+            arg = only_indexed(arg)
+            if rex.match(e, "sys(?:\\w+)HttpError$") then
+              result = ___.table.allocate({ "error", "url", "server" }, arg)
+            elseif rex.match(e, "sys(?:\\w+)HttpDone$") then
+              result = ___.table.allocate({ "url", "data", "server" }, arg)
+            else
+              error("Unknown event: " .. e)
+            end
+
+            ___.table.add(response, result)
+
+            done(response)
+          end
+        )
+      end
+
+      self.method_lc = lc
+      self.method_uc = uc
+      self.custom = self.options.method == "CUSTOM"
+
+      local func_name = string.format("%sHTTP", lc)
+      local func = _G[func_name]
+
+      assert(func, "HTTP method " .. func_name .. " not found")
+      assert(type(func) == "function", "HTTP method " .. func_name .. " is not a function")
+
+      local ok, err, result = pcall(
+        self.custom and
+          function() return func(self.options.method, self.options.url, self.options.headers) end or
+          function() return func(self.options.url, self.options.headers) end
       )
-    end
 
-    self.method_lc = lc
-    self.method_uc = uc
-    self.custom = options.method == "CUSTOM"
+      if not ok then
+        error("Error calling HTTP method " .. tostring(self.custom) .. " " .. tostring(func) .. ": " .. tostring(err))
+      end
 
-    local func_name = string.format("%sHTTP", lc)
-    local func = _G[func_name]
-
-    assert(func, "HTTP method " .. func_name .. " not found")
-    assert(type(func) == "function", "HTTP method " .. func_name .. " is not a function")
-
-    local ok, err, result = pcall(
-      self.custom and
-        function() return func(options.method, options.url, options.headers) end or
-        function() return func(options.url, options.headers) end
-    )
-
-    if not ok then
-      error("Error calling HTTP method " .. tostring(self.custom) .. " " .. tostring(func) .. ": " .. tostring(err))
+      return self
     end
   end
 })
@@ -124,15 +130,18 @@ local HttpClass = Glu.glass.register({
   name = "http",
   class_name = "HttpClass",
   dependencies = { "table", "valid" },
-  http_types = { "GET", "PUT", "POST", "DELETE" },
   setup = function(___, self)
-    function self.validate_options(options)
+    local function validate_options(options)
       ___.valid.type(options, "table", 1, false)
       ___.valid.not_empty(options, 1, false)
       ___.valid.type(options.method, "string", 2, false)
       ___.valid.regex(options.url, ___.regex.http_url, "url", 1, false)
-      ___.valid.type(options.callback, "function", 2, false)
+      ___.valid.type(options.callback, "function", 1, false)
     end
+
+    self.http_types = { "GET", "PUT", "POST", "DELETE" }
+
+    local requests = {}
 
     --- Downloads a file from the given URL and saves it to the specified path.
     --- You may certainly also use the `get` or `request` methods to download a
@@ -249,7 +258,7 @@ local HttpClass = Glu.glass.register({
     --- - `headers` (`table`) - The headers to send with the request.
     ---
     --- @param options table - The options for the request.
-    --- @param cb function - The callback function.
+    --- @param cb function|nil - The callback function.
     --- @return table - The HTTP request object.
     --- @example
     --- ```lua
@@ -257,16 +266,37 @@ local HttpClass = Glu.glass.register({
     ---   url = "http://example.com/file.txt"
     --- }, function(response) end)
     --- ```
-    function self.request(options)
-      self.validate_options(options)
+    function self.request(options, cb)
+      validate_options(options)
 
       -- upper case the method
       options.method = string.upper(options.method)
 
+      -- Add the callback if it was manually provided.
+      options.callback = options.callback or cb
+
       -- Get a new http request object
-      local request = ___.http_request.new(options, self)
-      requests[request.id] = request
+      local request = HttpRequestClass(options, self).execute()
+      table.insert(requests, request)
       return request
+    end
+
+    function self.delete_request(id)
+      for i = 1, #requests do
+        if requests[i].id == id then
+          table.remove(requests, i)
+          break
+        end
+      end
+    end
+
+    function self.find_request(id)
+      for _, request in ipairs(requests) do
+        if request.id == id then
+          return request
+        end
+      end
+      return nil
     end
   end
 })
