@@ -32,8 +32,8 @@ jobs:
 
       - name: Build Concatenated and Minified Versions
         run: |
-          python mini.py src/scripts build/glu.min-${{ env.mfile_version }}.lua
-          python mini.py src/scripts build/glu.single-${{ env.mfile_version }}.lua --no-minify
+          python mini.py src/scripts mini/glu.min-${{ env.mfile_version }}.lua
+          python mini.py src/scripts mini/glu.single-${{ env.mfile_version }}.lua --no-minify
 
       - name: Build With Muddler
         uses: demonnic/build-with-muddler@main
@@ -42,7 +42,7 @@ jobs:
 
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "build/${{ env.mfile_package }}.mpackage,build/glu.min-${{ env.mfile_version }}.lua,build/glu.single-${{ env.mfile_version }}.lua,${{ env.filename }}"
+          artifacts: "build/${{ env.mfile_package }}.mpackage,mini/glu.min-${{ env.mfile_version }}.lua,mini/glu.single-${{ env.mfile_version }}.lua,${{ env.filename }}"
           allowUpdates: true
           bodyFile: "./README.md"
           tag: ${{ env.mfile_version }}
