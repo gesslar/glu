@@ -3,7 +3,7 @@ local DateClass = Glu.glass.register({
   name = "date",
   dependencies = {},
   setup = function(___, self, opts)
-    local v = self.v
+    local v = ___.v
 
     function self.shms(seconds, as_string)
       v.type(seconds, "number", 1, false)

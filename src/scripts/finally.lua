@@ -3,13 +3,20 @@ local FinallyClass = Glu.glass.register({
   name = "finally",
   inherit_from = nil,
   call = "finally",
-  setup = function(___, self, opts)
+  setup = function(___, self, catch_result)
     function self.finally(f, ...)
       -- Pass both success and error information to finally block
       local success, result = pcall(f, {
-        success = opts.catch.success,
-        error = opts.catch.err,
-        original_error = opts.try.err
+        try = {
+          success = catch_result.catch.success,
+          err = catch_result.catch.err,
+          result = catch_result.catch.result
+        },
+        catch = {
+          success = catch_result.try.success,
+          err = catch_result.try.err,
+          result = catch_result.try.result
+        }
       })
       -- If finally block itself errors, we should probably handle that
       if not success then

@@ -150,6 +150,38 @@ function run_colour_tests()
     )
   end
 
+  local function contrast_ratio(cond)
+    return cond.is_deeply(
+      testing.contrast_ratio({255,255,255}, {0,0,0}),
+      21.0,
+      "contrast_ratio() should return the correct contrast ratio"
+    )
+  end
+
+  local function contrast(cond)
+    return cond.is_deeply(
+      testing.contrast({100,100,100}),
+      {156,156,156},
+      "contrast() should return the correct contrasting colour"
+    )
+  end
+
+  local function analogous(cond)
+    return cond.is_deeply(
+      testing.analogous({125,0,200}),
+      {{27,0,199},{125,0,200},{199,0,172}},
+      "analogous() should return the correct analogous colours"
+    )
+  end
+
+  local function split_complement(cond)
+    return cond.is_deeply(
+      testing.split_complement({125,0,200}),
+      {{172,199,0},{0,199,27}},
+      "split_complement() should return the correct split complement colours"
+    )
+  end
+
   -- Run the tests
   local runner = test.runner({
     name = testing.name,
@@ -169,6 +201,10 @@ function run_colour_tests()
       { name = "colour.random", func = random },
       { name = "colour.random_shade", func = random_shade },
       { name = "colour.triad", func = triad },
+      { name = "colour.contrast_ratio", func = contrast_ratio },
+      { name = "colour.contrast", func = contrast },
+      { name = "colour.analogous", func = analogous },
+      { name = "colour.split_complement", func = split_complement },
     },
   })
   .execute(true)

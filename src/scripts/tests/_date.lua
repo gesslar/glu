@@ -2,7 +2,7 @@
 function run_date_tests()
   -- This is a test for the date module.
   local tester_name = "__PKGNAME__"
-  local g = Glu(tester_name, nil)
+  local g = Glu(tester_name)
   local testing = g.date
   local test = g.test
 
@@ -38,8 +38,8 @@ function run_date_tests()
     )
   end
 
-  local runner = test:runner({
-    name = testing.class_name,
+  local runner = test.runner({
+    name = testing.name,
     tests = {
       { name = "date.shms", func = shms },
       { name = "date.shms_as_string", func = shms_as_string },

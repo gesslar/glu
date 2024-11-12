@@ -5,7 +5,7 @@ local FileClass = Glu.glass.register({
   dependencies = {},
   setup = function(___, self, opts, container)
     self:set_type("file")
-
+display(self)
     if not opts then return end
     if not opts.path then return end
 
