@@ -8,8 +8,8 @@ function run_colour_tests()
 
   local function interpolate(cond)
     return cond.is_deeply(
-      testing.interpolate({255,0,0},{0,0,255},0.5),
-      {128,0,128},
+      testing.interpolate({255,0,0},{0,0,255},50),
+      {255,0,255},
       "interpolate() should return the correct interpolated colour"
     )
   end
@@ -142,17 +142,17 @@ function run_colour_tests()
     return result
   end
 
-  local function generate_triad(cond)
+  local function triad(cond)
     return cond.is_deeply(
-      testing.generate_triad({125,0,200}),
-      {{40,204,204},{125,204,204}},
-      "generate_triad() should return the correct triad"
+      testing.triad({125,0,200}),
+      {{199,126,0},{0,199,126}},
+      "triad() should return the correct triad"
     )
   end
-  -- Run the tests
 
+  -- Run the tests
   local runner = test.runner({
-    name = testing.class_name,
+    name = testing.name,
     tests = {
       { name = "colour.interpolate", func = interpolate },
       { name = "colour.is_light", func = is_light },
@@ -168,7 +168,7 @@ function run_colour_tests()
       { name = "colour.adjust_saturation", func = adjust_saturation },
       { name = "colour.random", func = random },
       { name = "colour.random_shade", func = random_shade },
-      { name = "colour.generate_triad", func = generate_triad },
+      { name = "colour.triad", func = triad },
     },
   })
   .execute(true)

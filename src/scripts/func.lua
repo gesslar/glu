@@ -1,11 +1,11 @@
 local FuncClass = Glu.glass.register({
   name = "func",
   class_name = "FuncClass",
-  dependencies = { "valid" },
+  dependencies = {},
   setup = function(___, self)
     function self.delay(func, delay, ...)
-      ___.valid.type(func, "function", 1, false)
-      ___.valid.type(delay, "number", 2, false)
+      ___.v.type(func, "function", 1, false)
+      ___.v.type(delay, "number", 2, false)
 
       ---@diagnostic disable-next-line: return-type-mismatch
       return tempTimer(delay, function(...)
@@ -22,8 +22,8 @@ local FuncClass = Glu.glass.register({
       --- becho("Hello, world!")
       --- -- <b>Hello, world!</b>
       --- ```
-      ___.valid.type(func, "function", 1, false)
-      ___.valid.type(wrapper, "function", 2, false)
+      ___.v.type(func, "function", 1, false)
+      ___.v.type(wrapper, "function", 2, false)
 
       return function(...)
         return wrapper(func, ...)
@@ -31,9 +31,9 @@ local FuncClass = Glu.glass.register({
     end
 
     function self.repeater(func, interval, times, ...)
-      ___.valid.type(func, "function", 1, false)
-      ___.valid.type(interval, "number", 2, true)
-      ___.valid.type(times, "number", 3, true)
+      ___.v.type(func, "function", 1, false)
+      ___.v.type(interval, "number", 2, true)
+      ___.v.type(times, "number", 3, true)
 
       interval = interval or 1
       times = times or 1

@@ -1,7 +1,7 @@
 local TimerClass = Glu.glass.register({
   name = "timer",
   class_name = "TimerClass",
-  dependencies = { "table", "valid" },
+  dependencies = { "table" },
   setup = function(___, self)
     self.multi_timers = {}
 
@@ -62,9 +62,9 @@ local TimerClass = Glu.glass.register({
     --- })
     --- ```
     function self.multi(name, def, delay)
-      ___.valid.type(name, "string", 1, false)
-      ___.valid.not_empty(def, 2, false)
-      ___.valid.type(delay, "number", 3, true)
+      ___.v.type(name, "string", 1, false)
+      ___.v.not_empty(def, 2, false)
+      ___.v.type(delay, "number", 3, true)
 
       if delay then
         def = ___.table.map(def, function(_, element)
@@ -100,7 +100,7 @@ local TimerClass = Glu.glass.register({
     --- timer.kill_multi("Greetings")
     --- ```
     function self.kill_multi(name)
-      ___.valid.type(name, "string", 1, false)
+      ___.v.type(name, "string", 1, false)
 
       local timer_function = self.multi_timers[name]
       if not timer_function then return nil end

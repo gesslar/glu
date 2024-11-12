@@ -53,16 +53,18 @@ if not _G["Glu"] then
   -- Make Glu callable
   setmetatable(Glu, { __call = function(_, ...) return Glu.new(...) end })
 
-  local function newObject(instance, glass, instance_opts, container)
+  local function newObject(glu_instance, glass, instance_opts, container)
+    instance_opts = instance_opts or {}
+    container = container or glu_instance
+
     -- Check for circular dependencies
-    local function checkIndexForLoop(g)
+    local function checkIndexForLoop(ob)
       local seen = {}
-      local current = g
+      local current = ob
 
       while current do
         if seen[current] then
-          print("Loop detected in __index chain for:", g.name)
-          return true
+          error(">>   [newObject] Loop detected in __index chain for: " .. ob.name)
         end
         seen[current] = true
         current = getmetatable(current) and getmetatable(current).__index
@@ -70,40 +72,44 @@ if not _G["Glu"] then
       return false
     end
 
-    local function copyProperties(c, i)
-      local object = i[c.name]
+    local function copyProperties(glu_class, into)
+      local object = into[glu_class.name]
       for k, v in pairs(object) do
-        instance[c.name][k] = v
+        glu_instance[glu_class.name][k] = v
       end
 
-      -- Copy and print metatable info
+      -- Copy metatable info
       local meta = getmetatable(object)
       if meta then
-        setmetatable(instance[c.name], meta)
+        setmetatable(glu_instance[glu_class.name], meta)
       end
     end
 
-    local function instantiate(i, g, i_opts, cont)
-      if checkIndexForLoop(g) then return end
+    local function instantiate(glu, glu_class, ops, into)
+      if checkIndexForLoop(glu_class) then return end
       -- If the class has a parent, make sure it is instantiated first
-      if g.inherit_from then
-        local parentName = g.inherit_from.name
+      if glu_class.inherit_from then
+        local parent_name = glu_class.inherit_from
+        local parent = into.getObject(parent_name)
 
-        if not i[parentName] or #table.keys(i[parentName]) == 0 then
+        if not parent or (parent.glass and parent.glass.setup) then
+          local parent_class = glu.getGlass(parent_name)
           -- Recursively instantiate the parent class
-          instantiate(g.inherit_from, i, i_opts, cont)
+          return instantiate(glu, parent_class, ops, into)
+          -- error("Parent class `" .. glu_class.inherit_from .. "` not found for `" .. glu_class.name .. "`")
         end
       end
 
       -- Instantiate the current class if it hasn't been already
-      if not i[g.name] or #table.keys(i[g.name]) == 0 then
-        local object = g(i_opts, i)
-        i[g.name] = object   -- Add the instance to `instance`
-        copyProperties(g, i)
+      if not glu[glu_class.name] or table.index_of(table.keys(glu[glu_class.name]), "name") == nil then
+        local object = glu_class(ops, glu)
+        into[glu_class.name] = object   -- Add the instance to `instance`
+        copyProperties(glu_class, into)
+        return object
       end
     end
 
-    instantiate(instance, glass, instance_opts, container)
+    return instantiate(glu_instance, glass, instance_opts, container)
   end
 
   --- Constructor for Glu.
@@ -180,27 +186,90 @@ if not _G["Glu"] then
     function instance.hasObject(name) return instance.getObject(name) ~= nil end
     function instance.getObject(name) return instance[name] and type(instance[name]) == "table" and instance[name] or nil end
 
-    -- Instantiate all classes
-    -- Step 1: Create placeholders in `instance` for all registered classes
-    for _, class in ipairs(registeredGlasses) do
-      instance[class.name] = {} -- Create an empty table as a placeholder
+    -- OOB Validation functions
+    -- Standard validation functions
+    local trace_ignore = debug.getinfo(1).source
+    function instance.get_last_traceback_line()
+      local it, trace = 1, ""
+      while debug.getinfo(it) do
+        if debug.getinfo(it).source ~= trace_ignore then
+          local line = debug.getinfo(it).source ..
+              ":" ..
+              debug.getinfo(it).currentline
+          trace = trace .. line .. "\n"
+        end
+        it = it + 1
+      end
+
+      if #trace == 0 then
+        return "[No traceback]"
+      end
+
+      return trace
     end
 
-    -- Instantiate all classes
+    instance.v = {
+      get_last_traceback_line = instance.get_last_traceback_line,
+      test = function(statement, value, argument_index, nil_allowed)
+        if nil_allowed and value == nil then
+          return
+        end
+
+        local last = instance.get_last_traceback_line()
+        assert(statement, "Invalid value to argument " .. argument_index ..
+          ". " .. tostring(value) .. " in\n" .. last)
+      end,
+      type = function(value, expected_type, argument_index, nil_allowed)
+        local last = instance.get_last_traceback_line()
+        assert((nil_allowed == true and value == nil) or value ~= nil,
+          "value must not be nil for argument " .. argument_index ..
+          " in\n" .. last)
+        assert(type(expected_type) == "string",
+          "expected_type must be a string for argument " .. argument_index ..
+          " in\n" .. last)
+        assert(type(argument_index) == "number",
+          "argument_index must be a number for argument " .. argument_index ..
+          " in\n" .. last)
+        assert(nil == nil_allowed or type(nil_allowed) == "boolean",
+          "nil_allowed must be a boolean for argument " .. argument_index ..
+          " in\n" .. last)
+
+        if nil_allowed and value == nil then return end
+        if expected_type == "any" then return end
+
+        local expected_types = string.split(expected_type, "|") or { expected_type }
+        local invalid = table.n_filter(expected_types, function(t) return not instance.TYPE[t] end)
+
+        if table.size(invalid) > 0 then
+          error("Invalid type to argument " ..
+            argument_index .. ". Expected " .. table.concat(invalid, "|") .. ", got " .. type(value) .. " in\n" .. last)
+        end
+
+        for _, t in ipairs(expected_types) do
+          if type(value) == t then return end
+        end
+
+        error("Invalid type to argument " ..
+          argument_index .. ". Expected " .. expected_type .. ", got " .. type(value) .. " in\n" .. last)
+      end
+    }
+
+    -- Let's now create them!
     for _, class in ipairs(registeredGlasses) do
-      local instance_opts = { name = class.name }
-      newObject(instance, class, instance_opts, instance)
+      newObject(instance, class, {}, instance)
     end
 
     -- Trap events for uninstalling the package and clean ourselves up.
     local handler_name = "glu_sysUninstall_" .. Glu.id()
     instance.handler_name = handler_name
-    registerNamedEventHandler("glu", handler_name, "sysUninstall", function(event, p)
-      if p == instance.package_name then
-        deleteNamedEventHandler("glu", handler_name)
-        instance = nil
+    registerNamedEventHandler("glu", handler_name, "sysUninstall",
+      function(event, p)
+        if p == instance.package_name then
+          deleteNamedEventHandler("glu", handler_name)
+          instance = nil
+        end
       end
-    end)
+    )
 
     return instance
   end
@@ -211,14 +280,74 @@ if not _G["Glu"] then
     class_name = "Glass",
     inherit_from = nil,
     dependencies = {},
+    protect = function(glass, self)
+      local function protect_function(object, function_name)
+        assert(type(object) == "table", "`object` must be a table")
+        assert(type(function_name) == "string", "`function_name` must be a string")
+
+        local original_function = object[function_name]
+        assert(type(original_function) == "function", "`original_function` must be a function")
+
+        object[function_name] = function(caller, ...)
+          if self.inherits(object) then
+            return original_function(caller, ...)
+          end
+          error("Access denied: " .. function_name .. " is protected and can " ..
+            "only be called by inheriting classes.")
+        end
+      end
+
+      local function protect_variable(object, var_name)
+        assert(type(object) == "table", "`object` must be a table")
+        assert(type(var_name) == "string", "`var_name` must be a string")
+        assert(type(object[var_name]) ~= "nil", "`object[var_name]` must not be nil")
+
+        local base_class = getmetatable(object)
+
+        setmetatable(object, {
+          __index = function(tbl, key)
+            if key == var_name and not self.inherits(tbl, base_class) then
+              error("Access denied: Variable '" ..
+                var_name .. "' is protected and can only be accessed by inheriting classes.")
+            end
+            return rawget(tbl, key)
+          end,
+          __newindex = function(tbl, key, value)
+            if key == var_name and not self.inherits(tbl, base_class) then
+              error("Access denied: Variable '" ..
+                var_name .. "' is protected and can only be modified by inheriting classes.")
+            end
+            rawset(tbl, key, value)
+          end,
+        })
+      end
+
+      if glass.protected_functions then
+        for _, function_name in ipairs(glass.protected_functions) do
+          print("protecting function", function_name)
+          protect_function(self, function_name)
+        end
+      end
+
+      if glass.protected_variables then
+        for _, var_name in ipairs(glass.protected_variables) do
+          print("protecting variable", var_name)
+          protect_variable(self, var_name)
+        end
+      end
+    end,
     register = function(class_opts)
       assert(type(class_opts) == "table", "opts must be a table")
       assert(type(class_opts.name) == "string", "`name` must be a string")
-      assert(type(class_opts.class_name) == "string", "`class_name` must be a string")
-      assert(type(class_opts.inherit_from) == "table" or class_opts.inherit_from == nil,
-        "`inherit_from` must be a table or nil")
-      -- assert(type(class_opts.setup) == "function" or class_opts.setup == nil, "`setup` must be a function or nil")
-      assert(type(class_opts.setup) == "function", "`setup` must be a function")
+      assert(type(class_opts.class_name) == "string", "`class_name` must " ..
+        "be a string")
+      assert(type(class_opts.inherit_from) == "string" or
+        class_opts.inherit_from == nil,
+        "`inherit_from` must be a string or nil")
+      assert(type(class_opts.setup) == "function", "`setup` must " ..
+        "be a function")
+      assert(type(class_opts.valid) == "function" or class_opts.valid == nil,
+        "`valid` must be a function or nil")
 
       local name = class_opts.name
 
@@ -232,11 +361,15 @@ if not _G["Glu"] then
         inherit_from = class_opts.inherit_from,
         dependencies = class_opts.dependencies or {},
         setup = class_opts.setup,
+        valid = class_opts.valid,
+        protected_functions = class_opts.protected_functions,
+        protected_variables = class_opts.protected_variables,
       }
 
       function G.new(instance_opts, container)
         -- The instance_opts must be a table
-        assert(type(instance_opts) == "table", "`instance_opts` must be a table")
+        assert(type(instance_opts) == "table", "`instance_opts` must be " ..
+          "a table")
         -- The container must be a table with a metatable
         assert(type(container) == "table", "`container` must be a table")
 
@@ -254,18 +387,16 @@ if not _G["Glu"] then
 
         -- Set the __index for inheritance if there is a parent class
         if class_opts.inherit_from then
-          local inherit_from_name = class_opts.inherit_from.name
-          local parent_instance = container.objects[inherit_from_name]
+          local inherit_from = class_opts.inherit_from
+          local parent_instance = container.getObject(inherit_from)
 
           if not parent_instance then
-            error("Instance of parent class `" .. inherit_from_name .. "` not found for `" .. class_opts.class_name .. "`")
+            error("Instance of parent class `" .. inherit_from .. "` not " ..
+              "found for `" .. class_opts.class_name .. "`")
           end
 
           self.parent = parent_instance
 
-          if class_opts.call then
-            self[class_opts.call] = parent_instance[class_opts.call]
-          end
           setmetatable(self, { __index = parent_instance })
         else
           self.__index = self
@@ -273,33 +404,65 @@ if not _G["Glu"] then
 
         -- Determine anchor
         local ___ = self
-        repeat
-          ___ = ___.container
-        until not ___.container
+        repeat ___ = ___.container until not ___.container
         self.___ = ___
 
         for _, dep in ipairs(class_opts.dependencies or {}) do
           local obj = ___[dep]
           if not obj then
-            error("Object `" .. dep .. "` not found for `" .. class_opts.class_name .. "`")
+            local glass = ___.getGlass(dep)
+            if not glass then
+              error("Object `" .. dep .. "` not found for `" ..
+                class_opts.class_name .. "`")
+            end
           end
         end
 
         -- If we don't have a name, use a random UUID
-        local instance_name = instance_opts.name or ___.id()
-        self.name = instance_name
+        local instance_name = self.name or ___.id()
+
+        -- Validation functions
+        if G.valid and type(G.valid) == "function" then
+          ___.v = ___.v or {}
+          local valid = G.valid(___, self)
+          if valid then
+            for valid_function_name, valid_function in pairs(valid) do
+              ___.v[valid_function_name] = valid_function
+            end
+          end
+        end
 
         -- Add the instance to the container
         container.objects[instance_name] = self
-        if table.index_of(table.keys(G), "setup") and type(G.setup) == "function" then
+        if table.index_of(table.keys(G), "setup") and
+          type(G.setup) == "function" then
           -- Initialize the instance
           G.setup(___, self, instance_opts, container)
         end
 
-        assert(type(class_opts.call) == "string" or class_opts.call == nil, "`call` must be a string or nil")
-        if class_opts.call then
+        function self.inherits(base_class)
+          local current_instance = self
+          while current_instance do
+            if current_instance == base_class then
+              return true
+            end
+            current_instance = current_instance.parent
+          end
+          return false
+        end
+
+        -- Protect the functions and variables
+        ___.glass.protect(G, self)
+
+        assert(type(self.call) == "string" or self.call == nil,
+          "`call` must be a string or nil")
+
+        if self.call then
           local mt = getmetatable(self) or {}
-          mt.__call = function(_, ...) return self[class_opts.call](...) end
+          mt.__call = function(_, ...)
+            local args = { ... }
+            return self[self.call](unpack(args))
+          end
           setmetatable(self, mt)
         end
 

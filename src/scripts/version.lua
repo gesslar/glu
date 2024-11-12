@@ -1,7 +1,7 @@
 local VersionClass = Glu.glass.register({
   name = "version",
   class_name = "VersionClass",
-  dependencies = { "table", "valid" },
+  dependencies = { "table" },
   setup = function(___, self)
     --- Returns 1 if one is greater than two, -1 if one is less than two, and 0 if they are the same
     local function _compare(one, two)
@@ -32,9 +32,9 @@ local VersionClass = Glu.glass.register({
     --- ```
     function self.compare(version1, version2)
       -- The versions must be of the same type
-      ___.valid.test(type(version1) == "string" or type(version1) == "number", 1, "Invalid value to argument 1. Expected a string or number.")
-      ___.valid.test(type(version2) == "string" or type(version2) == "number", 2, "Invalid value to argument 2. Expected a string or number.")
-      ___.valid.same_type(version1, version2)
+      ___.v.test(type(version1) == "string" or type(version1) == "number", 1, "Invalid value to argument 1. Expected a string or number.")
+      ___.v.test(type(version2) == "string" or type(version2) == "number", 2, "Invalid value to argument 2. Expected a string or number.")
+      ___.v.same_type(version1, version2)
 
       version1 = tostring(version1)
       version2 = tostring(version2)
@@ -43,10 +43,10 @@ local VersionClass = Glu.glass.register({
       local version1_parts = version1:split("%.") or {}
       local version2_parts = version2:split("%.") or {}
 
-      ___.valid.test(type(version1_parts) == "table", 1, "Invalid value to argument 1. Expected a string.")
-      ___.valid.test(type(version2_parts) == "table", 2, "Invalid value to argument 2. Expected a string.")
+      ___.v.test(type(version1_parts) == "table", 1, "Invalid value to argument 1. Expected a string.")
+      ___.v.test(type(version2_parts) == "table", 2, "Invalid value to argument 2. Expected a string.")
 
-      ___.valid.test(#version1_parts == #version2_parts, 1, "Invalid value to arguments. Expected 1 and 2 to have the same number of parts.")
+      ___.v.test(#version1_parts == #version2_parts, 1, "Invalid value to arguments. Expected 1 and 2 to have the same number of parts.")
 
       for i = 1, #version1_parts do
         local result = _compare(version1_parts[i], version2_parts[i])

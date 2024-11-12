@@ -1,68 +1,7 @@
-local FileSystemObjectClass = Glu.glass.register({
-  class_name = "FileSystemObjectClass",
-  name = "file_system_object",
-  dependencies = { "table", "valid" },
-  setup = function(___, self, opts, container)
-    if not opts then return end
-
-    ___.table.add(self, {
-      type = "file_system_object",
-    })
-
-    function self:set_type(type)
-      self.type = type
-      return self
-    end
-
-    function self:get_type()
-      return self.type
-    end
-
-    -- Make functions protected
-    -- print(table.concat(table.keys(___.table), ","))
-    ___.table.protect_function(self, "set_type")
-
-    -- Make variables protected
-    ___.table.protect_variable(self, "type")
-  end
-})
-
-local FileClass = Glu.glass.register({
-  class_name = "FileClass",
-  name = "file",
-  inherit_from = FileSystemObjectClass,
-  dependencies = {},
-  setup = function(___, self, opts, container)
-    self:set_type("file")
-
-    if not opts then return end
-    if not opts.path then return end
-
-    ___.valid.file(opts.path, 1)
-    self.path = opts.path
-  end
-})
-
-local DirectoryClass = Glu.glass.register({
-  class_name = "DirectoryClass",
-  name = "directory",
-  inherit_from = FileSystemObjectClass,
-  dependencies = {},
-  setup = function(___, self, opts, container)
-    self:set_type("directory")
-
-    if not opts then return end
-    if not opts.path then return end
-
-    ___.valid.dir(opts.path, 1)
-    self.path = opts.path
-  end
-})
-
 local FdClass = Glu.glass.register({
   class_name = "FdClass",
   name = "fd",
-  dependencies = { "table", "valid" },
+  dependencies = { "table"},
   setup = function(___, self)
     --- Splits a path into a directory and file.
     ---
@@ -78,8 +17,8 @@ local FdClass = Glu.glass.register({
     --- @param dir_required boolean - Whether the directory is required (Optional. Default is false).
     --- @return string|nil,string|nil - A table with the directory and file, or nil if the path is invalid.
     function self.dir_file(path, dir_required)
-      ___.valid.type(path, "string", 1, false)
-      ___.valid.type(dir_required, "boolean", 2, true)
+      ___.v.type(path, "string", 1, false)
+      ___.v.type(dir_required, "boolean", 2, true)
 
       dir_required = dir_required or false
 
@@ -100,7 +39,7 @@ local FdClass = Glu.glass.register({
     end
 
     function self.root_dir_file(path)
-      ___.valid.type(path, "string", 1, false)
+      ___.v.type(path, "string", 1, false)
 
       local root = self.determine_root(path)
       if not root then return nil, nil end
@@ -121,7 +60,7 @@ local FdClass = Glu.glass.register({
     --- -- true
     --- ```
     function self.file_exists(path)
-      ___.valid.type(path, "string", 1, false)
+      ___.v.type(path, "string", 1, false)
 
       local attr, message, code = lfs.attributes(path)
       if not attr then return false end
@@ -138,7 +77,7 @@ local FdClass = Glu.glass.register({
     --- -- true
     --- ```
     function self.dir_exists(path)
-      ___.valid.type(path, "string", 1, false)
+      ___.v.type(path, "string", 1, false)
 
       local attr, message, code = lfs.attributes(path)
       if not attr then return false end
@@ -156,8 +95,8 @@ local FdClass = Glu.glass.register({
     --- -- "contents of file"
     --- ```
     function self.read_file(path, binary)
-      ___.valid.type(path, "string", 1, false)
-      ___.valid.type(binary, "boolean", 2, true)
+      ___.v.type(path, "string", 1, false)
+      ___.v.type(binary, "boolean", 2, true)
 
       local handle, error, code = io.open(path, "r" .. (binary and "b" or ""))
       if not handle then return nil, error, code end
@@ -180,10 +119,10 @@ local FdClass = Glu.glass.register({
     --- -- "path/to/file.txt", "contents of file", nil
     --- ```
     function self.write_file(path, data, overwrite, binary)
-      ___.valid.type(path, "string", 1, false)
-      ___.valid.type(data, "string", 2, false)
-      ___.valid.type(overwrite, "boolean", 3, true)
-      ___.valid.type(binary, "boolean", 4, true)
+      ___.v.type(path, "string", 1, false)
+      ___.v.type(data, "string", 2, false)
+      ___.v.type(overwrite, "boolean", 3, true)
+      ___.v.type(binary, "boolean", 4, true)
 
       path = self.fix_path(path)
 
@@ -208,7 +147,7 @@ local FdClass = Glu.glass.register({
     --- -- "path/to/file.txt"
     --- ```
     function self.fix_path(path)
-      ___.valid.type(path, "string", 1, false)
+      ___.v.type(path, "string", 1, false)
 
       local result, num = rex.gsub(rex.gsub(path, "\\\\", "/"), "//", "/")
       if not result or num == 0 then return path, 0 end
@@ -229,7 +168,7 @@ local FdClass = Glu.glass.register({
     --- fd.assure_dir("path/to/directory")
     --- ```
     function self.assure_dir(path)
-      ___.valid.type(path, "string", 1, false)
+      ___.v.type(path, "string", 1, false)
 
       path = self.fix_path(path)
       print(path)
@@ -268,7 +207,7 @@ local FdClass = Glu.glass.register({
     --- -- "c:"
     --- ```
     function self.determine_root(path)
-      ___.valid.type(path, "string", 1, false)
+      ___.v.type(path, "string", 1, false)
 
       path, _ = self.fix_path(path)
 
@@ -289,7 +228,7 @@ local FdClass = Glu.glass.register({
     --- -- true
     --- ```
     function self.rmfile(path)
-      ___.valid.file(path, 1)
+      ___.v.file(path, 1)
 
       return os.remove(path)
     end
@@ -303,7 +242,7 @@ local FdClass = Glu.glass.register({
     --- -- true
     --- ```
     function self.rmdir(path)
-      ___.valid.dir(path, 1)
+      ___.v.dir(path, 1)
 
       return lfs.rmdir(path)
     end
@@ -330,15 +269,15 @@ local FdClass = Glu.glass.register({
     --- -- {"file1", "file2", "file3"}
     --- ```
     function self.get_dir(path, include_dots)
-      ___.valid.type(path, "string", 1, false)
-      ___.valid.type(include_dots, "boolean", 2, true)
+      ___.v.type(path, "string", 1, false)
+      ___.v.type(include_dots, "boolean", 2, true)
 
       include_dots = include_dots or false
 
       path, _ = self.fix_path(path)
       path = path or ""
 
-      ___.valid.dir(path, 1)
+      ___.v.dir(path, 1)
 
       local result = {}
 
@@ -356,10 +295,10 @@ local FdClass = Glu.glass.register({
     end
 
     function self.tree(path)
-      ___.valid.type(path, "string", 1, false)
+      ___.v.type(path, "string", 1, false)
 
       path, _ = self.fix_path(path)
-      ___.valid.dir(path, 1)
+      ___.v.dir(path, 1)
 
       local function build_tree(current_path)
         local tree = {}
@@ -413,5 +352,28 @@ local FdClass = Glu.glass.register({
 
       return exported_tree
     end
+  end,
+  valid = function(___, self)
+    return {
+      file = function(path, argument_index)
+        self.type(path, "string", argument_index, false)
+        self.type(argument_index, "number", 2, false)
+
+        local attr = lfs.attributes(path)
+
+        local last = self.get_last_traceback_line()
+        assert(attr ~= nil and attr.mode == "file", "Invalid value. " ..
+          "Expected file, got " .. path .. " in\n" .. last)
+      end,
+      dir = function(path, argument_index)
+        self.type(path, "string", argument_index, false)
+        self.type(argument_index, "number", 2, false)
+
+        local attr = lfs.attributes(path)
+        local last = self.get_last_traceback_line()
+        assert(attr ~= nil and attr.mode == "directory", "Invalid value. " ..
+          "Expected directory, got " .. path .. " in\n" .. last)
+      end
+    }
   end
 })

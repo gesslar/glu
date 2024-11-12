@@ -1,7 +1,7 @@
 local TableClass = Glu.glass.register({
   name = "table",
   class_name = "TableClass",
-  dependencies = { "valid" },
+  dependencies = { },
   setup = function(___, self)
     --- Casts a value to an indexed table if it is not already one.
     ---
@@ -35,8 +35,8 @@ local TableClass = Glu.glass.register({
       --- -- {2, 4, 6}
     --- ```
     function self.map(t, fn, ...)
-      ___.valid.type(t, "table", 1, false)
-      ___.valid.type(fn, "function", 2, false)
+      ___.v.type(t, "table", 1, false)
+      ___.v.type(fn, "function", 2, false)
 
       local result = {}
       for k, v in pairs(t) do
@@ -54,7 +54,7 @@ local TableClass = Glu.glass.register({
     --- -- {1, 2, 3}
     --- ```
     function self.values(t)
-      ___.valid.type(t, "table", 1, false)
+      ___.v.type(t, "table", 1, false)
 
       local result = {}
         for _, v in pairs(t) do
@@ -75,10 +75,10 @@ local TableClass = Glu.glass.register({
     --- -- true
     --- ```
     function self.n_uniform(t, typ)
-      ___.valid.type(t, "table", 1, false)
-      ___.valid.not_empty(t, 1, false)
-      ___.valid.indexed(t, 1, false)
-      ___.valid.type(typ, "string", 2, true)
+      ___.v.type(t, "table", 1, false)
+      ___.v.not_empty(t, 1, false)
+      ___.v.indexed(t, 1, false)
+      ___.v.type(typ, "string", 2, true)
 
       typ = typ or type(t[1])
 
@@ -100,7 +100,7 @@ local TableClass = Glu.glass.register({
     --- -- {1, 2, 3, 4, 5}
     --- ```
     function self.n_distinct(t)
-      ___.valid.indexed(t, 1, false)
+      ___.v.indexed(t, 1, false)
 
       local result, seen = {}, {}
       for _, v in ipairs(t) do
@@ -121,8 +121,8 @@ local TableClass = Glu.glass.register({
     --- -- 3
     --- ```
     function self.pop(t)
-      ___.valid.type(t, "table", 1, false)
-      ___.valid.indexed(t, 1, false)
+      ___.v.type(t, "table", 1, false)
+      ___.v.indexed(t, 1, false)
       return table.remove(t, #t)
     end
 
@@ -136,9 +136,9 @@ local TableClass = Glu.glass.register({
     --- -- 4
     --- ```
     function self.push(t, v)
-      ___.valid.type(t, "table", 1, false)
-      ___.valid.type(v, "any", 2, false)
-      ___.valid.indexed(t, 1, false)
+      ___.v.type(t, "table", 1, false)
+      ___.v.type(v, "any", 2, false)
+      ___.v.indexed(t, 1, false)
       table.insert(t, v)
 
       return #t
@@ -154,9 +154,9 @@ local TableClass = Glu.glass.register({
     --- -- 4
     --- ```
     function self.unshift(t, v)
-      ___.valid.type(t, "table", 1, false)
-      ___.valid.type(v, "any", 2, false)
-      ___.valid.indexed(t, 1, false)
+      ___.v.type(t, "table", 1, false)
+      ___.v.type(v, "any", 2, false)
+      ___.v.indexed(t, 1, false)
       table.insert(t, 1, v)
 
       return #t
@@ -171,8 +171,8 @@ local TableClass = Glu.glass.register({
     --- -- 1
     --- ```
     function self.shift(t)
-      ___.valid.type(t, "table", 1, false)
-      ___.valid.indexed(t, 1, false)
+      ___.v.type(t, "table", 1, false)
+      ___.v.indexed(t, 1, false)
       return table.remove(t, 1)
     end
 
@@ -208,14 +208,14 @@ local TableClass = Glu.glass.register({
     --- ```
     function self.allocate(source, spec)
       local spec_type = type(spec)
-      ___.valid.type(source, "table", 1, false)
-      ___.valid.not_empty(source, 1, false)
-      ___.valid.indexed(source, 1, false)
+      ___.v.type(source, "table", 1, false)
+      ___.v.not_empty(source, 1, false)
+      ___.v.indexed(source, 1, false)
       if spec_type == ___.TYPE.TABLE then
-        ___.valid.indexed(spec, 2, false)
+        ___.v.indexed(spec, 2, false)
         assert(#source == #spec, "Expected source and spec to have the same number of elements")
       elseif spec_type == ___.TYPE.FUNCTION then
-        ___.valid.type(spec, "function", 2, false)
+        ___.v.type(spec, "function", 2, false)
       end
 
       local result = {}
@@ -249,7 +249,7 @@ local TableClass = Glu.glass.register({
     --- -- true
     --- ```
     function self.indexed(t)
-      ___.valid.type(t, "table", 1, false)
+      ___.v.type(t, "table", 1, false)
 
       local index = 1
       for k in pairs(t) do
@@ -273,7 +273,7 @@ local TableClass = Glu.glass.register({
     --- -- true
     --- ```
     function self.associative(t)
-      ___.valid.type(t, "table", 1, false)
+      ___.v.type(t, "table", 1, false)
 
       for k, _ in pairs(t) do
         if type(k) ~= "number" or k % 1 ~= 0 or k <= 0 then
@@ -294,9 +294,9 @@ local TableClass = Glu.glass.register({
     --- -- 6
     --- ```
     function self.reduce(t, fn, initial)
-      ___.valid.indexed(t, 1, false)
-      ___.valid.type(fn, "function", 2, false)
-      ___.valid.type(initial, "any", 3, false)
+      ___.v.indexed(t, 1, false)
+      ___.v.type(fn, "function", 2, false)
+      ___.v.type(initial, "any", 3, false)
 
       local acc = initial
       for k, v in pairs(t) do
@@ -322,12 +322,12 @@ local TableClass = Glu.glass.register({
     --- -- {2, 3, 4, 5}
     --- ```
     function self.slice(t, start, stop)
-      ___.valid.indexed(t, 1, false)
-      ___.valid.type(start, "number", 2, false)
-      ___.valid.type(stop, "number", 3, true)
-      ___.valid.test(start >= 1, 2, false)
-      ___.valid.test(table.size(t) >= start, 2, false)
-      ___.valid.test(stop and stop >= start, 3, true)
+      ___.v.indexed(t, 1, false)
+      ___.v.type(start, "number", 2, false)
+      ___.v.type(stop, "number", 3, true)
+      ___.v.test(start >= 1, 2, false)
+      ___.v.test(table.size(t) >= start, 2, false)
+      ___.v.test(stop and stop >= start, 3, true)
 
       if not stop then
         stop = #t
@@ -361,12 +361,12 @@ local TableClass = Glu.glass.register({
     --- -- {2}
     --- ```
     function self.remove(t, start, stop)
-      ___.valid.indexed(t, 1, false)
-      ___.valid.type(start, "number", 2, false)
-      ___.valid.type(stop, "number", 3, true)
-      ___.valid.test(start >= 1, 2, false)
-      ___.valid.test(table.size(t) >= start, 2, false)
-      ___.valid.test(stop and stop >= start, 3, true)
+      ___.v.indexed(t, 1, false)
+      ___.v.type(start, "number", 2, false)
+      ___.v.type(stop, "number", 3, true)
+      ___.v.test(start >= 1, 2, false)
+      ___.v.test(table.size(t) >= start, 2, false)
+      ___.v.test(stop and stop >= start, 3, true)
 
       local snipped = {}
       if not stop then stop = start end
@@ -389,12 +389,12 @@ local TableClass = Glu.glass.register({
     --- -- {{1, 2}, {3, 4}, {5}}
     --- ```
     function self.chunk(t, size)
-      ___.valid.indexed(t, 1, false)
-      ___.valid.type(size, "number", 2, false)
+      ___.v.indexed(t, 1, false)
+      ___.v.type(size, "number", 2, false)
 
       local result = {}
       for i = 1, #t, size do
-        result[#result + 1] = mod.slice(___, t, i, i + size - 1)
+        result[#result + 1] = ___.slice(t, i, i + size - 1)
       end
       return result
     end
@@ -412,7 +412,7 @@ local TableClass = Glu.glass.register({
     --- -- {1, 2, 3, {4}}
     --- ```
     function self.concat(tbl, ...)
-      ___.valid.indexed(tbl, 1, false)
+      ___.v.indexed(tbl, 1, false)
 
       local args = { ... }
 
@@ -439,9 +439,9 @@ local TableClass = Glu.glass.register({
     --- -- {4, 5}
     --- ```
     function self.drop(tbl, n)
-      ___.valid.indexed(tbl, 1, false)
-      ___.valid.type(n, "number", 2, false)
-      ___.valid.test(n >= 1, 2, false)
+      ___.v.indexed(tbl, 1, false)
+      ___.v.type(n, "number", 2, false)
+      ___.v.test(n >= 1, 2, false)
       return self.slice(___, tbl, n + 1)
     end
 
@@ -455,9 +455,9 @@ local TableClass = Glu.glass.register({
     --- -- {1, 2}
     --- ```
     function self.dropRight(tbl, n)
-      ___.valid.indexed(tbl, 1, false)
-      ___.valid.type(n, "number", 2, false)
-      ___.valid.test(n >= 1, 2, false)
+      ___.v.indexed(tbl, 1, false)
+      ___.v.type(n, "number", 2, false)
+      ___.v.test(n >= 1, 2, false)
       return self.slice(___, tbl, 1, #tbl - n)
     end
 
@@ -478,12 +478,12 @@ local TableClass = Glu.glass.register({
     --- -- {"x", "x", "x", "x", "x"}
     --- ```
     function self.fill(tbl, value, start, stop)
-      ___.valid.indexed(tbl, 1, false)
-      ___.valid.type(value, "any", 2, false)
-      ___.valid.type(start, "number", 3, true)
-      ___.valid.type(stop, "number", 4, true)
-      ___.valid.test(start and start >= 1, value, 3, true)
-      ___.valid.test(stop and stop >= start, value, 4, true)
+      ___.v.indexed(tbl, 1, false)
+      ___.v.type(value, "any", 2, false)
+      ___.v.type(start, "number", 3, true)
+      ___.v.type(stop, "number", 4, true)
+      ___.v.test(start and start >= 1, value, 3, true)
+      ___.v.test(stop and stop >= start, value, 4, true)
 
       for i = start or 1, stop or #tbl do
         tbl[i] = value
@@ -502,8 +502,8 @@ local TableClass = Glu.glass.register({
     --- -- 4
     --- ```
     function self.find(tbl, fn)
-      ___.valid.indexed(tbl, 1, false)
-      ___.valid.type(fn, "function", 2, false)
+      ___.v.indexed(tbl, 1, false)
+      ___.v.type(fn, "function", 2, false)
 
       for i = 1, #tbl do
         if fn(i, tbl[i]) then
@@ -524,8 +524,8 @@ local TableClass = Glu.glass.register({
     --- -- 4
     --- ```
     function self.findLast(tbl, fn)
-      ___.valid.indexed(tbl, 1, false)
-      ___.valid.type(fn, "function", 2, false)
+      ___.v.indexed(tbl, 1, false)
+      ___.v.type(fn, "function", 2, false)
 
       for i = #tbl, 1, -1 do
         if fn(i, tbl[i]) then
@@ -544,12 +544,12 @@ local TableClass = Glu.glass.register({
     --- -- {1, 2, 3, 4, 5}
     --- ```
     function self.flatten(tbl)
-      ___.valid.indexed(tbl, 1, false)
+      ___.v.indexed(tbl, 1, false)
 
       local result = {}
       for _, v in ipairs(tbl) do
         if type(v) == "table" then
-          mod.concat(___, result, v)
+          ___.concat(result, v)
         else
           table.insert(result, v)
         end
@@ -567,12 +567,12 @@ local TableClass = Glu.glass.register({
     --- -- {1, 2, 3, 4, 5}
     --- ```
     function self.flattenDeep(tbl)
-      ___.valid.indexed(tbl, 1, false)
+      ___.v.indexed(tbl, 1, false)
 
       local result = {}
       for _, v in ipairs(tbl) do
         if type(v) == "table" then
-          mod.concat(___, result, mod.flatten_deep(___, v))
+          ___.concat(result, ___.flatten_deep(v))
         else
           table.insert(result, v)
         end
@@ -590,7 +590,7 @@ local TableClass = Glu.glass.register({
     --- -- {1, 2, 3, 4}
     --- ```
     function self.initial(tbl)
-      ___.valid.indexed(tbl, 1, false)
+      ___.v.indexed(tbl, 1, false)
       return self.slice(___, tbl, 1, #tbl - 1)
     end
 
@@ -606,7 +606,7 @@ local TableClass = Glu.glass.register({
     --- -- { 1, 4, 3, 4, 1 }
     --- ```
     function self.pull(tbl, ...)
-      ___.valid.indexed(tbl, 1, false)
+      ___.v.indexed(tbl, 1, false)
 
       local args = { ... }
       if #args == 0 then return tbl end
@@ -636,7 +636,7 @@ local TableClass = Glu.glass.register({
     --- -- {5, 4, 3, 2, 1}
     --- ```
     function self.reverse(tbl)
-      ___.valid.indexed(tbl, 1, false)
+      ___.v.indexed(tbl, 1, false)
 
       local len, midpoint = #tbl, math.floor(#tbl / 2)
       for i = 1, midpoint do
@@ -657,7 +657,7 @@ local TableClass = Glu.glass.register({
     --- -- {1, 2, 3, 4, 5}
     --- ```
     function self.uniq(tbl)
-      ___.valid.indexed(tbl, 1, false)
+      ___.v.indexed(tbl, 1, false)
 
       local seen = {}
       local writeIndex = 1
@@ -688,12 +688,12 @@ local TableClass = Glu.glass.register({
     --- -- {{1, 3, 5}, {2, 4, 6}}
     --- ```
     function self.unzip(tbl)
-      ___.valid.indexed(tbl, 1, false)
+      ___.v.indexed(tbl, 1, false)
 
       local size_of_table = #tbl
       -- Ensure that all sub-tables are of the same length
       local size_of_elements = #tbl[1]
-      for _, t in ipairs(tbl) do ___.valid.test(size_of_elements == #t, t, 1, false) end
+      for _, t in ipairs(tbl) do ___.v.test(size_of_elements == #t, t, 1, false) end
 
       local num_new_sub_tables = size_of_elements -- yes, this is redundant, but it's more readable
       local new_sub_table_size = size_of_table -- this is the size of the sub-tables
@@ -723,7 +723,7 @@ local TableClass = Glu.glass.register({
     --- -- A table with weak value references
     --- ```
     function self.newWeak(opt)
-      ___.valid.test(rex.match(opt, "^(k?v?|v?k?)$"), opt, 1, true)
+      ___.v.test(rex.match(opt, "^(k?v?|v?k?)$"), opt, 1, true)
 
       opt = opt or "v"
 
@@ -739,7 +739,7 @@ local TableClass = Glu.glass.register({
     --- -- true
     --- ```
     function self.weak(tbl)
-      ___.valid.type(tbl, "table", 1, false)
+      ___.v.type(tbl, "table", 1, false)
       return getmetatable(tbl) and getmetatable(tbl).__mode ~= nil
     end
 
@@ -777,15 +777,15 @@ local TableClass = Glu.glass.register({
     --- -- true
     --- ```
     function self.includes(tbl, value)
-      ___.valid.indexed(tbl, 1, false)
-      ___.valid.type(value, "any", 2, false)
+      ___.v.indexed(tbl, 1, false)
+      ___.v.type(value, "any", 2, false)
       return table.index_of(tbl, value) ~= nil
     end
 
     local function collect_tables(tbl, inherited)
       -- Check if the table is a valid object with a metatable and an __index field
-      ___.valid.object(tbl, 1, false)
-      ___.valid.type(inherited, "boolean", 2, true)
+      ___.v.object(tbl, 1, false)
+      ___.v.type(inherited, "boolean", 2, true)
 
       -- Set-like table to track visited tables
       local visited = {}
@@ -825,8 +825,8 @@ local TableClass = Glu.glass.register({
     --- -- {"c"}
     --- ```
     local function get_types(tbl, test)
-      ___.valid.type(tbl, "table", 1, false)
-      ___.valid.type(test, "function", 2, false)
+      ___.v.type(tbl, "table", 1, false)
+      ___.v.type(test, "function", 2, false)
 
       local keys = table.keys(tbl)
       keys = table.n_filter(keys, function(k) return test(tbl, k) end) or {}
@@ -838,7 +838,7 @@ local TableClass = Glu.glass.register({
       for _, t in ipairs(tables) do
         local keys = get_types(t, test) or {}
         for _, k in ipairs(keys) do
-          if not mod.includes(___, result, k) then
+          if not ___.table.includes(result, k) then
             table.insert(result, k)
           end
         end
@@ -859,8 +859,8 @@ local TableClass = Glu.glass.register({
     --- -- {"method1", "method2"}
     --- ```
     function self.functions(tbl, inherited)
-      ___.valid.object(tbl, 1, false)
-      ___.valid.type(inherited, "boolean", 2, true)
+      ___.v.object(tbl, 1, false)
+      ___.v.type(inherited, "boolean", 2, true)
 
       local tables = collect_tables(tbl, inherited) or {}
       local test = function(t, k) return type(t[k]) == "function" end
@@ -871,8 +871,8 @@ local TableClass = Glu.glass.register({
     self.methods = self.functions
 
     function self.properties(tbl, inherited)
-      ___.valid.object(tbl, 1, false)
-      ___.valid.type(inherited, "boolean", 2, true)
+      ___.v.object(tbl, 1, false)
+      ___.v.type(inherited, "boolean", 2, true)
 
       local tables = collect_tables(tbl, inherited) or {}
       local test = function(t, k) return type(t[k]) ~= "function" end
@@ -895,7 +895,7 @@ local TableClass = Glu.glass.register({
     --- -- true
     --- ```
     function self.is_object(tbl)
-      ___.valid.type(tbl, "table", 1, false)
+      ___.v.type(tbl, "table", 1, false)
       return tbl.object == true
     end
 
@@ -918,8 +918,8 @@ local TableClass = Glu.glass.register({
     --- -- {a = 1, c = 3, d = 4, b = 2}
     --- ```
     function self.add(tbl, value)
-      ___.valid.associative(tbl, 1, false)
-      ___.valid.associative(value, 2, false)
+      ___.v.associative(tbl, 1, false)
+      ___.v.associative(value, 2, false)
 
       for k, v in pairs(value) do
         tbl[k] = v
@@ -952,9 +952,9 @@ local TableClass = Glu.glass.register({
     --- -- {{a = 1}, {b = 2}, {d = 4}, {e = 5}, {f = 6}, {c = 3}}
     --- ```
     function self.n_add(tbl1, tbl2, index)
-      ___.valid.indexed(tbl1, 1, false)
-      ___.valid.indexed(tbl2, 2, false)
-      ___.valid.range(index, 1, #tbl1 + 1, 3, true)
+      ___.v.indexed(tbl1, 1, false)
+      ___.v.indexed(tbl2, 2, false)
+      ___.v.range(index, 1, #tbl1 + 1, 3, true)
 
       -- We are not adding +1 to the end index because we will be doing +1
       -- in the loop below
@@ -977,7 +977,7 @@ local TableClass = Glu.glass.register({
     --- end
     --- ```
     function self.walk(tbl)
-      ___.valid.indexed(tbl, 1, false)
+      ___.v.indexed(tbl, 1, false)
 
       local i = 0
       return function()
@@ -986,83 +986,112 @@ local TableClass = Glu.glass.register({
       end
     end
 
-    --- Checks if a caller inherits from a base class.
-    --- @param caller table - The caller to check.
-    --- @param base_class table - The base class to check against.
-    --- @return boolean - Whether the caller inherits from the base class.
+    --- Returns a random element from a list.
     --- @example
     --- ```lua
-    --- table.inherits(object, base_class)
-    --- -- true
+    --- table.element_of({ 1, 2, 3 })
+    --- -- 2
     --- ```
-    function self.inherits(caller, base_class)
-      -- ___.valid.object(caller, 1, false)
-      -- ___.valid.object(base_class, 2, false)
+    --- @param list table - The list to choose an element from.
+    --- @return any - A random element from the list.
+    function self.element_of(list)
+      ___.v.type(list, "table", 1, false)
 
-      local current_instance = caller
-      while current_instance do
-        if current_instance == base_class then
-          return true
-        end
-        current_instance = current_instance.parent
-      end
-      return false
+      local max = #list
+      return list[math.random(max)]
     end
 
-    --- Protects a function so that it can only be called by inheriting classes.
-    --- @param object table - The object to protect the function on.
-    --- @param function_name string - The name of the function to protect.
+    --- Returns a random element from a list, with each element having a weight.
     --- @example
     --- ```lua
-    --- table.protect_function(object, "function_name")
+    --- table.element_of_weighted({ [1] = 10, [2] = 20, [3] = 70 })
+    --- -- 3
     --- ```
-    function self.protect_function(object, function_name)
-      -- ___.valid.object(object, 1, false)
-      ___.valid.type(function_name, "string", 2, false)
+    --- @param list table - The list to choose an element from.
+    --- @return any - A random element from the list.
+    function self.element_of_weighted(list)
+      ___.v.type(list, "table", 1, false)
 
-      local original_function = object[function_name]
-      ___.valid.type(original_function, "function", 2, false)
+      local total = 0
+      for _, value in pairs(list) do
+        total = total + value
+      end
 
-      object[function_name] = function(caller, ...)
-        if self.inherits(caller, object) then
-          return original_function(caller, ...)
+      local random = math.random(total)
+
+      for key, value in pairs(list) do
+        random = random - value
+        if random <= 0 then
+          return key
         end
-        error("Access denied: " .. function_name .. " is protected and can " ..
-          "only be called by inheriting classes.")
       end
     end
+  end,
+  valid = function(___, self)
+    return {
+      not_empty = function(value, argument_index, nil_allowed)
+        assert(type(value) == "table", "Invalid type to argument " ..
+          argument_index .. ". Expected table, got " .. type(value) .. " in\n" ..
+          self.get_last_traceback_line())
+        if nil_allowed and value == nil then
+          return
+        end
 
-    --- Protects a variable so that it can only be accessed by inheriting
-    --- classes.
-    --- @param object table - The object to protect the variable on.
-    --- @param var_name string - The name of the variable to protect.
-    --- @example
-    --- ```lua
-    --- table.protect_variable(object, "var_name")
-    --- ```
-    function self.protect_variable(object, var_name)
-      -- ___.valid.object(object, 1, false)
-      ___.valid.type(var_name, "string", 2, false)
-      ___.valid.type(object[var_name], "any", 2, false)
+        local last = self.get_last_traceback_line()
+        assert(not table.is_empty(value), "Invalid value to argument " ..
+          argument_index .. ". Expected non-empty in\n" .. last)
+      end,
 
-      local base_class = getmetatable(object)
+      n_uniform = function(value, expected_type, argument_index, nil_allowed)
+        if nil_allowed and value == nil then
+          return
+        end
 
-      setmetatable(object, {
-        __index = function(tbl, key)
-          if key == var_name and not self.inherits(tbl, base_class) then
-            error("Access denied: Variable '" ..
-            var_name .. "' is protected and can only be accessed by inheriting classes.")
-          end
-          return rawget(tbl, key)
-        end,
-        __newindex = function(tbl, key, value)
-          if key == var_name and not self.inherits(tbl, base_class) then
-            error("Access denied: Variable '" ..
-            var_name .. "' is protected and can only be modified by inheriting classes.")
-          end
-          rawset(tbl, key, value)
-        end,
-      })
-    end
-  end
+        local last = self.get_last_traceback_line()
+        assert(self.n_uniform(value, expected_type),
+          "Invalid type to argument " .. argument_index .. ". Expected an " ..
+          "indexed table of " .. expected_type .. " in\n" .. last)
+      end,
+      indexed = function(value, argument_index, nil_allowed)
+        if nil_allowed and value == nil then
+          return
+        end
+
+        local last = self.get_last_traceback_line()
+        assert(self.indexed(value), "Invalid value to argument " ..
+          argument_index .. ". Expected indexed table, got " .. type(value) ..
+          " in\n" .. last)
+      end,
+      associative = function(value, argument_index, nil_allowed)
+        if nil_allowed and value == nil then
+          return
+        end
+
+        local last = self.get_last_traceback_line()
+        assert(self.associative(value),
+          "Invalid value to argument " .. argument_index .. ". Expected " ..
+          "associative table, got " .. type(value) .. " in\n" .. last)
+      end,
+      object = function(value, argument_index, nil_allowed)
+        if nil_allowed and value == nil then
+          return
+        end
+
+        local last = self.get_last_traceback_line()
+        assert(self.object(value), "Invalid value to argument " ..
+          argument_index .. ". Expected object, got " .. type(value) ..
+          " in\n" .. last)
+      end,
+      option = function(value, options, argument_index)
+        self.type(value, "any", argument_index, false)
+        ___.v.indexed(options, argument_index, false)
+        self.type(argument_index, "number", 3, false)
+
+        local last = self.get_last_traceback_line()
+        assert(table.index_of(options, value) ~= nil, "Invalid value to " ..
+          "argument " .. argument_index .. ". Expected one of " ..
+          table.concat(options, ", ") .. ", got " .. value .. " in\n" .. last)
+      end
+    }
+  end,
 })

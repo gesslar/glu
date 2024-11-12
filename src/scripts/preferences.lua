@@ -1,7 +1,7 @@
 local PreferencesClass = Glu.glass.register({
   name = "preferences",
   class_name = "PreferencesClass",
-  dependencies = { "table", "valid" },
+  dependencies = { "table" },
   setup = function(___, self)
     --- Loads preferences from a file. If a package name is provided, it will be
     --- used to construct the path. Otherwise, the file will be loaded from the
@@ -19,9 +19,9 @@ local PreferencesClass = Glu.glass.register({
     --- })
     --- ```
     function self.load(pkg, file, defaults)
-      ___.valid.type(pkg, "string", 1, true)
-      ___.valid.type(file, "string", 2, false)
-      ___.valid.type(defaults, "table", 3, false)
+      ___.v.type(pkg, "string", 1, true)
+      ___.v.type(file, "string", 2, false)
+      ___.v.type(defaults, "table", 3, false)
 
       local path = getMudletHomeDir() .. "/" .. (pkg and pkg .. "/" or "") .. file
 
@@ -50,9 +50,9 @@ local PreferencesClass = Glu.glass.register({
     --- })
     --- ```
     function self.save(pkg, file, prefs)
-      ___.valid.type(pkg, "string", 1, true)
-      ___.valid.type(file, "string", 2, false)
-      ___.valid.type(prefs, "table", 3, false)
+      ___.v.type(pkg, "string", 1, true)
+      ___.v.type(file, "string", 2, false)
+      ___.v.type(prefs, "table", 3, false)
 
       local path = getMudletHomeDir() .. "/" .. (pkg and pkg .. "/" or "") .. file
 

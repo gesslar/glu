@@ -1,11 +1,13 @@
 local DateClass = Glu.glass.register({
   class_name = "DateClass",
   name = "date",
-  dependencies = { "valid" },
+  dependencies = {},
   setup = function(___, self, opts)
+    local v = self.v
+
     function self.shms(seconds, as_string)
-      ___.valid.type(seconds, "number", 1, false)
-      ___.valid.type(as_string, "boolean", 2, true)
+      v.type(seconds, "number", 1, false)
+      v.type(as_string, "boolean", 2, true)
 
       local s = seconds or 0
 

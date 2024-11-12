@@ -1,15 +1,15 @@
 local SameClass = Glu.glass.register({
   name = "same",
   class_name = "SameClass",
-  dependencies = { "table", "valid" },
+  dependencies = { "table" },
   setup = function(___, self)
     --- Checks if two values are the same, including special cases for NaN and zero.
     --- @param value1 any - The first value to compare.
     --- @param value2 any - The second value to compare.
     --- @return boolean - True if the values are the same, false otherwise.
     function self.value_zero(value1, value2)
-      ___.valid.type(value1, "any", 1, false)
-      ___.valid.type(value2, "any", 2, false)
+      ___.v.type(value1, "any", 1, false)
+      ___.v.type(value2, "any", 2, false)
 
       -- If types are different, return false
       if type(value1) ~= type(value2) then
@@ -39,8 +39,8 @@ local SameClass = Glu.glass.register({
     --- @param value2 any - The second value to compare.
     --- @return boolean - True if the values are the same, false otherwise.
     function self.value(value1, value2)
-      ___.valid.type(value1, "any", 1, false)
-      ___.valid.type(value2, "any", 2, false)
+      ___.v.type(value1, "any", 1, false)
+      ___.v.type(value2, "any", 2, false)
 
       -- If types are different, return false
       if type(value1) ~= type(value2) then

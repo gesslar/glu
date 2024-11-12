@@ -1,7 +1,7 @@
 local UrlClass = Glu.glass.register({
   name = "url",
   class_name = "UrlClass",
-  dependencies = { "table", "valid" },
+  dependencies = { "table" },
   setup = function(___, self)
     --- Decodes a string that has been URL-encoded. Useful for decoding query
     --- parameters into a more readable format.
@@ -14,7 +14,7 @@ local UrlClass = Glu.glass.register({
     --- -- "This string is now readable!!!"
     --- ```
     function self.decode(str)
-      ___.valid.type(str, "string", 1, false)
+      ___.v.type(str, "string", 1, false)
 
       str = (string.gsub(str, '+', ' ') or str)
       str = (string.gsub(str, '%%(%x%x)', function(h)
@@ -34,7 +34,7 @@ local UrlClass = Glu.glass.register({
     --- -- "This%20string%20is%20now%20usable%20in%20a%20URL%2E"
     --- ```
     function self.encode(str)
-      ___.valid.type(str, "string", 1, false)
+      ___.v.type(str, "string", 1, false)
 
       str = (string.gsub(str, "([^%w])", function(c)
         return string.format("%%%02X", string.byte(c))
@@ -99,7 +99,7 @@ local UrlClass = Glu.glass.register({
     --- -- }
     --- ```
     function self.parse(url)
-      ___.valid.type(url, "string", 1, false)
+      ___.v.type(url, "string", 1, false)
 
       local protocol, host, port, path, query_string = rex.match(url, "^(https?)://([^/:]+)(?::(\\d+))?/([^?]*)\\??(.*)")
       local file = (rex.match(path, "([^/]+)$") or path)

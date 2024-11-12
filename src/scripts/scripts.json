@@ -8,7 +8,7 @@
   {
     "isActive": "yes",
     "isFolder": "no",
-    "name": "valid",
+    "name": "conditions",
     "script": ""
   },
   {
@@ -26,6 +26,96 @@
   {
     "isActive": "yes",
     "isFolder": "no",
+    "name": "dependency",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "dependency_queue",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "fd",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "file_system_object",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "dir",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "file",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "func",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "http",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "http_request",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "http_response",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "number",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "queue",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "queue_stack",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "regex",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "same",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
     "name": "string",
     "script": ""
   },
@@ -38,7 +128,13 @@
   {
     "isActive": "yes",
     "isFolder": "no",
-    "name": "number",
+    "name": "test",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "test_runner",
     "script": ""
   },
   {
@@ -50,7 +146,19 @@
   {
     "isActive": "yes",
     "isFolder": "no",
-    "name": "regex",
+    "name": "try",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "catch",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "finally",
     "script": ""
   },
   {
@@ -63,48 +171,6 @@
     "isActive": "yes",
     "isFolder": "no",
     "name": "version",
-    "script": ""
-  },
-  {
-    "isActive": "yes",
-    "isFolder": "no",
-    "name": "queue",
-    "script": ""
-  },
-  {
-    "isActive": "yes",
-    "isFolder": "no",
-    "name": "same",
-    "script": ""
-  },
-  {
-    "isActive": "yes",
-    "isFolder": "no",
-    "name": "func",
-    "script": ""
-  },
-  {
-    "isActive": "yes",
-    "isFolder": "no",
-    "name": "test",
-    "script": ""
-  },
-  {
-    "isActive": "yes",
-    "isFolder": "no",
-    "name": "fd",
-    "script": ""
-  },
-  {
-    "isActive": "yes",
-    "isFolder": "no",
-    "name": "http",
-    "script": ""
-  },
-  {
-    "isActive": "yes",
-    "isFolder": "no",
-    "name": "conditions",
     "script": ""
   }
 ]
