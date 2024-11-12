@@ -37,13 +37,13 @@ local TestClass = Glu.glass.register({
     function self.summary(runner)
       local good_colour, bad_colour = unpack(___.table.values(runner.colours))
       local total_run = sum_field(runner.tests, "total")
-      local total_success = sum_field(runner.tests, "success")
-      local total_failure = sum_field(runner.tests, "failure")
+      local total_pass = sum_field(runner.tests, "passes")
+      local total_fail = sum_field(runner.tests, "fails")
 
       print("")
       cecho("<b> Tests run:</b> <gold>" .. total_run .. "<r>\n")
-      cecho("<b> Successes:</b> " .. good_colour .. total_success .. "<r>\n")
-      cecho("<b>  Failures:</b> " .. bad_colour .. total_failure .. "<r>\n")
+      cecho("<b> Successes:</b> " .. good_colour .. total_pass .. "<r>\n")
+      cecho("<b>  Failures:</b> " .. bad_colour .. total_fail .. "<r>\n")
     end
 
     return self
