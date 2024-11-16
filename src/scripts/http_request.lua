@@ -18,30 +18,24 @@ local HttpRequestClass = Glu.glass.register({
 
       self.headers = self.options.headers
 
-      local function write_file(filepath, data)
-        local dir, file = ___.fd.dir_file(filepath, true)
-        if dir and file then
-          return ___.fd.write_file(filepath, data, true)
-        else
-          return nil, "Invalid file path."
-        end
-      end
-
       local function done(response_data)
         local ob_id = response_data.id
         local ob = owner.find_request(ob_id)
 
+        local result = {}
         if self.options.saveTo and not response_data.error then
-          local result = { write_file(self.options.saveTo, response_data.data) }
+          result.write = { ___.fd.write_file(self.options.saveTo, response_data.data) }
         end
 
         local cb = self.options.callback
-        local response = HttpResponseClass(response_data, owner)
+        local gl = ___.getGlass("http_response")
+        local response = gl(response_data, owner)
 
         cb(response)
         deleteAllNamedEventHandlers(ob_id)
         owner.delete_request(ob_id)
         ob = nil
+        response_data = nil
       end
 
       -- Events to listen for
@@ -74,6 +68,7 @@ local HttpRequestClass = Glu.glass.register({
               event = e,
               id = self.id,
             }
+
             local result
             arg = only_indexed(arg)
             if rex.match(e, "sys(?:\\w+)HttpError$") then
@@ -110,7 +105,6 @@ local HttpRequestClass = Glu.glass.register({
       if not ok then
         error("Error calling HTTP method " .. tostring(self.custom) .. " " .. tostring(func) .. ": " .. tostring(err))
       end
-
       return self
     end
   end

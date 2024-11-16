@@ -8,6 +8,12 @@
   {
     "isActive": "yes",
     "isFolder": "no",
+    "name": "glass_loader",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
     "name": "conditions",
     "script": ""
   },
@@ -39,24 +45,6 @@
     "isActive": "yes",
     "isFolder": "no",
     "name": "fd",
-    "script": ""
-  },
-  {
-    "isActive": "yes",
-    "isFolder": "no",
-    "name": "file_system_object",
-    "script": ""
-  },
-  {
-    "isActive": "yes",
-    "isFolder": "no",
-    "name": "dir",
-    "script": ""
-  },
-  {
-    "isActive": "yes",
-    "isFolder": "no",
-    "name": "file",
     "script": ""
   },
   {
@@ -152,18 +140,6 @@
   {
     "isActive": "yes",
     "isFolder": "no",
-    "name": "catch",
-    "script": ""
-  },
-  {
-    "isActive": "yes",
-    "isFolder": "no",
-    "name": "finally",
-    "script": ""
-  },
-  {
-    "isActive": "yes",
-    "isFolder": "no",
     "name": "url",
     "script": ""
   },
@@ -171,6 +147,12 @@
     "isActive": "yes",
     "isFolder": "no",
     "name": "version",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "promise",
     "script": ""
   }
 ]

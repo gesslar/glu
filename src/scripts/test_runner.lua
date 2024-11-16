@@ -125,7 +125,7 @@ local TestRunnerClass = Glu.glass.register({
 
           -- If we didn't succeed in our pcall OR we failed tests
           if not success or not result then
-            if not success then self.fail(t) end
+            self.fail(t)
             status_message =
                 status_message .. self.colours.fail .. self.symbols.fail .. "\n" ..
                 " " .. self.colours.fail .. "Error in test '" .. t.name .. "':\n" ..

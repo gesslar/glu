@@ -20,7 +20,7 @@ local QueueClass = Glu.glass.register({
     --- ```
     function self.new(funcs)
       ___.v.type(funcs, "table", 1, true)
-      ___.valid:n_uniform(funcs, "function", 1, false)
+      ___.v.n_uniform(funcs, "function", 1, false)
 
       funcs = funcs or {}
       local queue = ___.queue_stack(funcs, self)

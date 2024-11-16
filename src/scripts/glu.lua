@@ -8,25 +8,25 @@ if not _G["Glu"] then
 
   local registeredGlasses = {}
 
-  function Glu.getGlasses() return registeredGlasses end
-  function Glu.getGlassNames()
+  function Glu.get_glasses() return registeredGlasses end
+  function Glu.get_glass_names()
     local names = {}
-    local glasses = Glu.getGlasses()
+    local glasses = Glu.get_glasses()
     for _, glass in ipairs(glasses or {}) do
       table.insert(names, glass.name)
     end
     return names
   end
-  function Glu.getGlass(name)
-    for _, glass in ipairs(Glu.getGlasses()) do
+  function Glu.get_glass(name)
+    for _, glass in ipairs(Glu.get_glasses()) do
       if glass.name == name then
         return glass
       end
     end
     return nil
   end
-  function Glu.hasGlass(name)
-    return Glu.getGlass(name) ~= nil
+  function Glu.has_glass(name)
+    return Glu.get_glass(name) ~= nil
   end
 
   function Glu.id()
@@ -53,12 +53,12 @@ if not _G["Glu"] then
   -- Make Glu callable
   setmetatable(Glu, { __call = function(_, ...) return Glu.new(...) end })
 
-  local function newObject(glu_instance, glass, instance_opts, container)
+  local function new_object(glu_instance, glass, instance_opts, container)
     instance_opts = instance_opts or {}
     container = container or glu_instance
 
     -- Check for circular dependencies
-    local function checkIndexForLoop(ob)
+    local function check_index_for_loop(ob)
       local seen = {}
       local current = ob
 
@@ -72,7 +72,7 @@ if not _G["Glu"] then
       return false
     end
 
-    local function copyProperties(glu_class, into)
+    local function copy_properties(glu_class, into)
       local object = into[glu_class.name]
       for k, v in pairs(object) do
         glu_instance[glu_class.name][k] = v
@@ -86,14 +86,14 @@ if not _G["Glu"] then
     end
 
     local function instantiate(glu, glu_class, ops, into)
-      if checkIndexForLoop(glu_class) then return end
+      if check_index_for_loop(glu_class) then return end
       -- If the class has a parent, make sure it is instantiated first
       if glu_class.inherit_from then
         local parent_name = glu_class.inherit_from
-        local parent = into.getObject(parent_name)
+        local parent = into.get_object(parent_name)
 
         if not parent or (parent.glass and parent.glass.setup) then
-          local parent_class = glu.getGlass(parent_name)
+          local parent_class = glu.get_glass(parent_name)
           -- Recursively instantiate the parent class
           return instantiate(glu, parent_class, ops, into)
           -- error("Parent class `" .. glu_class.inherit_from .. "` not found for `" .. glu_class.name .. "`")
@@ -104,7 +104,7 @@ if not _G["Glu"] then
       if not glu[glu_class.name] or table.index_of(table.keys(glu[glu_class.name]), "name") == nil then
         local object = glu_class(ops, glu)
         into[glu_class.name] = object   -- Add the instance to `instance`
-        copyProperties(glu_class, into)
+        copy_properties(glu_class, into)
         return object
       end
     end
@@ -112,9 +112,6 @@ if not _G["Glu"] then
     return instantiate(glu_instance, glass, instance_opts, container)
   end
 
-  --- Constructor for Glu.
-  --- @param pkg string - The name of the package to which this module belongs.
-  --- @param module_dir_name string|nil - The directory name inside the package directory where the modules are located.
   function Glu.new(pkg, module_dir_name)
     assert(type(pkg) == "string", "Package name must be a string.")
     assert(type(module_dir_name) == "string" or module_dir_name == nil, "Module directory name must be a string or nil.")
@@ -176,15 +173,15 @@ if not _G["Glu"] then
       assert(type(module_dir_name) == "string", "Module directory name must be a string")
       assert(lfs.attributes(pkg_path), "Package directory " .. pkg .. " does not exist")
       assert(lfs.attributes(module_path), "Module directory " .. module_dir_name .. " does not exist in package " .. pkg)
-      detectModules(module_path, require_path)
+      detect_modules(module_path, require_path)
     end
 
     -- Either way, we should have modules by now.
     assert(table.size(registeredGlasses) > 0, "No modules found in " .. pkg)
 
     function instance.getPackageName() return instance.package_name end
-    function instance.hasObject(name) return instance.getObject(name) ~= nil end
-    function instance.getObject(name) return instance[name] and type(instance[name]) == "table" and instance[name] or nil end
+    function instance.has_object(name) return instance.get_object(name) ~= nil end
+    function instance.get_object(name) return instance[name] and type(instance[name]) == "table" and instance[name] or nil end
 
     -- OOB Validation functions
     -- Standard validation functions
@@ -256,7 +253,7 @@ if not _G["Glu"] then
 
     -- Let's now create them!
     for _, class in ipairs(registeredGlasses) do
-      newObject(instance, class, {}, instance)
+      new_object(instance, class, {}, instance)
     end
 
     -- Trap events for uninstalling the package and clean ourselves up.
@@ -324,14 +321,12 @@ if not _G["Glu"] then
 
       if glass.protected_functions then
         for _, function_name in ipairs(glass.protected_functions) do
-          print("protecting function", function_name)
           protect_function(self, function_name)
         end
       end
 
       if glass.protected_variables then
         for _, var_name in ipairs(glass.protected_variables) do
-          print("protecting variable", var_name)
           protect_variable(self, var_name)
         end
       end
@@ -352,7 +347,7 @@ if not _G["Glu"] then
       local name = class_opts.name
 
       -- Declare the class. And return it if it already exists.
-      local G = Glu.getGlass(name)
+      local G = Glu.get_glass(name)
       if G then return G end
 
       G = {
@@ -367,9 +362,9 @@ if not _G["Glu"] then
       }
 
       function G.new(instance_opts, container)
-        -- The instance_opts must be a table
-        assert(type(instance_opts) == "table", "`instance_opts` must be " ..
-          "a table")
+        -- The instance_opts must be a table or nil
+        assert(type(instance_opts) == "table" or instance_opts == nil, "`instance_opts` must be " ..
+          "a table or nil")
         -- The container must be a table with a metatable
         assert(type(container) == "table", "`container` must be a table")
 
@@ -385,10 +380,15 @@ if not _G["Glu"] then
         }
         self.__index = self
 
+        -- Determine anchor
+        local ___ = self
+        repeat ___ = ___.container until not ___.container
+        self.___ = ___
+
         -- Set the __index for inheritance if there is a parent class
         if class_opts.inherit_from then
           local inherit_from = class_opts.inherit_from
-          local parent_instance = container.getObject(inherit_from)
+          local parent_instance = ___.get_object(inherit_from)
 
           if not parent_instance then
             error("Instance of parent class `" .. inherit_from .. "` not " ..
@@ -402,18 +402,15 @@ if not _G["Glu"] then
           self.__index = self
         end
 
-        -- Determine anchor
-        local ___ = self
-        repeat ___ = ___.container until not ___.container
-        self.___ = ___
-
         for _, dep in ipairs(class_opts.dependencies or {}) do
           local obj = ___[dep]
           if not obj then
-            local glass = ___.getGlass(dep)
+            local glass = ___.get_glass(dep)
             if not glass then
               error("Object `" .. dep .. "` not found for `" ..
                 class_opts.class_name .. "`")
+            else
+              obj = new_object(___, glass, {}, ___.container)
             end
           end
         end
@@ -476,6 +473,9 @@ if not _G["Glu"] then
         __index = class_opts.inherit_from or nil,
         __call = function(_, ...) return G.new(...) end
       })
+
+      tempTimer(0, function() raiseEvent("Glu.Glass.Registered", G) end)
+
       return G
     end
   }

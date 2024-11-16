@@ -158,16 +158,6 @@ local StringClass = Glu.glass.register({
       return ___.table.walk(data)
     end
 
-    function self.explode(input, delimiter)
-      if type(input) == "string" then
-        return self.split(input, delimiter)
-      elseif type(input) == "table" then
-        return input
-      end
-
-      error("Input must be string or table")
-    end
-
     --- Formats a number with thousands separators and decimal places.
     --- If not specified, defaults to "," for thousands and "." for decimal.
     ---
@@ -250,6 +240,101 @@ local StringClass = Glu.glass.register({
 
       -- Convert to number
       return tonumber(str) or 0
+    end
+
+    --- Checks if a string starts with a given PCRE regex pattern.
+    --- If the pattern does not start with "^", it is prepended with "^".
+    ---
+    --- @param str string - The string to check.
+    --- @param start string - The pattern to check for.
+    --- @return boolean - Whether the string starts with the pattern.
+    --- @example
+    --- ```lua
+    --- string.starts_with("hello world", "hello")
+    --- -- true
+    --- ```
+    function self.starts_with(str, start)
+      ___.v.type(str, "string", 1, false)
+      ___.v.type(start, "string", 2, false)
+
+      start = string.sub(start, 1) == "^" and start or "^" .. start
+
+      return rex.match(str, start) ~= nil
+    end
+
+    --- Checks if a string ends with a given PCRE regex pattern.
+    --- If the pattern does not end with "$", it is appended with "$".
+    ---
+    --- @param str string - The string to check.
+    --- @param ending string - The pattern to check for.
+    --- @return boolean - Whether the string ends with the pattern.
+    --- @example
+    --- ```lua
+    --- string.ends_with("hello world", "world")
+    --- -- true
+    --- ```
+    function self.ends_with(str, ending)
+      ___.v.type(str, "string", 1, false)
+      ___.v.type(ending, "string", 2, false)
+
+      ending = string.sub(ending, 1) == "$" and ending or ending .. "$"
+
+      return rex.match(str, ending) ~= nil
+    end
+
+    --- Checks if a string contains a given PCRE regex pattern. The pattern
+    --- may not start with "^" or end with "$". For those, use
+    --- `string.starts_with` and `string.ends_with`.
+    ---
+    --- @param str string - The string to check.
+    --- @param pattern string - The pattern to check for.
+    --- @return boolean - Whether the string contains the pattern.
+    --- @example
+    --- ```lua
+    --- string.contains("hello world", "world")
+    --- -- true
+    --- ```
+    function self.contains(str, pattern)
+      ___.v.type(str, "string", 1, false)
+      ___.v.type(pattern, "string", 2, false)
+      ___.v.test(not self.starts_with(pattern, "^"), "Expected pattern to not start with ^", 2)
+      ___.v.test(not self.ends_with(pattern, "$"), "Expected pattern to not end with $", 2)
+
+      return rex.match(str, pattern) ~= nil
+    end
+
+    --- Appends a suffix to a string if it does not already end with the suffix.
+    ---
+    --- @param str string - The string to append to.
+    --- @param suffix string - The suffix to append.
+    --- @return string - The string with the suffix appended.
+    --- @example
+    --- ```lua
+    --- string.append("hello", " world")
+    --- -- "hello world"
+    --- ```
+    function self.append(str, suffix)
+      ___.v.type(str, "string", 1, false)
+      ___.v.type(suffix, "string", 2, false)
+
+      return self.ends_with(str, suffix) and str or str .. suffix
+    end
+
+    --- Prepends a prefix to a string if it does not already start with the prefix.
+    ---
+    --- @param str string - The string to prepend to.
+    --- @param prefix string - The prefix to prepend.
+    --- @return string - The string with the prefix prepended.
+    --- @example
+    --- ```lua
+    --- string.prepend("world", "hello ")
+    --- -- "hello world"
+    --- ```
+    function self.prepend(str, prefix)
+      ___.v.type(str, "string", 1, false)
+      ___.v.type(prefix, "string", 2, false)
+
+      return self.starts_with(str, prefix) and str or prefix .. str
     end
 
     --- Implementation of reg_assoc for Mudlet using rex PCRE support

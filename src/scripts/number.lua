@@ -341,15 +341,15 @@ local NumberClass = Glu.glass.register({
     --- @return number - The percentage
     --- @example
     --- ```lua
-    --- number.percent_of(25, 100)
-    --- -- 25
+    --- number.percent_of(25, 20)
+    --- -- 5
     --- ```
-    function self.percent_of(value, total, round_digits)
-      ___.v.type(value, "number", 1, false)
-      ___.v.type(total, "number", 2, false)
+    function self.percent_of(numerator, denominator, round_digits)
+      ___.v.type(numerator, "number", 1, false)
+      ___.v.type(denominator, "number", 2, false)
       ___.v.type(round_digits, "number", 3, true)
 
-      local result = (value / total) * 100
+      local result = (numerator * 100) / denominator
       if round_digits then
         return self.round(result, round_digits)
       end
@@ -373,7 +373,7 @@ local NumberClass = Glu.glass.register({
       ___.v.type(total, "number", 2, false)
       ___.v.type(round_digits, "number", 3, true)
 
-      local result = (percent / 100) * total
+      local result = (percent * total) / 100
       if round_digits then
         return self.round(result, round_digits)
       end

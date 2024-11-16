@@ -139,16 +139,19 @@ local HttpClass = Glu.glass.register({
     --- }, function(response) end)
     --- ```
     function self.request(options, cb)
+      ___.v.type(options, "table", 1, false)
+      ___.v.not_empty(options, 1, false)
+
+      options.callback = options.callback or cb
+
       validate_options(options)
 
       -- upper case the method
       options.method = string.upper(options.method)
 
-      -- Add the callback if it was manually provided.
-      options.callback = options.callback or cb
-
       -- Get a new http request object
-      local request = HttpRequestClass(options, self).execute()
+      local gl = ___.getGlass("http_request")
+      local request = gl(options, self).execute()
       table.insert(requests, request)
       return request
     end

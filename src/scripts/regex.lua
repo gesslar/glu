@@ -12,7 +12,7 @@ local RegexClass = Glu.glass.register({
           return
         end
 
-        local last = self.get_last_traceback_line()
+        local last = ___.get_last_traceback_line()
 
         assert(rex.match(value, pattern), "Invalid value to argument " ..
           argument_index .. ". Expected " .. pattern .. ", got " .. value ..

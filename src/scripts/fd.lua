@@ -42,11 +42,11 @@ local FdClass = Glu.glass.register({
       ___.v.type(path, "string", 1, false)
 
       local root = self.determine_root(path)
-      if not root then return nil, nil end
+      if not root then return nil, nil, nil end
 
       local len = utf8.len(root)
       local dir, file = self.dir_file(path:sub(len + 1))
-      if not dir then return nil, nil end
+      if not dir then return nil, nil, nil end
 
       return root, dir, file
     end
@@ -160,6 +160,60 @@ local FdClass = Glu.glass.register({
       return result, num
     end
 
+    function self.determine_path_separator(path)
+      ___.v.type(path, "string", 1, false)
+
+      for _, sep in ipairs({ "/", "\\" }) do
+        if path:find(sep) then return sep end
+      end
+
+      return nil
+    end
+
+    function self.valid_path_string(path)
+      ___.v.type(path, "string", 1, false)
+
+      return self.determine_path_separator(path) ~= nil
+    end
+
+    function self.valid_path_table(paths)
+      ___.v.indexed(paths, "table", 1, false)
+
+      return ___.table.all(paths, self.valid_path_string)
+    end
+
+    function self.valid_path_table_or_string(path)
+      path = ___.table.n_cast(path)
+
+      ___.v.indexed(path, "table", 1, false)
+
+      if type(path) == "string" then
+        return self.valid_path_string(path)
+      elseif type(path) == "table" then
+        return self.valid_path_table(path)
+      end
+
+      return false
+    end
+
+    function self.valid_path(path)
+      ___.v.type(path, "string", 1, false)
+
+      return self.dir_exists(path) or self.file_exists(path)
+    end
+
+    function self.valid_paths(paths)
+      ___.v.n_uniform(paths, "string", 1, false)
+
+      return ___.table.all(paths, self.valid_path)
+    end
+
+    function self.valid_path_table(paths)
+      ___.v.indexed(paths, "table", 1, false)
+
+      return ___.table.all(paths, self.valid_path)
+    end
+
     --- Ensures that a directory exists.
     --- @param path string - The path to the directory.
     --- @return table|nil, string|nil, number|nil - A table of created directories, the error message, and the error code.
@@ -170,30 +224,29 @@ local FdClass = Glu.glass.register({
     function self.assure_dir(path)
       ___.v.type(path, "string", 1, false)
 
+      local sep = self.determine_path_separator(path)
+
       path = self.fix_path(path)
-      print(path)
+      path = ___.string.append(path, sep)
       local root
       root, path, _ = self.root_dir_file(path)
-      if path[1] == "/" then path = path:sub(2) end
+      if path[1] == sep then path = path:sub(2) end
 
-      local dirs = path:split("/")
+      local dirs = path:split(sep)
       local target = root
       dirs = table.n_filter(dirs, function(dir) return dir ~= "" end)
 
       local created = {}
       repeat
         local dir = table.remove(dirs, 1)
-        target = target .. "/" .. dir
+        target = ___.string.append(target, dir) .. sep
 
         if not self.dir_exists(target) then
           local ok, err, code = lfs.mkdir(target)
-          if not ok then
-            return nil, err, code
-          end
+          if not ok and err and code ~= 17 then return nil, err, code end
           table.insert(created, target)
         end
       until #dirs == 0
-
       created = ___.table.map(created, function(_, dir) return self.fix_path(dir) end)
       return created, nil, nil
     end
@@ -294,85 +347,59 @@ local FdClass = Glu.glass.register({
       return result
     end
 
-    function self.tree(path)
-      ___.v.type(path, "string", 1, false)
+    function self.temp_dir()
+      local dir = getMudletHomeDir() .. "/tmp/" .. ___.id()
 
-      path, _ = self.fix_path(path)
-      ___.v.dir(path, 1)
+      local ok, err, code = self.assure_dir(dir)
+      if not ok then return nil, err, code end
 
-      local function build_tree(current_path)
-        local tree = {}
-        for entry in lfs.dir(current_path) do
-          if entry ~= "." and entry ~= ".." then
-            local full_path = current_path .. "/" .. entry
-            local attr = lfs.attributes(full_path)
-
-            if attr then
-              if attr.mode == "directory" then
-                -- Instantiate DirectoryClass and add it to the tree
-                tree[entry] = DirectoryClass({ path = full_path, attributes = attr })
-                tree[entry].children = build_tree(full_path) -- Recurse into the directory
-              elseif attr.mode == "file" then
-                -- Instantiate FileClass and add it to the tree
-                tree[entry] = FileClass({ path = full_path, attributes = attr })
-              end
-            end
-          end
-        end
-        return tree
-      end
-
-      local root_name = path:match("^.*/(.*)") or path
-      local tree = { [root_name] = DirectoryClass({ path = path }) }
-      tree[root_name].children = build_tree(path)
-
-      return tree
-    end
-
-    function self.export_tree(tree)
-      local function traverse(node)
-        local exported = {}
-
-        for name, obj in pairs(node) do
-          if type(obj) == "table" and obj.class_name == "DirectoryClass" then
-            -- Recurse for directories
-            exported[name] = traverse(obj.children or {})
-          elseif type(obj) == "table" and obj.class_name == "FileClass" then
-            -- Mark files with their type or other metadata as needed
-            exported[name] = "file"
-          end
-        end
-
-        return exported
-      end
-
-      local root_name = next(tree)
-      local exported_tree = {}
-      exported_tree[root_name] = traverse(tree[root_name].children or {})
-
-      return exported_tree
+      return dir
     end
   end,
   valid = function(___, self)
     return {
       file = function(path, argument_index)
-        self.type(path, "string", argument_index, false)
-        self.type(argument_index, "number", 2, false)
+        ___.v.type(path, "string", argument_index, false)
+        ___.v.type(argument_index, "number", 2, false)
 
         local attr = lfs.attributes(path)
-
-        local last = self.get_last_traceback_line()
+        local last = ___.get_last_traceback_line()
         assert(attr ~= nil and attr.mode == "file", "Invalid value. " ..
           "Expected file, got " .. path .. " in\n" .. last)
       end,
+
       dir = function(path, argument_index)
-        self.type(path, "string", argument_index, false)
-        self.type(argument_index, "number", 2, false)
+        ___.v.type(path, "string", argument_index, false)
+        ___.v.type(argument_index, "number", 2, false)
 
         local attr = lfs.attributes(path)
-        local last = self.get_last_traceback_line()
+        local last = ___.get_last_traceback_line()
         assert(attr ~= nil and attr.mode == "directory", "Invalid value. " ..
           "Expected directory, got " .. path .. " in\n" .. last)
+      end,
+
+      path_string = function(path, argument_index, allow_nil)
+        ___.v.type(path, "string", argument_index, false)
+        ___.v.type(argument_index, "number", 2, false)
+        ___.v.type(allow_nil, "boolean", 3, true)
+
+        if allow_nil and path == nil then return end
+
+        assert(self.valid_path_string(path), "Invalid value. " ..
+          "Expected valid path string, got " .. path .. " in\n" ..
+            ___.get_last_traceback_line())
+      end,
+
+      path_table = function(paths, argument_index, allow_nil)
+        ___.v.uniform(paths, "string", 1, false)
+        ___.v.type(allow_nil, "boolean", 2, true)
+
+        allow_nil = allow_nil or false
+        if allow_nil and #paths == 0 then return end
+
+        assert(self.valid_path_table(paths), "Invalid value. " ..
+          "Expected valid path table, got " .. ___.table.to_string(paths) ..
+            " in\n" .. ___.get_last_traceback_line())
       end
     }
   end

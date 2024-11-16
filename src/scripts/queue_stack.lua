@@ -8,7 +8,7 @@ local QueueStackClass = Glu.glass.register({
     local funcs = opts.funcs or {}
 
     funcs = ___.table.n_cast(funcs)
-    ___.valid:n_uniform(funcs, "function", 2, false)
+    ___.v.n_uniform(funcs, "function", 2, false)
 
     self.stack = funcs
     self.id = ___.id()
