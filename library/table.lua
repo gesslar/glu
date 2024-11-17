@@ -404,8 +404,7 @@ if false then -- ensure that functions do not get defined
   ---```
   ---
   ---@name new_weak
-  ---@param opt s
-  ---@tring? - The reference type.
+  ---@param opt string? - The reference type.
   ---@return table # A new table with weak references.
   function table.new_weak(opt) end
 

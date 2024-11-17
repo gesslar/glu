@@ -1,7 +1,7 @@
 local TableClass = Glu.glass.register({
   name = "table",
   class_name = "TableClass",
-  dependencies = { },
+  dependencies = {},
   setup = function(___, self)
     function self.n_cast(...)
       if type(...) == "table" and self.indexed(...) then
