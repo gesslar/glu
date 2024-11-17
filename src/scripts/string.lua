@@ -100,48 +100,51 @@ local StringClass = Glu.glass.register({
       return str
     end
 
-    --- Splits a string into a table of strings.
+    --- Splits a string into a table of strings using PCRE regex. If no
+    --- delimiter is provided, it defaults to ".", which will split the string
+    --- into individual characters.
     ---
     --- @param str string - The string to split.
-    --- @param delimiter string - The delimiter to split the string by. (Optional, defaults to ".")
+    --- @param delimiter string - The regex delimiter to split the string by.
     --- @return table - The split string.
     --- @example
     --- ```lua
+    --- string.split("hello world")
+    --- -- {"h", "e", "l", "l", "o", " ", "w", "o", "r", "l", "d"}
+    ---
     --- string.split("hello world", " ")
     --- -- {"hello", "world"}
     ---
-    --- string.split("hello.world")
+    --- string.split("hello.world", "\\.")
     --- -- {"hello", "world"}
+    ---
+    --- string.split("hello world", "o")
+    --- -- {"hell", " w", "rld"}
     --- ```
     function self.split(str, delimiter)
       ___.v.type(str, "string", 1, false)
       ___.v.type(delimiter, "string", 2, true)
 
       local t = {}
-      if not delimiter then
-        -- Split by character
-        for c in str:gmatch(".") do
-          table.insert(t, c)
-        end
-      else
-        -- Split by delimiter
-        for part in str:gmatch("[^" .. delimiter .. "]+") do
-          table.insert(t, part)
-        end
+      delimiter = delimiter or "."
+
+      for part in str:gmatch("[^" .. delimiter .. "]+") do
+        table.insert(t, part)
       end
 
       return t
     end
 
-    --- Walks over a string or table, splitting the string and returning an iterator.
+    --- Walks over a string or table, splitting the string with a PCRE regex
+    --- delimiter and returning an iterator.
     ---
     --- @param input string - The string to walk over.
-    --- @param delimiter string - The delimiter to split the string by. (Optional, defaults to ".")
+    --- @param delimiter string - The regex delimiter to split the string by.
     --- @return function - The iterator function.
     --- @example
     --- ```lua
-    --- for i, part in string.walk("hello.world") do
-    ---   print(i, part) -- prints 1=hello, 2=world
+    --- for i, part in string.walk("hello world") do
+    ---   print(i, part) -- prints 1=h, 2=e, 3=l, 4=l, 5=o, 6= , 7=w, 8=o, 9=r, 10=l, 11=d
     --- end
     --- ```
     function self.walk(input, delimiter)
