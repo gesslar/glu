@@ -148,11 +148,5 @@
     "isFolder": "no",
     "name": "version",
     "script": ""
-  },
-  {
-    "isActive": "yes",
-    "isFolder": "no",
-    "name": "promise",
-    "script": ""
   }
 ]
