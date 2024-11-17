@@ -62,11 +62,13 @@ local doubled = glu.awesome.double_it(21)  -- 42
 
 ## Documentation
 
-Check out our [Wiki](https://github.com/gesslar/glu/wiki) for detailed documentation, guides, and examples.
+Check out our [Wiki](https://github.com/gesslar/glu/wiki) for detailed
+documentation, guides, and examples.
 
 ## License
 
 [IDGAF License](LICENSE.md) - Do whatever you want with this code. Seriously.
+
 - Use it ✅
 - Modify it ✅
 - Copy it ✅
