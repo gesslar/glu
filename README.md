@@ -1,6 +1,6 @@
 # Glu
 
-[![Y2K Compliant](https://img.shields.io/badge/Y2K-Compliant-success?style=flat&logo=data:...)]
+![Y2K Compliant](https://img.shields.io/badge/Y2K-Compliant-success?style=flat&logo=data:...)
 
 A modular utility library for Mudlet that just works. No fuss, no muss.
 
@@ -10,8 +10,27 @@ A modular utility library for Mudlet that just works. No fuss, no muss.
 -- Get some Glu in your life
 local glu = Glu("MyPackage")
 
--- String manipulation? Easy.
-local fancy = glu.string.capitalize("hello world")  -- "Hello world"
+-- Iterate over a string? Easy.
+for i, part in glu.string.walk("hello world") do
+  if math.random() > 0.5 then
+    part = string.title(part)
+  end
+
+  print(i, part)
+end
+
+-- prints (probably):
+-- 1  "H"
+-- 2  "e"
+-- 3  "l"
+-- 4  "l"
+-- 5  "o"
+-- 6  " "
+-- 7  "W"
+-- 8  "o"
+-- 9  "r"
+-- 10 "l"
+-- 11 "D"
 
 -- Dates giving you trouble? Not anymore.
 local pretty_time = glu.date.shms(3665, true)      -- "1h 1m 5s"
