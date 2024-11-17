@@ -66,7 +66,7 @@ Check out our [Wiki](https://github.com/gesslar/glu/wiki) for detailed documenta
 
 ## License
 
-IDGAF License - Do whatever you want with this code. Seriously.
+[IDGAF License](LICENSE.md) - Do whatever you want with this code. Seriously.
 - Use it ✅
 - Modify it ✅
 - Copy it ✅
