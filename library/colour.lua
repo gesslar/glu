@@ -40,8 +40,8 @@ if false then -- ensure that functions do not get defined
   ---@example
   ---```lua
   ---colour.rgb_to_hsl({255, 255, 255})
-  --- -- {0, 0, 100}
-  --- ```
+  ----- {0, 0, 100}
+  ---```
   ---
   ---@name rgb_to_hsl
   ---@param rgb table - The RGB colour as a table with three elements: red, green, and blue.
