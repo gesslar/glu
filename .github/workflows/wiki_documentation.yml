@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           # Make sure to also checkout the wiki repository
-          repository: ${{ github.repository }}/wiki
+          repository: ${{ github.repository }}.wiki
           ref: main  # Ensure you're using the correct branch for the wiki
 
       - name: Set up Node.js
