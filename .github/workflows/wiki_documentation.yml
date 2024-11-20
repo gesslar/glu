@@ -27,6 +27,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: gesslar/glu.wiki
+          ref: master  # Ensure you're using the correct branch for the wiki
           path: wiki
           fetch-depth: 0
 
