@@ -7,15 +7,12 @@ jobs:
   generate-docs:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout your main repository (the source code or documentation files)
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # This checks out your main repository
           path: glu
           fetch-depth: 0
 
-      # Step 2: Generate documentation using Gludoc
       - name: Run Gludoc to generate documentation
         uses: gesslar/gludoc@main
         with:
@@ -23,15 +20,14 @@ jobs:
           destination: './generated-wiki'
           debug: 'false'
 
-      # Step 3: Checkout the wiki repository (to push the documentation)
       - name: Checkout wiki repository
         uses: actions/checkout@v4
         with:
           repository: gesslar/glu.wiki
-          ref: master  # Ensure you're using the correct branch for the wiki
+          ref: master
           path: wiki
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.WIKI_TOKEN }}  # Changed from GITHUB_TOKEN
 
       - name: List directory
         run: |
@@ -39,13 +35,13 @@ jobs:
           ls -R ./glu
           ls -R ./generated-wiki
 
-      # Step 4: Copy the generated documentation into the wiki directory
       - name: Copy generated docs to wiki
         run: |
           cp -Rv ./generated-wiki/* ./wiki/
 
-      # Step 5: Commit and push the documentation to the wiki
       - name: Publish to Wiki
+        env:
+          GITHUB_TOKEN: ${{ secrets.WIKI_PAT }}  # Changed from GITHUB_TOKEN
         run: |
           cd wiki
           git config user.name "github-actions[bot]"
@@ -53,5 +49,3 @@ jobs:
           git add .
           git commit -m "Update wiki documentation from main repository"
           git push origin master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
