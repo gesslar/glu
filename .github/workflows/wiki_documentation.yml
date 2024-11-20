@@ -1,0 +1,37 @@
+name: Update Wiki
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update_wiki:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          # Make sure to also checkout the wiki repository
+          repository: ${{ github.repository }}.wiki
+          ref: main  # Ensure you're using the correct branch for the wiki
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+
+      # Add any steps here to generate the documentation files to push to the wiki
+      - name: Run Gludoc to generate documentation
+        uses: gesslar/gludoc@main
+        with:
+          source: 'library'
+          destination: 'wiki'
+          debug: 'false'
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Auto-update Wiki with latest documentation"
+          git push origin main
