@@ -20,6 +20,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: List directory
+        run: ls -R ./  # Lists all files recursively from the current directory
+
       # Add any steps here to generate the documentation files to push to the wiki
       - name: Run Gludoc to generate documentation
         uses: gesslar/gludoc@main
