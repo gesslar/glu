@@ -32,6 +32,12 @@ jobs:
           path: wiki
           fetch-depth: 0
 
+      - name: List directory
+        run: |
+          pwd
+          ls -R ./glu
+          ls -R ./generated-wiki
+
       # Step 4: Copy the generated documentation into the wiki directory
       - name: Copy generated docs to wiki
         run: |
