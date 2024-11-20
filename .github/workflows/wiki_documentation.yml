@@ -9,7 +9,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           # Make sure to also checkout the wiki repository
           repository: ${{ github.repository }}.wiki
