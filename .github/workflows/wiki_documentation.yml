@@ -12,13 +12,14 @@ jobs:
         uses: actions/checkout@v2
         with:
           # This checks out your main repository
+          path: glu
           fetch-depth: 0
 
       # Step 2: Generate documentation using Gludoc
       - name: Run Gludoc to generate documentation
         uses: gesslar/gludoc@main
         with:
-          source: './library'
+          source: './glu/library'
           destination: './generated-wiki'
           debug: 'false'
 
