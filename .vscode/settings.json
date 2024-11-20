@@ -8,4 +8,23 @@
   "editor.tabSize": 2,
   "editor.indentSize": "tabSize",
   "Lua.diagnostics.enable": false,
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#a0c081",
+    "activityBar.background": "#a0c081",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#557faa",
+    "activityBarBadge.foreground": "#e7e7e7",
+    "commandCenter.border": "#15202b99",
+    "sash.hoverBorder": "#a0c081",
+    "statusBar.background": "#87af5f",
+    "statusBar.foreground": "#15202b",
+    "statusBarItem.hoverBackground": "#6d9249",
+    "statusBarItem.remoteBackground": "#87af5f",
+    "statusBarItem.remoteForeground": "#15202b",
+    "titleBar.activeBackground": "#87af5f",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveBackground": "#87af5f99",
+    "titleBar.inactiveForeground": "#15202b99"
+  },
 }

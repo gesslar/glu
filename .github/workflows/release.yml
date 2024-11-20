@@ -46,3 +46,10 @@ jobs:
           allowUpdates: true
           bodyFile: "./README.md"
           tag: ${{ env.mfile_version }}
+
+      - name: Run Gludoc to generate documentation
+        uses: gesslar/gludoc@main
+        with:
+          source: 'library'
+          destination: 'wiki'
+          debug: 'false'
