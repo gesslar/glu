@@ -30,6 +30,7 @@ jobs:
           ref: master  # Ensure you're using the correct branch for the wiki
           path: wiki
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       # Step 4: Copy the generated documentation into the wiki directory
       - name: Copy generated docs to wiki
