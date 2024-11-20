@@ -30,7 +30,6 @@ jobs:
           ref: master  # Ensure you're using the correct branch for the wiki
           path: wiki
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       # Step 4: Copy the generated documentation into the wiki directory
       - name: Copy generated docs to wiki
@@ -39,10 +38,12 @@ jobs:
 
       # Step 5: Commit and push the documentation to the wiki
       - name: Publish to Wiki
+        env:
+          WIKI_TOKEN: ${{ secrets.WIKI_TOKEN }}
         run: |
           cd wiki
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
           git commit -m "Update wiki documentation from main repository"
-          git push origin master
+          git push https://${WIKI_TOKEN}@github.com/gesslar/glu.wiki.git master
