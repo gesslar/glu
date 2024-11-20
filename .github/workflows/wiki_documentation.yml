@@ -38,12 +38,12 @@ jobs:
 
       # Step 5: Commit and push the documentation to the wiki
       - name: Publish to Wiki
-        env:
-          WIKI_TOKEN: ${{ secrets.WIKI_TOKEN }}
         run: |
           cd wiki
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
           git commit -m "Update wiki documentation from main repository"
-          git push https://${WIKI_TOKEN}@github.com/gesslar/glu.wiki.git master
+          git push origin master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
