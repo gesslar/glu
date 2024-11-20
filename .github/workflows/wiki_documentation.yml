@@ -1,40 +1,48 @@
-name: Update Wiki
+name: Generate and Publish Documentation
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
-  update_wiki:
+  generate-docs:
     runs-on: ubuntu-latest
-
     steps:
+      # Step 1: Checkout your main repository (the source code or documentation files)
       - name: Checkout repository
-        uses: actions/checkout@main
+        uses: actions/checkout@v2
         with:
-          # Make sure to also checkout the wiki repository
-          repository: ${{ github.repository }}.wiki
-          ref: master  # Ensure you're using the correct branch for the wiki
+          # This checks out your main repository
+          fetch-depth: 0
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '20'
-
-      - name: List directory
-        run: ls -R ../glu  # Lists all files recursively from the current directory
-
-      # Add any steps here to generate the documentation files to push to the wiki
+      # Step 2: Generate documentation using Gludoc
       - name: Run Gludoc to generate documentation
         uses: gesslar/gludoc@main
         with:
           source: './library'
-          destination: './wiki'
+          destination: './generated-wiki'
           debug: 'false'
 
-      - name: Commit and push changes
+      # Step 3: Checkout the wiki repository (to push the documentation)
+      - name: Checkout wiki repository
+        uses: actions/checkout@v2
+        with:
+          repository: gesslar/glu.wiki
+          path: wiki
+          fetch-depth: 0
+
+      # Step 4: Copy the generated documentation into the wiki directory
+      - name: Copy generated docs to wiki
         run: |
+          cp -R ./generated-wiki/* ./wiki/
+
+      # Step 5: Commit and push the documentation to the wiki
+      - name: Publish to Wiki
+        run: |
+          cd wiki
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Auto-update Wiki with latest documentation"
+          git commit -m "Update wiki documentation from main repository"
           git push origin master
