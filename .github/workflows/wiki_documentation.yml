@@ -27,7 +27,7 @@ jobs:
           ref: master
           path: wiki
           fetch-depth: 0
-          token: ${{ secrets.WIKI_TOKEN }}  # Changed from GITHUB_TOKEN
+          token: ${{ secrets.WIKI_PAT }}
 
       - name: List directory
         run: |
@@ -41,7 +41,7 @@ jobs:
 
       - name: Publish to Wiki
         env:
-          GITHUB_TOKEN: ${{ secrets.WIKI_PAT }}  # Changed from GITHUB_TOKEN
+          GITHUB_TOKEN: ${{ secrets.WIKI_PAT }}
         run: |
           cd wiki
           git config user.name "github-actions[bot]"
