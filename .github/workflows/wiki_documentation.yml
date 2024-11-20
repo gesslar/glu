@@ -31,6 +31,7 @@ jobs:
           ref: master  # Ensure you're using the correct branch for the wiki
           path: wiki
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: List directory
         run: |
