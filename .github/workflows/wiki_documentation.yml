@@ -42,7 +42,7 @@ jobs:
       # Step 4: Copy the generated documentation into the wiki directory
       - name: Copy generated docs to wiki
         run: |
-          cp -R ./generated-wiki/* ./wiki/
+          cp -Rv ./generated-wiki/* ./wiki/
 
       # Step 5: Commit and push the documentation to the wiki
       - name: Publish to Wiki
