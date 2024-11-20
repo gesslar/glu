@@ -24,8 +24,8 @@ jobs:
       - name: Run Gludoc to generate documentation
         uses: gesslar/gludoc@main
         with:
-          source: 'library'
-          destination: 'wiki'
+          source: './library'
+          destination: './wiki'
           debug: 'false'
 
       - name: Commit and push changes
