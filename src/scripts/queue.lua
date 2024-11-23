@@ -1,6 +1,7 @@
 local QueueClass = Glu.glass.register({
   name = "queue",
   class_name = "QueueClass",
+  call = "new_queue",
   dependencies = { "table" },
   setup = function(___, self)
     self.queues = {}
@@ -11,22 +12,21 @@ local QueueClass = Glu.glass.register({
     --- is available both through the queue object and the functions from
     --- this module. The ID is in the form of a v4 UUID.
     ---
-    --- @param funcs table - A table of functions to be added to the queue
+    --- @param funcs table? - A table of functions to be added to the queue
     --- @return table - The new queue object
     ---
     --- @example
     --- ```lua
     --- local queue = queue.new(parent).new({})
     --- ```
-    function self.new(funcs)
+    function self.new_queue(funcs)
       ___.v.type(funcs, "table", 1, true)
-      ___.v.n_uniform(funcs, "function", 1, false)
+      ___.v.n_uniform(funcs, "function", 1, true)
 
       funcs = funcs or {}
-      local queue = ___.queue_stack(funcs, self)
+      local queue = Glu.get_glass("queue_stack").new({ funcs = funcs }, self)
       ___.table.push(self.queues, queue)
 
-      ---@diagnostic disable-next-line: return-type-mismatch
       return queue
     end
 
@@ -58,7 +58,7 @@ local QueueClass = Glu.glass.register({
       ___.v.type(id, "string", 1, false)
       ___.v.type(f, "function", 2, false)
 
-      local q, err = self:get(id)
+      local q, err = self.get(id)
       if not q then return nil, err end
 
       return q.push(f)

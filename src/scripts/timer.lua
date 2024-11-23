@@ -6,7 +6,7 @@ local TimerClass = Glu.glass.register({
     self.multi_timers = {}
 
     local function perform_multi_timer_function(name)
-      local timer_function = mod.multi_timers[name]
+      local timer_function = self.multi_timers[name]
       if not timer_function then
         return false
       end
@@ -48,9 +48,7 @@ local TimerClass = Glu.glass.register({
     ---   { func = function() echo("amazing\n") end },
     ---   { func = function() echo("developer\n") end },
     --- }, 5)
-    --- ```
     ---
-    --- ```lua
     --- -- After 1s, print "hi", after 3s, print "there", after 6s, print "you",
     --- -- after 10s, print "amazing", and after 15s, print "developer"
     --- timer.multi("Greetings", {
@@ -76,9 +74,8 @@ local TimerClass = Glu.glass.register({
       -- Record the initial information
       self.multi_timers[name] = { def = def }
 
-      local timer_result
       local timer_id = tempTimer(def[1].delay, function()
-        timer_result = perform_multi_timer_function(name)
+        perform_multi_timer_function(name)
       end)
 
       if not timer_id then

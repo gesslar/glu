@@ -3,11 +3,7 @@ local QueueStackClass = Glu.glass.register({
   class_name = "QueueStackClass",
   dependencies = { "table" },
   setup = function(___, self, opts, container)
-    if not opts.funcs then return end
-
-    local funcs = opts.funcs or {}
-
-    funcs = ___.table.n_cast(funcs)
+    local funcs = ___.table.n_cast(opts.funcs or {})
     ___.v.n_uniform(funcs, "function", 2, false)
 
     self.stack = funcs

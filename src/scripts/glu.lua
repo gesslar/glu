@@ -92,10 +92,10 @@ if not _G["Glu"] then
         local parent_name = glu_class.inherit_from
         local parent = into.get_object(parent_name)
 
-        if not parent or (parent.glass and parent.glass.setup) then
+        if not parent then
           local parent_class = glu.get_glass(parent_name)
           -- Recursively instantiate the parent class
-          return instantiate(glu, parent_class, ops, into)
+          instantiate(glu, parent_class, ops, into)
           -- error("Parent class `" .. glu_class.inherit_from .. "` not found for `" .. glu_class.name .. "`")
         end
       end
@@ -248,6 +248,10 @@ if not _G["Glu"] then
 
         error("Invalid type to argument " ..
           argument_index .. ". Expected " .. expected_type .. ", got " .. type(value) .. " in\n" .. last)
+      end,
+      not_nil = function(value, argument_index)
+        local last = instance.get_last_traceback_line()
+        assert(value ~= nil, "value must not be nil for argument " .. argument_index .. " in\n" .. last)
       end
     }
 

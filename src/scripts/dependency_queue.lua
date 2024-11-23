@@ -8,29 +8,31 @@ local DependencyQueueClass = Glu.glass.register({
     function self.new_dependency_queue(packages, cb)
       local installed = getPackages()
       local not_installed = table.n_filter(packages, function(package)
-        return ___.table.index_of(installed, package.name) == nil
+        return table.index_of(installed, package.name) == nil
       end) or {}
 
       -- We have no packages not installed, so just return as if we're done.
       if #not_installed == 0 then
-        cecho("All dependencies are already installed.\n")
-        cb(true, nil)
+        cb(true, "All dependencies are already installed.")
         return
       end
 
-      local id = ___.id()
-      ___.table.add(self, {
-        id = id,
+      local this = {
+        id = ___.id(),
         cb = cb,
+        queue = self.new_queue(),
         packages = not_installed,
         handler_name = f "dependency_{id}_installed",
-      })
+      }
+      ___.table.add(self, this)
 
       for _, package in ipairs(not_installed) do
-        self.push(self.id, function()
-          cecho(f "Installing dependency `<b>{package.name}</b>`...\n")
+        local func = function()
+          cecho("Installing dependency `<b>" .. package.name .. "</b>`...\n")
           installPackage(package.url)
-        end)
+        end
+
+        self.queue.push(func)
       end
 
       registerNamedEventHandler("glu", self.handler_name, "sysInstall",
@@ -63,8 +65,13 @@ local DependencyQueueClass = Glu.glass.register({
       end
 
       function self.start()
-        self.execute()
+        if not self.queue then
+          return nil, "Queue not found"
+        end
+        return self.queue.execute()
       end
+
+      return self
     end
   end
 })

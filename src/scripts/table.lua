@@ -36,7 +36,6 @@ local TableClass = Glu.glass.register({
 
     function self.n_uniform(t, typ)
       ___.v.type(t, "table", 1, false)
-      ___.v.not_empty(t, 1, false)
       ___.v.indexed(t, 1, false)
       ___.v.type(typ, "string", 2, true)
 
