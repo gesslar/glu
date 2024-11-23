@@ -33,7 +33,7 @@ jobs:
         run: |
           pwd
           ls -R ./
-          find ./wiki/ -type f ! -name 'Home.md' ! -name '_Footer.md' -exec rm -v {} +
+          find ./wiki/ -type f ! -name 'Home.md' ! -name '_Footer.md' -exec git rm -f {} +
           cp -Rv ./generated-wiki/* ./wiki/
 
       - name: Publish to Wiki
