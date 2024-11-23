@@ -1,7 +1,7 @@
 local DependencyClass = Glu.glass.register({
   class_name = "DependencyClass",
   name = "dependency",
-  dependencies = { "queue", "table"},
+  dependencies = { "dependency_queue", "table"},
   setup = function(___, self)
     self.queues = {}
 
