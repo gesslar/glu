@@ -21,30 +21,23 @@ local TryClass = Glu.glass.register({
     -- first, let's try to execute the function
     function self.try(f, ...)
       local success, try_result, b = pcall(f, ...)
-      if success and try_result then
-        result.try = {
-          success = success,
-          error = nil,
-          result = try_result
-        }
-        result.result = try_result
-      else
-        self.caught = true
-        result.try = {
-          success = success,
-          error = try_result,
-          result = nil
-        }
-      end
+      result.try = {
+        success = success,
+        error = success and nil or try_result,
+        result = success and try_result or nil,
+        caught = not success
+      }
 
       return self
     end
 
     function self.catch(f)
       local success, catch_result = pcall(f, result.try)
-      if success then
-        catch_result.catch = { success = true, error = nil }
-      end
+      result.catch = {
+        success = success,
+        error = success and nil or catch_result,
+        result = not success and catch_result or nil
+      }
       return self
     end
 
