@@ -32,10 +32,8 @@ jobs:
       - name: Copy generated docs to wiki
         run: |
           pwd
-          ls -R ./
-          cd wiki
-          find . -type f ! -name 'Home.md' ! -name '_Footer.md' -exec git rm -f {} +
-          cd ..
+          # ls -R ./
+          cd wiki && pwd && ls -R && find . -type f -name '*.md' ! -name 'Home.md' ! -name '_Footer.md' -exec git rm -f {} + && cd ..
           cp -Rv ./generated-wiki/* ./wiki/
 
       - name: Publish to Wiki
