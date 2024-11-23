@@ -29,14 +29,9 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.WIKI_PAT }}
 
-      - name: List directory
-        run: |
-          pwd
-          ls -R ./glu
-          ls -R ./generated-wiki
-
       - name: Copy generated docs to wiki
         run: |
+          git rm -rf ./wiki/*
           cp -Rv ./generated-wiki/* ./wiki/
 
       - name: Publish to Wiki
