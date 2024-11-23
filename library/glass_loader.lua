@@ -20,6 +20,7 @@ if false then -- ensure that functions do not get defined
   ---})
   ---```
   ---
+  ---@name load_glass
   ---@param opts table - The options table.
   ---@param opts.path string - The path or url to the glass script.
   ---@param opts.cb function - The callback function.
