@@ -11,7 +11,13 @@ if false then -- ensure that functions do not get defined
   --- Loads a glass script from a path or url.
   ---@example
   ---```lua
-  ---glass_loader.load_glass({ path = "path/to/glass.lua" })
+  ---glass_loader.load_glass({
+  ---  path = "path/to/glass.lua",
+  ---  cb = function(result)
+  ---    print(result)
+  ---  end,
+  ---  execute = true
+  ---})
   ---```
   ---
   ---@param opts table - The options table.
