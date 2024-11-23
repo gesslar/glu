@@ -20,6 +20,11 @@ jobs:
           destination: './generated-wiki'
           debug: 'false'
 
+      - name: Clear wiki directory
+        run: |
+          cd wiki
+          find . -type f ! -name 'Home.md' ! -name '_Footer.md' -exec rm -v {} +
+
       - name: Checkout wiki repository
         uses: actions/checkout@v4
         with:
@@ -31,7 +36,6 @@ jobs:
 
       - name: Copy generated docs to wiki
         run: |
-          git rm -rf ./wiki/*
           cp -Rv ./generated-wiki/* ./wiki/
 
       - name: Publish to Wiki
