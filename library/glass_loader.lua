@@ -9,7 +9,11 @@ if false then -- ensure that functions do not get defined
   ---@class GlassLoaderClass
 
   --- Loads a glass script from a path or url.
-  ---@name load_glass
+  ---@example
+  ---```lua
+  ---glass_loader.load_glass({ path = "path/to/glass.lua" })
+  ---```
+  ---
   ---@param opts table - The options table.
   ---@param opts.path string - The path or url to the glass script.
   ---@param opts.cb function - The callback function.
