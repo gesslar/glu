@@ -150,7 +150,7 @@ local HttpClass = Glu.glass.register({
       options.method = string.upper(options.method)
 
       -- Get a new http request object
-      local gl = ___.getGlass("http_request")
+      local gl = ___.get_glass("http_request")
       local request = gl(options, self).execute()
       table.insert(requests, request)
       return request

@@ -12,7 +12,7 @@ local TryClass = Glu.glass.register({
     }
 
     function self.clone(f, ...)
-      local glass = ___.getGlass("try")
+      local glass = ___.get_glass("try")
       assert(glass, "TryClass not found")
       local try = glass(opts, self)
       return try.try(f, ...)

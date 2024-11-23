@@ -28,7 +28,7 @@ local HttpRequestClass = Glu.glass.register({
         end
 
         local cb = self.options.callback
-        local gl = ___.getGlass("http_response")
+        local gl = ___.get_glass("http_response")
         local response = gl(response_data, owner)
 
         cb(response)
