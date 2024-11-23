@@ -32,12 +32,6 @@
   {
     "isActive": "yes",
     "isFolder": "no",
-    "name": "dependency",
-    "script": ""
-  },
-  {
-    "isActive": "yes",
-    "isFolder": "no",
     "name": "dependency_queue",
     "script": ""
   },
