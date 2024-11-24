@@ -1,0 +1,13 @@
+{
+  "name": "glu",
+  "version": "1.0.0",
+  "description": "![Y2K Compliant](https://img.shields.io/badge/Y2K-Compliant-success?style=flat&logo=data:...)",
+  "main": "index.js",
+  "scripts": {
+    "release": "gh workflow run release.yml",
+    "docs": "gh workflow run wiki_documentation.yml"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
