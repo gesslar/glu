@@ -47,6 +47,8 @@ jobs:
             echo "pristine=👎🏻" >> $GITHUB_OUTPUT
           fi
 
+          cat $GITHUB_OUTPUT
+
       - name: Publish to Wiki
         if: steps.check_pristine.outputs.pristine == '👍🏻'
         env:
