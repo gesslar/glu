@@ -1,6 +1,10 @@
 name: Generate and Publish Documentation
 
 on:
+  workflow_run:
+    workflows: ['Build project using muddler and upload artifact']
+    types:
+      - completed
   workflow_dispatch:
 
 jobs:
