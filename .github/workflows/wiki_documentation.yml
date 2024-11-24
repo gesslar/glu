@@ -45,15 +45,14 @@ jobs:
         run: |
           # Check if there are uncommitted changes
           cd wiki
-          result=$(git status -s | wc -l)
+          result=$(git diff --stat origin/main | wc -l)
           if [[ $result -gt 0 ]]; then
             echo "dirty=👍🏻" >> $GITHUB_OUTPUT
           else
             echo "dirty=👎🏻" >> $GITHUB_OUTPUT
           fi
 
-          git status -s
-          git status -s | wc -l
+          git diff --stat origin/main
           echo "dirty: $result"
           cat $GITHUB_OUTPUT
 
