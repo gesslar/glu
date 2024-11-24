@@ -37,7 +37,7 @@ jobs:
         run: |
           pwd
           # ls -R ./
-          cd wiki && pwd && ls -R && find . -type f -name '*.md' ! -name 'Home.md' ! -name '_Footer.md' -exec git rm -f {} + && cd ..
+          cd wiki && pwd && ls -R && find . -type f -name '*.md' ! -name 'Home.md' ! -name '_Footer.md' -exec rm -f {} + && cd ..
           cp -Rv ./generated-wiki/* ./wiki/
 
       - name: Check for Dirty State
