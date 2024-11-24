@@ -36,7 +36,6 @@ jobs:
       - name: Copy generated docs to wiki
         run: |
           pwd
-          # ls -R ./
           cd wiki && pwd && ls -R && find . -type f -name '*.md' ! -name 'Home.md' ! -name '_Footer.md' -exec rm -f {} + && cd ..
           cp -Rv ./generated-wiki/* ./wiki/
 
@@ -51,10 +50,6 @@ jobs:
           else
             echo "dirty=👎🏻" >> $GITHUB_OUTPUT
           fi
-
-          git status --porcelain
-          echo "dirty: $result"
-          cat $GITHUB_OUTPUT
 
       - name: Publish to Wiki
         if: steps.check_dirty.outputs.dirty == '👍🏻'
