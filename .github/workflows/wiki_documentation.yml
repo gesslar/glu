@@ -40,6 +40,7 @@ jobs:
         id: check_pristine
         run: |
           # Check if there are uncommitted changes
+          cd wiki
           if [[ -n $(git status --porcelain) ]]; then
             echo "pristine=👍🏻" >> $GITHUB_OUTPUT
           else
