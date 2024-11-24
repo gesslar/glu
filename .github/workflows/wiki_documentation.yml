@@ -36,21 +36,21 @@ jobs:
           cd wiki && pwd && ls -R && find . -type f -name '*.md' ! -name 'Home.md' ! -name '_Footer.md' -exec git rm -f {} + && cd ..
           cp -Rv ./generated-wiki/* ./wiki/
 
-      - name: Check for Pristine State
-        id: check_pristine
+      - name: Check for Dirty State
+        id: check_dirty
         run: |
           # Check if there are uncommitted changes
           cd wiki
           if [[ -n $(git status --porcelain) ]]; then
-            echo "pristine=👍🏻" >> $GITHUB_OUTPUT
+            echo "dirty=👎🏻" >> $GITHUB_OUTPUT
           else
-            echo "pristine=👎🏻" >> $GITHUB_OUTPUT
+            echo "dirty=👍🏻" >> $GITHUB_OUTPUT
           fi
 
           cat $GITHUB_OUTPUT
 
       - name: Publish to Wiki
-        if: steps.check_pristine.outputs.pristine == '👍🏻'
+        if: steps.check_dirty.outputs.dirty == '👍🏻'
         env:
           GITHUB_TOKEN: ${{ secrets.WIKI_PAT }}
         run: |
