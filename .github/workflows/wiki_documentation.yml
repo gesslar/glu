@@ -52,6 +52,7 @@ jobs:
             echo "dirty=👎🏻" >> $GITHUB_OUTPUT
           fi
 
+          git status --porcelain
           git status --porcelain | wc -l
           echo "dirty: $result"
           cat $GITHUB_OUTPUT
