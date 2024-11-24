@@ -52,6 +52,9 @@ jobs:
             echo "dirty=👎🏻" >> $GITHUB_OUTPUT
           fi
 
+          echo "dirty: $result"
+          cat $GITHUB_OUTPUT
+
       - name: Publish to Wiki
         if: steps.check_dirty.outputs.dirty == '👍🏻'
         env:
