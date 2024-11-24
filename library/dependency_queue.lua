@@ -28,6 +28,7 @@ if false then -- ensure that functions do not get defined
   ---
   --- local queue = glu.dependency_queue(...)
   ---```
+  ---
   ---@name new_dependency_queue
   ---@param packages table - A table of dependency objects, each with a `name` and `url` property.
   ---@param cb function - A callback function that will be called with two arguments: `success` and `error`.
