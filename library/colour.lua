@@ -15,11 +15,11 @@ if false then -- ensure that functions do not get defined
   ---the second colour.
   ---
   ---Available interpolation methods are:
-  ---- linear
-  ---- smooth (default)
-  ---- smoother
-  ---- ease_in
-  ---- ease_out
+  ---- `linear`
+  ---- `smooth` (default)
+  ---- `smoother`
+  ---- `ease_in`
+  ---- `ease_out`
   ---
   ---@example
   ---```lua
