@@ -425,10 +425,10 @@ local TableClass = Glu.glass.register({
       return table.index_of(tbl, value) ~= nil
     end
 
-    local function collect_tables(tbl, inherited)
+    local function collect_tables(tbl, extending)
       -- Check if the table is a valid object with a metatable and an __index field
       ___.v.object(tbl, 1, false)
-      ___.v.type(inherited, "boolean", 2, true)
+      ___.v.type(extending, "boolean", 2, true)
 
       -- Set-like table to track visited tables
       local visited = {}
@@ -444,14 +444,14 @@ local TableClass = Glu.glass.register({
       -- Start by adding the main table
       add_table(tbl)
 
-      if inherited then
+      if extending then
         local mt = getmetatable(tbl)
         while mt and mt.__index do
-          local inheritedTbl = mt.__index
-          if type(inheritedTbl) == "table" then
-            add_table(inheritedTbl)
+          local extendingTbl = mt.__index
+          if type(extendingTbl) == "table" then
+            add_table(extendingTbl)
           end
-          mt = getmetatable(inheritedTbl)
+          mt = getmetatable(extendingTbl)
         end
       end
 
@@ -480,11 +480,11 @@ local TableClass = Glu.glass.register({
       return result
     end
 
-    function self.functions(tbl, inherited)
+    function self.functions(tbl, extending)
       ___.v.object(tbl, 1, false)
-      ___.v.type(inherited, "boolean", 2, true)
+      ___.v.type(extending, "boolean", 2, true)
 
-      local tables = collect_tables(tbl, inherited) or {}
+      local tables = collect_tables(tbl, extending) or {}
       local test = function(t, k) return type(t[k]) == "function" end
 
       return assemble_results(tables, test)
@@ -492,11 +492,11 @@ local TableClass = Glu.glass.register({
     -- Alias for functions
     self.methods = self.functions
 
-    function self.properties(tbl, inherited)
+    function self.properties(tbl, extending)
       ___.v.object(tbl, 1, false)
-      ___.v.type(inherited, "boolean", 2, true)
+      ___.v.type(extending, "boolean", 2, true)
 
-      local tables = collect_tables(tbl, inherited) or {}
+      local tables = collect_tables(tbl, extending) or {}
       local test = function(t, k) return type(t[k]) ~= "function" end
 
       return assemble_results(tables, test)
@@ -627,6 +627,29 @@ local TableClass = Glu.glass.register({
 
       return #table.n_filter(tbl, condition)
     end
+
+    function self.natural_sort(tble)
+      print("We here")
+      ___.v.indexed(tble, 1, false)
+
+      local sorted = {}
+      for i = 1, #tble do
+        sorted[i] = tble[i]
+      end
+      table.sort(sorted, ___.string.natural_compare)
+      return sorted
+    end
+
+    function self.sort(tbl, arg)
+      ___.v.indexed(tbl, 1, false)
+
+      if type (arg) == "function" then
+        table.sort(tbl, arg)
+      else
+        return self.natural_sort(tbl)
+      end
+    end
+
   end,
   valid = function(___, self)
     return {

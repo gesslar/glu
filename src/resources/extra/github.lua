@@ -1,7 +1,7 @@
 local GitHubClass = Glu.glass.register({
   class_name = "GitHubClass",
   name = "github",
-  inherit_from = "http",
+  extends = "http",
   setup = function(___, self, opts, container)
     local gh_api_base = "https://api.github.com/repos/%s/%s/"
 

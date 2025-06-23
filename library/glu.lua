@@ -66,7 +66,7 @@ if false then -- ensure that functions do not get defined
   ---local glass = Glu.get_glass("MyGlass")
   ---```
   ---
-  function Glu.get_glass() end
+  function Glu.get_glass(glass_name) end
 
   ---Check if a glass exists.
   ---

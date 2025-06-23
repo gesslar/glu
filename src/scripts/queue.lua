@@ -6,11 +6,12 @@ local QueueClass = Glu.glass.register({
   setup = function(___, self)
     self.queues = {}
 
-    --- Instantiates a new queue object and adds it to the list of queues.
-    --- The object will contain a property that is the ID may be used to
-    --- manipulate the queue. The same functionality to manipulate the queue
-    --- is available both through the queue object and the functions from
-    --- this module. The ID is in the form of a v4 UUID.
+    --- Instantiates a new queue stack object and adds it to the list of
+    --- queues. The object will contain a property that is the ID may be used
+    --- to manipulate the queue. The same functionality to manipulate the queue
+    ---
+    --- is available both through the queue object and the functions from this
+    --- module. The ID is in the form of a v4 UUID.
     ---
     --- @param funcs table? - A table of functions to be added to the queue
     --- @return table - The new queue object

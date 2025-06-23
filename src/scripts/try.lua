@@ -1,7 +1,7 @@
 local TryClass = Glu.glass.register({
   class_name = "TryClass",
   name = "try",
-  inherit_from = nil,
+  extends = nil,
   call = "clone",
   setup = function(___, self, opts)
     local result = {

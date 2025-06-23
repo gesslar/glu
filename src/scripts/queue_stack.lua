@@ -9,14 +9,14 @@ local QueueStackClass = Glu.glass.register({
     self.stack = funcs
     self.id = ___.id()
 
-    function self.push(f)
-      ___.v.type(f, "function", 1, false)
-      return ___.table.push(self.stack, f)
-    end
+function self.push(f)
+  ___.v.type(f, "function", 1, false)
+  return ___.table.push(self.stack, f)
+end
 
-    function self.shift()
-      return ___.table.shift(self.stack)
-    end
+function self.shift()
+  return ___.table.shift(self.stack)
+end
 
     function self.execute(...)
       -- Shift the next task off the queue

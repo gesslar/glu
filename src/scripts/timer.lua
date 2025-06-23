@@ -2,13 +2,15 @@ local TimerClass = Glu.glass.register({
   name = "timer",
   class_name = "TimerClass",
   dependencies = { "table" },
+  call = "new_multi_timer",
   setup = function(___, self)
+
     self.multi_timers = {}
 
     local function perform_multi_timer_function(name)
       local timer_function = self.multi_timers[name]
       if not timer_function then
-        return false
+        return false, "multi timer with name " .. name .. " does not exist"
       end
 
       local defs = timer_function.def
@@ -16,14 +18,14 @@ local TimerClass = Glu.glass.register({
       local ok, result = pcall(def.func, def.args)
 
       if not ok then
-        return false
+        return false, "error in multi timer with name " .. name .. ": " .. result
       end
 
       table.remove(defs, 1)
       if #defs > 0 then
         local result2 = ___.timer.multi(name, defs)
         if not result2 then
-          return false
+          return false, "error in multi timer with name " .. name .. ": " .. result2
         end
       else
         ___.timer.kill_multi(name)
@@ -80,7 +82,7 @@ local TimerClass = Glu.glass.register({
 
       if not timer_id then
         ___.timer.kill_multi(name)
-        return false
+        return false, "error creating multi timer with name " .. name
       end
 
       -- Record the timer id

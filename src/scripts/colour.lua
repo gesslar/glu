@@ -1,7 +1,7 @@
 local ColourClass = Glu.glass.register({
   class_name = "ColourClass",
   name = "colour",
-  dependencies = { "number",},
+  dependencies = {"number"},
   setup = function(___, self)
     local v = self.v
     --- Interpolates between two RGB colours based on a step value. Functionally,

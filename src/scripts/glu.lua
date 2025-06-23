@@ -88,15 +88,15 @@ if not _G["Glu"] then
     local function instantiate(glu, glu_class, ops, into)
       if check_index_for_loop(glu_class) then return end
       -- If the class has a parent, make sure it is instantiated first
-      if glu_class.inherit_from then
-        local parent_name = glu_class.inherit_from
-        local parent = into.get_object(parent_name)
+      if glu_class.extends then
+        local parent_name = glu_class.extends
+        local parent = into.get_glass(parent_name)
 
         if not parent then
-          local parent_class = glu.get_glass(parent_name)
+          local parent_class = Glu.get_glass(parent_name)
           -- Recursively instantiate the parent class
           instantiate(glu, parent_class, ops, into)
-          -- error("Parent class `" .. glu_class.inherit_from .. "` not found for `" .. glu_class.name .. "`")
+          -- error("Parent class `" .. glu_class.extends .. "` not found for `" .. glu_class.name .. "`")
         end
       end
 
@@ -145,6 +145,8 @@ if not _G["Glu"] then
 
     -- Add the Glass class to the instance
     instance.glass = Glu.glass
+    -- Add the Void class to the instance
+    instance.void = Glu.void
 
     setmetatable(instance, Glu)
 
@@ -279,7 +281,7 @@ if not _G["Glu"] then
   Glass = {
     name = "glu_glass",
     class_name = "Glass",
-    inherit_from = nil,
+    extends = nil,
     dependencies = {},
     protect = function(glass, self)
       local function protect_function(object, function_name)
@@ -290,11 +292,11 @@ if not _G["Glu"] then
         assert(type(original_function) == "function", "`original_function` must be a function")
 
         object[function_name] = function(caller, ...)
-          if self.inherits(object) then
+          if self.extending(object) then
             return original_function(caller, ...)
           end
           error("Access denied: " .. function_name .. " is protected and can " ..
-            "only be called by inheriting classes.")
+            "only be called by extending classes.")
         end
       end
 
@@ -307,16 +309,16 @@ if not _G["Glu"] then
 
         setmetatable(object, {
           __index = function(tbl, key)
-            if key == var_name and not self.inherits(tbl, base_class) then
+            if key == var_name and not self.extending(tbl, base_class) then
               error("Access denied: Variable '" ..
-                var_name .. "' is protected and can only be accessed by inheriting classes.")
+                var_name .. "' is protected and can only be accessed by extending classes.")
             end
             return rawget(tbl, key)
           end,
           __newindex = function(tbl, key, value)
-            if key == var_name and not self.inherits(tbl, base_class) then
+            if key == var_name and not self.extending(tbl, base_class) then
               error("Access denied: Variable '" ..
-                var_name .. "' is protected and can only be modified by inheriting classes.")
+                var_name .. "' is protected and can only be modified by extending classes.")
             end
             rawset(tbl, key, value)
           end,
@@ -340,13 +342,29 @@ if not _G["Glu"] then
       assert(type(class_opts.name) == "string", "`name` must be a string")
       assert(type(class_opts.class_name) == "string", "`class_name` must " ..
         "be a string")
-      assert(type(class_opts.inherit_from) == "string" or
-        class_opts.inherit_from == nil,
-        "`inherit_from` must be a string or nil")
+      assert(type(class_opts.extends) == "string" or
+        class_opts.extends == nil,
+        "`extends` must be a string or nil")
       assert(type(class_opts.setup) == "function", "`setup` must " ..
         "be a function")
       assert(type(class_opts.valid) == "function" or class_opts.valid == nil,
         "`valid` must be a function or nil")
+
+      -- After the other assertions
+      if class_opts.adopts then
+        assert(type(class_opts.adopts) == "table", "`adopts` must be a table")
+
+        for class_name, adoption in pairs(class_opts.adopts) do
+          assert(type(class_name) == "string", "adoption class name must be a string")
+          assert(type(adoption) == "table", "adoption configuration must be a table")
+          assert(type(adoption.methods) == "table", "adoption methods must be a table")
+
+          -- Verify all method names are strings
+          for _, method in ipairs(adoption.methods) do
+            assert(type(method) == "string", "adopted method names must be strings")
+          end
+        end
+      end
 
       local name = class_opts.name
 
@@ -357,7 +375,8 @@ if not _G["Glu"] then
       G = {
         name = name,
         class_name = class_opts.class_name,
-        inherit_from = class_opts.inherit_from,
+        extends = class_opts.extends,
+        adopts = class_opts.adopts,
         dependencies = class_opts.dependencies or {},
         setup = class_opts.setup,
         valid = class_opts.valid,
@@ -366,36 +385,45 @@ if not _G["Glu"] then
       }
 
       function G.new(instance_opts, container)
+        print("Hi from G.new")
+
         -- The instance_opts must be a table or nil
-        assert(type(instance_opts) == "table" or instance_opts == nil, "`instance_opts` must be " ..
-          "a table or nil")
-        -- The container must be a table with a metatable
-        assert(type(container) == "table", "`container` must be a table")
+        assert(type(instance_opts) == "table" or instance_opts == nil,
+          "`instance_opts` must be a table or nil")
+
+        -- The container must be a table with a metatable, otherwise we
+        -- we move it to the void.
+        assert(container == nil or type(container) == "table",
+          "`container` must be a table or nil")
 
         -- Setup instance
         local self = {
-          inherit_from = class_opts.inherit_from,
+          extends = class_opts.extends,
           name = class_opts.name,
           class = class_opts.class_name,
           call = class_opts.call,
-          container = container,
           objects = {},
           object = true,
         }
         self.__index = self
 
+        container = container or self.get_void()
+        assert(getmetatable(container) ~= nil, "`container` must have a metatable")
+
+        self.container = container
         -- Determine anchor
         local ___ = self
         repeat ___ = ___.container until not ___.container
+
         self.___ = ___
 
-        -- Set the __index for inheritance if there is a parent class
-        if class_opts.inherit_from then
-          local inherit_from = class_opts.inherit_from
-          local parent_instance = ___.get_object(inherit_from)
+        -- Set the __index for extension if this class extends another
+        if class_opts.extends then
+          local extends_class = class_opts.extends
+          local parent_instance = ___.get_glass(extends_class)
 
           if not parent_instance then
-            error("Instance of parent class `" .. inherit_from .. "` not " ..
+            error("Instance of parent class `" .. extends_class .. "` not " ..
               "found for `" .. class_opts.class_name .. "`")
           end
 
@@ -406,10 +434,46 @@ if not _G["Glu"] then
           self.__index = self
         end
 
+        -- Handle adoptions
+        if class_opts.adopts then
+          local mt = getmetatable(self)
+          local adopted_methods = {}
+
+          for class_name, adoption in pairs(class_opts.adopts) do
+            print("Adopting from " .. class_name)
+            printError("", true)
+            local master_object = ___.get_object(class_name)
+            if not master_object then
+              error("Cannot adopt from class `" .. class_name .. "`: class not found")
+            end
+            -- display(master_object)
+            -- Add each method from the donor class
+            for _, method_name in ipairs(adoption.methods) do
+              print("Adopting method " .. method_name)
+              if type(master_object[method_name]) ~= "function" then
+                error("Cannot adopt method `" .. method_name .. "` from `" ..
+                  class_name .. "`: method not found")
+              end
+              adopted_methods[method_name] = master_object[method_name]
+            end
+          end
+
+          -- If we're extending, merge with parent's __index
+          local mt = getmetatable(self) or {}
+          if type(mt.__index) == "table" then
+            for k, v in pairs(adopted_methods) do
+              mt.__index[k] = v
+            end
+          else
+            -- Not extending, just set the adopted methods
+            mt.__index = adopted_methods
+          end
+        end
+
         for _, dep in ipairs(class_opts.dependencies or {}) do
           local obj = ___[dep]
           if not obj then
-            local glass = ___.get_glass(dep)
+            local glass = Glu.get_glass(dep)
             if not glass then
               error("Object `" .. dep .. "` not found for `" ..
                 class_opts.class_name .. "`")
@@ -441,7 +505,7 @@ if not _G["Glu"] then
           G.setup(___, self, instance_opts, container)
         end
 
-        function self.inherits(base_class)
+        function self.extending(base_class)
           local current_instance = self
           while current_instance do
             if current_instance == base_class then
@@ -474,7 +538,7 @@ if not _G["Glu"] then
 
       -- Set the metatable for the class. Always use the class's own `new` method for `__call`.
       setmetatable(G, {
-        __index = class_opts.inherit_from or nil,
+        __index = class_opts.extends or nil,
         __call = function(_, ...) return G.new(...) end
       })
 
@@ -488,4 +552,23 @@ if not _G["Glu"] then
     __call = function(_, ...) return Glass.new(...) end
   })
   Glu.glass = Glass
+
+  -- We need a void class to hold objects that don't have a container.
+  local Void = {
+    name = "void",
+    class_name = "VoidClass",
+    objects = {},
+  }
+  Void.__index = Void
+  Glu.void = Void
 end
+
+-- TODO: maybe i should add a function, new, to the instance, so that
+-- when someone call new, it automatically passes the instance of Glu
+-- as the first argument, and then the rest of the arguments are for
+-- the actual class constructor. That way, we always have the instance
+-- of Glu available to Glass. Verify this with Claude tomorrow.
+-- In the metatable. But the user doesn't need to pass Glu as the first
+-- argument.
+-- This way, we can always find the Void, because the anchor is always
+-- the Glu instance.

@@ -408,6 +408,123 @@ local StringClass = Glu.glass.register({
 
       return results, token_list
     end
+
+    function is_alpha(char)
+      ___.v.type(char, "string", 1, false)
+      ___.v.test(#char == 1, "Expected a single character", 1)
+
+      return rex.match(char, "^[a-zA-Z]$") ~= nil
+    end
+
+    function is_numeric(char)
+      ___.v.type(char, "string", 1, false)
+      ___.v.test(#char == 1, "Expected a single character", 1)
+
+      return rex.match(char, "^[0-9]$") ~= nil
+    end
+
+    function is_alphanumeric(char)
+      ___.v.type(char, "string", 1, false)
+      ___.v.test(#char == 1, "Expected a single character", 1)
+
+      return rex.match(char, "^[a-zA-Z0-9]$") ~= nil
+    end
+
+    function is_whitespace(char)
+      ___.v.type(char, "string", 1, false)
+      ___.v.test(#char == 1, "Expected a single character", 1)
+
+      return rex.match(char, "^%s$") ~= nil
+    end
+
+    function is_punctuation(char)
+      ___.v.type(char, "string", 1, false)
+      ___.v.test(#char == 1, "Expected a single character", 1)
+
+      return rex.match(char, "^[^a-zA-Z0-9%s]$") ~= nil
+    end
+
+    function is_uppercase(char)
+      ___.v.type(char, "string", 1, false)
+      ___.v.test(#char == 1, "Expected a single character", 1)
+
+      return rex.match(char, "^[A-Z]$") ~= nil
+    end
+
+    -- TODO: handle 1 or more
+    function is_lowercase(char)
+      ___.v.type(char, "string", 1, false)
+      ___.v.test(#char == 1, "Expected a single character", 1)
+
+      return rex.match(char, "^[a-z]$") ~= nil
+    end
+
+    function split_natural(str)
+      ___.v.type(str, "string", 1, false)
+
+      local resulit, current, is_numeric = {}, {}, false
+
+      local chars = {}
+      for c in self.walk(str) do
+        local new_is_num = self.is_numeric(c)
+
+        if i > 1 and new_is_num ~= is_num then
+          local chunk = table.concat(current)
+          if is_num then
+            table.push(result, tonumber(chunk))
+          else
+            table.insert(result, chunk)
+          end
+          current = {}
+        end
+
+        if #current > 0 then
+          local chunk = table.concat(current)
+          if is_num then
+            self.push(result, tonumber(chunk))
+          else
+            table.insert(result, chunk)
+          end
+        end
+      end
+    end
+
+    function natural_compare(a, b)
+      local a_parts = self.split_natural(a)
+      local b_parts = self.split_natural(b)
+
+      local len = math.min(#a_parts, #b_parts)
+
+      for i = 1, len do
+        local a_part, b_part = a_parts[i], b_parts[i]
+        local a_type, b_type = type(a_part), type(b_part)
+
+        if a_type == "number" and b_type == "number" then
+          if a_part ~= b_part then
+            return a_part < b_part
+          end
+        elseif a_type == "string" and b_type == "string" then
+          if a_part ~= b_part then
+            return a_part < b_part
+          end
+        else
+          local str_a, str_b = tostring(a_part), tostring(b_part)
+
+          if str_a ~= str_b then
+            return str_a < str_b
+          end
+        end
+      end
+
+      return #a_parts < #b_parts
+    end
+
+    function self.index_of(str, pattern)
+      ___.v.type(str, "string", 1, false)
+      ___.v.type(pattern, "string", 2, false)
+
+      return rex.find(str, pattern)
+    end
   end
 })
 
