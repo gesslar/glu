@@ -9,6 +9,7 @@ if not _G["Glu"] then
   local registeredGlasses = {}
 
   function Glu.get_glasses() return registeredGlasses end
+
   function Glu.get_glass_names()
     local names = {}
     local glasses = Glu.get_glasses()
@@ -17,6 +18,7 @@ if not _G["Glu"] then
     end
     return names
   end
+
   function Glu.get_glass(name)
     for _, glass in ipairs(Glu.get_glasses()) do
       if glass.name == name then
@@ -25,6 +27,7 @@ if not _G["Glu"] then
     end
     return nil
   end
+
   function Glu.has_glass(name)
     return Glu.get_glass(name) ~= nil
   end
@@ -103,7 +106,7 @@ if not _G["Glu"] then
       -- Instantiate the current class if it hasn't been already
       if not glu[glu_class.name] or table.index_of(table.keys(glu[glu_class.name]), "name") == nil then
         local object = glu_class(ops, glu)
-        into[glu_class.name] = object   -- Add the instance to `instance`
+        into[glu_class.name] = object -- Add the instance to `instance`
         copy_properties(glu_class, into)
         return object
       end
@@ -182,8 +185,13 @@ if not _G["Glu"] then
     assert(table.size(registeredGlasses) > 0, "No modules found in " .. pkg)
 
     function instance.getPackageName() return instance.package_name end
+
     function instance.has_object(name) return instance.get_object(name) ~= nil end
-    function instance.get_object(name) return instance[name] and type(instance[name]) == "table" and instance[name] or nil end
+
+    function instance.get_object(name)
+      return instance[name] and type(instance[name]) == "table" and instance[name] or
+          nil
+    end
 
     -- OOB Validation functions
     -- Standard validation functions
@@ -500,7 +508,7 @@ if not _G["Glu"] then
         -- Add the instance to the container
         container.objects[instance_name] = self
         if table.index_of(table.keys(G), "setup") and
-          type(G.setup) == "function" then
+            type(G.setup) == "function" then
           -- Initialize the instance
           G.setup(___, self, instance_opts, container)
         end
@@ -561,6 +569,8 @@ if not _G["Glu"] then
   }
   Void.__index = Void
   Glu.void = Void
+
+  return Glu
 end
 
 -- TODO: maybe i should add a function, new, to the instance, so that
