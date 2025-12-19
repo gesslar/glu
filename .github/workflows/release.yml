@@ -21,6 +21,7 @@ jobs:
       - name: "create version file"
         id: create_version_file
         run: |
+          mkdir -p build
           echo "filename=${{ env.mfile_package }}_version.txt" >> $GITHUB_ENV
           echo "${{ env.mfile_version }}" > "${{ env.mfile_package }}_version.txt"
 
