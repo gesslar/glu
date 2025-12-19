@@ -23,7 +23,7 @@ jobs:
         run: |
           mkdir -p build
           echo "filename=${{ env.mfile_package }}_version.txt" >> $GITHUB_ENV
-          echo "${{ env.mfile_version }}" > "${{ env.mfile_package }}_version.txt"
+          echo "${{ env.mfile_version }}" > "build/${{ env.mfile_package }}_version.txt"
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -32,8 +32,8 @@ jobs:
 
       - name: Build Concatenated and Minified Versions
         run: |
-          python mini.py src/scripts mini/Glu.min.lua
-          python mini.py src/scripts mini/Glu.single.lua --no-minify
+          python mini.py src/scripts build/Glu.min.lua
+          python mini.py src/scripts build/Glu.single.lua --no-minify
 
       - name: Build With Muddler
         uses: demonnic/build-with-muddler@main
@@ -42,7 +42,7 @@ jobs:
 
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "build/${{ env.mfile_package }}.mpackage,mini/Glu.min.lua,mini/Glu.single.lua,${{ env.filename }}"
+          artifacts: "build/${{ env.mfile_package }}.mpackage,build/Glu.min.lua,build/Glu.single.lua,build/${{ env.filename }}"
           allowUpdates: true
           bodyFile: "./README.md"
           tag: ${{ env.mfile_version }}
