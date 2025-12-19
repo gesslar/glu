@@ -4,9 +4,10 @@
 -- DateClass
 ------------------------------------------------------------------------------
 
-if false then -- ensure that functions do not get defined
+---@class DateClass
+date = {}
 
-  ---@class DateClass
+if false then -- ensure that functions do not get defined
 
   ---Converts a number of seconds into a human-readable string. By default, the
   ---result is returned as a table of three strings. However, if the `as_string`

@@ -4,9 +4,10 @@
 -- Glu
 ------------------------------------------------------------------------------
 
-if false then -- ensure that functions do not get defined
+---@class Glu
+Glu = {}
 
-  ---@class Glu
+if false then -- ensure that functions do not get defined
 
   ---Instantiate a new Glu instance. Can be invoked by its class name or
   ---by the `new` function.

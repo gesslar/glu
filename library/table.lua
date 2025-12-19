@@ -4,9 +4,10 @@
 -- TableClass
 ------------------------------------------------------------------------------
 
-if false then -- ensure that functions do not get defined
+---@class TableClass
+table = {}
 
-  ---@class TableClass
+if false then -- ensure that functions do not get defined
 
   ---Adds a second associative table to a first associative table, merging the
   ---second table into the first.

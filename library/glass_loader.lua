@@ -4,9 +4,10 @@
 -- GlassLoaderClass
 ------------------------------------------------------------------------------
 
-if false then -- ensure that functions do not get defined
+---@class GlassLoaderClass
+glass_loader = {}
 
-  ---@class GlassLoaderClass
+if false then -- ensure that functions do not get defined
 
   --- Loads a glass script from a path or url.
   ---@example

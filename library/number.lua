@@ -4,9 +4,10 @@
 -- NumberClass
 ------------------------------------------------------------------------------
 
-if false then -- ensure that functions do not get defined
+---@class NumberClass
+number = {}
 
-  ---@class NumberClass
+if false then -- ensure that functions do not get defined
 
   ---Calculates the average of a list of numbers. The input can be a single
   ---table of numbers or multiple numbers as individual arguments.

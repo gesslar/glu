@@ -4,9 +4,10 @@
 -- PreferencesClass
 ------------------------------------------------------------------------------
 
-if false then -- ensure that functions do not get defined
+---@class PreferencesClass
+preferences = {}
 
-  ---@class PreferencesClass
+if false then -- ensure that functions do not get defined
 
   ---Loads preferences from a file. If a package name is provided, it will be
   ---used to construct the path. Otherwise, the file will be loaded from the

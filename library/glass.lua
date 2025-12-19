@@ -4,9 +4,10 @@
 -- Glass
 ------------------------------------------------------------------------------
 
-if false then -- ensure that functions do not get defined
+---@class Glass
+Glass = {}
 
-  ---@class Glass
+if false then -- ensure that functions do not get defined
 
   ---Register a class with the Glu framework.
   ---

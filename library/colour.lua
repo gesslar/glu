@@ -4,8 +4,10 @@
 -- ColourClass
 ------------------------------------------------------------------------------
 
+---@class ColourClass
+colour = {}
+
 if false then -- ensure that functions do not get defined
-  ---@class ColourClass
 
   ---Interpolates between two RGB colours based on a step value. Functionally,
   ---it takes two colours and returns a third colour somewhere between the

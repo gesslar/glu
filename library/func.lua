@@ -4,9 +4,10 @@
 -- FuncClass
 ------------------------------------------------------------------------------
 
-if false then -- ensure that functions do not get defined
+---@class FuncClass
+func = {}
 
-  ---@class FuncClass
+if false then -- ensure that functions do not get defined
 
   --- Delays the execution of a function.
   ---

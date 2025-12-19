@@ -4,8 +4,10 @@
 -- DependencyQueueClass
 ------------------------------------------------------------------------------
 
+---@class DependencyQueueClass
+dependency_queue = {}
+
 if false then -- ensure that functions do not get defined
-  ---@class DependencyQueueClass
 
   --- Instantiates a new dependency queue for use with DependencyClass. When
   --- the queue is executed, it will install all the dependencies in the order

@@ -1,0 +1,40 @@
+{
+  "runtime": {
+    "version": "Lua 5.1"
+  },
+  "diagnostics": {
+    "globals": [
+      "colour",
+      "conditions",
+      "date",
+      "dependency_queue",
+      "fd",
+      "func",
+      "glass_loader",
+      "http",
+      "http_request",
+      "http_response",
+      "number",
+      "queue",
+      "queue_stack",
+      "regex",
+      "same",
+      "string",
+      "table",
+      "test",
+      "test_runner",
+      "timer",
+      "try",
+      "url",
+      "version",
+      "queuable",
+      "Glu",
+      "Glass"
+    ]
+  },
+  "workspace": {
+    "library": [
+      "library"
+    ]
+  }
+}
