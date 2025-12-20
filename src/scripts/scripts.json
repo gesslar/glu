@@ -26,6 +26,12 @@
   {
     "isActive": "yes",
     "isFolder": "no",
+    "name": "command_queue",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
     "name": "date",
     "script": ""
   },
@@ -69,6 +75,12 @@
     "isActive": "yes",
     "isFolder": "no",
     "name": "number",
+    "script": ""
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "preferences",
     "script": ""
   },
   {

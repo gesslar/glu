@@ -111,13 +111,15 @@ if not _G["Glu"] then
         return object
       end
     end
-
     return instantiate(glu_instance, glass, instance_opts, container)
   end
 
   function Glu.new(pkg, module_dir_name)
     assert(type(pkg) == "string", "Package name must be a string.")
     assert(type(module_dir_name) == "string" or module_dir_name == nil, "Module directory name must be a string or nil.")
+
+    -- For single-file distributions, module_dir_name can be nil and glasses
+    -- are already registered when the file is loaded
 
     local instance = {
       name = "Glu",
@@ -153,12 +155,20 @@ if not _G["Glu"] then
 
     setmetatable(instance, Glu)
 
-    -- If the glu_modules table is empty, it means that we weren't loaded
-    -- from a package with Mudlet. So, we have to detect the modules ourselves.
+    -- If registeredGlasses is empty, it means that we weren't loaded
+    -- from a package with Mudlet. So, we have to detect the glasses ourselves.
+    -- This only applies when we have a module_dir_name (multi-file distribution).
+    -- In single-file distributions, glasses are already registered.
     if table.size(registeredGlasses) == 0 then
+      if not module_dir_name then
+        error("No glasses registered and no module_dir_name provided. " ..
+          "For single-file distributions, ensure all Glass classes are registered before calling Glu.new(). " ..
+          "For multi-file distributions, provide module_dir_name parameter.")
+      end
+
       -- In the event that we have added Glu in our package as resource files,
-      -- we need to detect those modules and load them.
-      local function detectModules(module_path, require_path)
+      -- we need to detect those glasses and load them.
+      local function detectGlasses(module_path, require_path)
         local filter = "glu.lua"
 
         for file in lfs.dir(module_path) do
@@ -175,14 +185,15 @@ if not _G["Glu"] then
       local pkg_path = getMudletHomeDir() .. "/" .. pkg
       local module_path = pkg_path .. "/" .. module_dir_name
       local require_path = pkg .. "/" .. module_dir_name
-      assert(type(module_dir_name) == "string", "Module directory name must be a string")
+
       assert(lfs.attributes(pkg_path), "Package directory " .. pkg .. " does not exist")
       assert(lfs.attributes(module_path), "Module directory " .. module_dir_name .. " does not exist in package " .. pkg)
-      detect_modules(module_path, require_path)
+
+      detectGlasses(module_path, require_path)
     end
 
-    -- Either way, we should have modules by now.
-    assert(table.size(registeredGlasses) > 0, "No modules found in " .. pkg)
+    -- Either way, we should have glasses by now.
+    assert(table.size(registeredGlasses) > 0, "No glasses found in " .. pkg)
 
     function instance.getPackageName() return instance.package_name end
 
@@ -393,8 +404,6 @@ if not _G["Glu"] then
       }
 
       function G.new(instance_opts, container)
-        print("Hi from G.new")
-
         -- The instance_opts must be a table or nil
         assert(type(instance_opts) == "table" or instance_opts == nil,
           "`instance_opts` must be a table or nil")
@@ -448,8 +457,7 @@ if not _G["Glu"] then
           local adopted_methods = {}
 
           for class_name, adoption in pairs(class_opts.adopts) do
-            print("Adopting from " .. class_name)
-            printError("", true)
+            -- printError("", true)
             local master_object = ___.get_object(class_name)
             if not master_object then
               error("Cannot adopt from class `" .. class_name .. "`: class not found")
@@ -457,7 +465,6 @@ if not _G["Glu"] then
             -- display(master_object)
             -- Add each method from the donor class
             for _, method_name in ipairs(adoption.methods) do
-              print("Adopting method " .. method_name)
               if type(master_object[method_name]) ~= "function" then
                 error("Cannot adopt method `" .. method_name .. "` from `" ..
                   class_name .. "`: method not found")
@@ -569,16 +576,4 @@ if not _G["Glu"] then
   }
   Void.__index = Void
   Glu.void = Void
-
-  return Glu
 end
-
--- TODO: maybe i should add a function, new, to the instance, so that
--- when someone call new, it automatically passes the instance of Glu
--- as the first argument, and then the rest of the arguments are for
--- the actual class constructor. That way, we always have the instance
--- of Glu available to Glass. Verify this with Claude tomorrow.
--- In the metatable. But the user doesn't need to pass Glu as the first
--- argument.
--- This way, we can always find the Void, because the anchor is always
--- the Glu instance.

@@ -1,12 +1,12 @@
 {
   "name": "glu",
-  "version": "1.15.2",
+  "version": "1.16.0",
   "description": "![Y2K Compliant](https://img.shields.io/badge/Y2K-Compliant-success?style=flat&logo=data:...)",
   "main": "index.js",
   "scripts": {
     "build": "(\nset -e pipefail\nmuddle\nnpm run build:single\nnpm run build:min\n)",
-    "build:single": "python mini.py src/scripts build/Glu-single.lua --no-minify",
-    "build:min": "python mini.py src/scripts build/Glu-min.lua",
+    "build:single": "python unify.py src/scripts build/Glu-single.lua",
+    "build:min": "python unify.py src/scripts build/tmp/Glu-unified.lua && python mini.py build/tmp/Glu-unified.lua build/Glu-min.lua",
     "clean": "rm -rf build/Glu-*.lua build/filtered build/tmp",
     "release": "gh workflow run release.yml",
     "docs": "gh workflow run wiki_documentation.yml"
