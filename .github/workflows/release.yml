@@ -2,6 +2,11 @@ name: Build project using muddler and upload artifact
 
 on:
   workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -11,19 +16,42 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Determine Version
+        id: version_check
+        uses: gesslar/new-version-questionmark@main
+        with:
+          source: package.json
+          version_pattern: v\d+\.\d+\.\d+
+
+      - name: Check if new version
+        id: is_new_version
+        run: |
+          if [ "${{ steps.version_check.outputs.updated_version }}" != "no changes" ]; then
+            echo "is_new=true" >> $GITHUB_OUTPUT
+            echo "New version detected: ${{ steps.version_check.outputs.updated_version }}"
+          else
+            echo "is_new=false" >> $GITHUB_OUTPUT
+            echo "No version change detected"
+          fi
 
       - name: JSON to variables
+        if: steps.is_new_version.outputs.is_new == 'true'
         uses: antifree/json-to-variables@v1.3.0
         with:
           filename: "./mfile"
           prefix: "mfile"
 
       - name: Build With Muddler
+        if: steps.is_new_version.outputs.is_new == 'true'
         uses: demonnic/build-with-muddler@main
         with:
           muddlerVersion: LATEST
 
       - name: "create version file"
+        if: steps.is_new_version.outputs.is_new == 'true'
         id: create_version_file
         run: |
           mkdir -p build
@@ -31,16 +59,19 @@ jobs:
           echo "${{ env.mfile_version }}" > "build/${{ env.mfile_package }}_version.txt"
 
       - name: Set up Python
+        if: steps.is_new_version.outputs.is_new == 'true'
         uses: actions/setup-python@v6
         with:
           python-version: "3.x"
 
       - name: Build Concatenated and Minified Versions
+        if: steps.is_new_version.outputs.is_new == 'true'
         run: |
-          python mini.py src/scripts build/Glu-min.lua
-          python mini.py src/scripts build/Glu-single.lua --no-minify
+          npm run build:single
+          npm run build:min
 
       - uses: ncipollo/release-action@v1
+        if: steps.is_new_version.outputs.is_new == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           artifacts: "build/${{env.mfile_package}}.mpackage,build/Glu-min.lua,build/Glu-single.lua,build/${{env.filename}}"
           allowUpdates: true
