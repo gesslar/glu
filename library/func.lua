@@ -8,7 +8,6 @@
 func = {}
 
 if false then -- ensure that functions do not get defined
-
   --- Delays the execution of a function.
   ---
   ---@example
@@ -47,5 +46,4 @@ if false then -- ensure that functions do not get defined
   ---@param interval number? - The interval between repetitions (Optional. Default is 1).
   ---@param times number? - The number of times to repeat the function (Optional. Default is 1).
   function func.repeater(func, interval, times, ...) end
-
 end

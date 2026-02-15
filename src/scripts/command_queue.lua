@@ -41,10 +41,32 @@ local CommandQueueClass = Glu.glass.register({
 
         if ___.string.starts_with(v, "lua ") then
           local space = ___.string.index_of(v, "\\s")
-          local command = v:sub(space + 1)
-          f = function() loadstring(command)() end
+          if not space then
+            f = function()
+              printError("[ CommandQueue ] Invalid lua command: " .. tostring(v))
+            end
+          else
+            local command = v:sub(space + 1)
+            f = function()
+              local ok, err = pcall(function()
+                local chunk, load_err = loadstring(command)
+                if not chunk then
+                  error(load_err)
+                end
+                return chunk()
+              end)
+              if not ok then
+                printError("[ CommandQueue ] Lua error: " .. tostring(err))
+              end
+            end
+          end
         else
-          f = function() send(v) end
+          f = function()
+            local ok, err = pcall(function() send(v) end)
+            if not ok then
+              printError("[ CommandQueue ] Send error: " .. tostring(err))
+            end
+          end
         end
 
         return { func = f }

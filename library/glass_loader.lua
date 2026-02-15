@@ -8,7 +8,6 @@
 glass_loader = {}
 
 if false then -- ensure that functions do not get defined
-
   --- Loads a glass script from a path or url.
   ---@example
   ---```lua
@@ -28,5 +27,4 @@ if false then -- ensure that functions do not get defined
   ---@param opts.execute boolean? - Whether to execute the glass script.
   ---@return any - The result of the glass script.
   function glass_loader.load_glass(opts) end
-
 end

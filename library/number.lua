@@ -8,7 +8,6 @@
 number = {}
 
 if false then -- ensure that functions do not get defined
-
   ---Calculates the average of a list of numbers. The input can be a single
   ---table of numbers or multiple numbers as individual arguments.
   ---
@@ -197,5 +196,4 @@ if false then -- ensure that functions do not get defined
   ---@param ... number|number[] - The numbers to sum.
   ---@return number # The sum of the numbers.
   function number.sum(...) end
-
 end

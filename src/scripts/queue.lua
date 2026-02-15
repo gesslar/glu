@@ -42,7 +42,7 @@ local QueueClass = Glu.glass.register({
       for _, q in pairs(self.queues) do
         if q.id == id then return q end
       end
-      return nil, f"Queue not found for id `{id}`."
+      return nil, f "Queue not found for id `{id}`."
     end
 
     --- Add a function to the end of a queue by its identifier.

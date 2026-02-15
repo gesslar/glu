@@ -8,7 +8,6 @@
 colour = {}
 
 if false then -- ensure that functions do not get defined
-
   ---Interpolates between two RGB colours based on a step value. Functionally,
   ---it takes two colours and returns a third colour somewhere between the
   ---two colours, based on the step value. Generally used to fade between two
@@ -347,5 +346,4 @@ if false then -- ensure that functions do not get defined
   ---@param rgb table - The RGB colour as a table with three elements: red, green, and blue.
   ---@return table # The contrasting colour as a table with three elements: red, green, and blue.
   function colour.contrast(rgb) end
-
 end

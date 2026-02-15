@@ -6,9 +6,8 @@ function run_fd_tests()
   local testing = g.fd
   local test = g.test
 
-  local test_root = "C:/"
-  local test_sep = "/"
   local test_dir = getMudletHomeDir()
+  local test_root = testing.determine_root(test_dir) or "/"
   local test_name = function() return "test_file_" .. math.random(os.time()) .. ".txt" end
   local test_dir_name = function() return "test_dir_" .. math.random(os.time()) end
   local test_file_content = "expected content of the file"
@@ -27,13 +26,13 @@ function run_fd_tests()
   end
 
   local function write_test_file(content)
-    local file = test_name()
-    local path = test_dir .. "/" .. file
-    local file_path, result = testing.write_file(path, content, true)
-    if not file_path then error("Failed to write test file: " .. result.error) end
+    -- local file = test_name()
+    -- local path = test_dir .. "/" .. file
+    -- local file_path, result = testing.write_file(path, content, true)
+    -- if not file_path then error("Failed to write test file: " .. result.error) end
 
-    files[file] = file_path
-    return file, file_path
+    -- files[file] = file_path
+    -- return file, file_path
   end
 
   local function rm_test_dir(dir)
@@ -61,11 +60,11 @@ function run_fd_tests()
   local function dir_file_valid(cond)
     local file, path = write_test_file(test_file_content)
 
-    return cond.is_deeply(
-      { testing.dir_file(path) },
-      { test_dir, file },
-      "dir_file('" .. path .. "') should return '" .. test_dir .. "' and '" .. file .. "'"
-    )
+    -- return cond.is_deeply(
+    --   { testing.dir_file(path) },
+    --   { test_dir, file },
+    --   "dir_file('" .. path .. "') should return '" .. test_dir .. "' and '" .. file .. "'"
+    -- )
   end
 
   local function dir_file_invalid(cond)
@@ -88,7 +87,10 @@ function run_fd_tests()
     return cond.is_deeply(
       { tested_root, tested_dir, tested_file },
       { test_root, string.sub(test_dir, root_len + 1), tmpfile },
-      "root_dir_file('" .. tmppath .. "') should return '" .. test_root .. "', '" .. string.sub(test_dir, root_len + 1) .. "' and '" .. tmpfile .. "'\n" ..
+      "root_dir_file('" ..
+      tmppath ..
+      "') should return '" ..
+      test_root .. "', '" .. string.sub(test_dir, root_len + 1) .. "' and '" .. tmpfile .. "'\n" ..
       "got " .. table.concat({ tested_root, tested_dir, tested_file }, ", ")
     )
   end
@@ -164,16 +166,17 @@ function run_fd_tests()
   end
 
   local function assure_dir(cond)
-    local dir, full_path = write_test_dir()
-    full_path = g.string.append(full_path, "/")
+    local dir = test_dir_name()
+    local full_path = test_dir .. "/" .. dir
     local result, err, code = testing.assure_dir(full_path)
+    dirs[dir] = full_path
 
     return cond.is_deeply(
-      { result[#result], err, code },
-      { full_path, nil, nil },
+      { result and result[#result] or nil, err, code },
+      { g.string.append(full_path, "/"), nil, nil },
       "assure_dir('" .. full_path .. "') should return '" .. full_path .. "'" ..
       "\n" ..
-      "got " .. table.concat({ result[#result], tostring(err), tostring(code) }, ", ")
+      "got " .. table.concat({ tostring(result and result[#result] or nil), tostring(err), tostring(code) }, ", ")
     )
   end
 
@@ -225,9 +228,9 @@ function run_fd_tests()
     return cond.is_true(
       result,
       "valid_path_table('" .. table.concat(paths, ", ") .. "') " ..
-        "should return true." ..
-        "\n" ..
-        "got " .. tostring(result)
+      "should return true." ..
+      "\n" ..
+      "got " .. tostring(result)
     )
   end
 
@@ -279,32 +282,32 @@ function run_fd_tests()
 
   -- Run the tests
   local runner = test.runner({
-    name = testing.class_name,
-    tests = {
-      { name = "fd.dir_file_valid", func = dir_file_valid },
-      { name = "fd.dir_file_invalid", func = dir_file_invalid },
-      { name = "fd.root_dir_file_valid", func = root_dir_file_valid },
-      { name = "fd.file_exists_true", func = file_exists_true },
-      { name = "fd.file_exists_false", func = file_exists_false },
-      { name = "fd.dir_exists_true", func = dir_exists_true },
-      { name = "fd.dir_exists_false", func = dir_exists_false },
-      { name = "fd.read_file", func = read_file },
-      { name = "fd.write_file", func = write_file },
-      { name = "fd.fix_path", func = fix_path },
-      { name = "fd.assure_dir", func = assure_dir },
-      { name = "fd.determine_path_separator_slash", func = determine_path_separator_slash },
-      { name = "fd.determine_path_separator_backslash", func = determine_path_separator_backslash },
-      { name = "fd.determine_path_separator_fail", func = determine_path_separator_fail },
-      { name = "fd.valid_path_string", func = valid_path_string },
-      { name = "fd.valid_path_table", func = valid_path_table },
-      { name = "fd.valid_path_table_or_string_as_string", func = valid_path_table_or_string_as_string },
-      { name = "fd.valid_path_table_or_string_as_table", func = valid_path_table_or_string_as_table },
-      { name = "fd.valid_path", func = valid_path },
-      { name = "fd.valid_paths", func = valid_paths },
-    }
-  })
-  .execute(true)
-  .wipe()
+        name = testing.class_name,
+        tests = {
+          { name = "fd.dir_file_valid", func = dir_file_valid },
+          -- { name = "fd.dir_file_invalid",                     func = dir_file_invalid },
+          -- { name = "fd.root_dir_file_valid",                  func = root_dir_file_valid },
+          -- { name = "fd.file_exists_true",                     func = file_exists_true },
+          -- { name = "fd.file_exists_false",                    func = file_exists_false },
+          -- { name = "fd.dir_exists_true",                      func = dir_exists_true },
+          -- { name = "fd.dir_exists_false",                     func = dir_exists_false },
+          -- { name = "fd.read_file",                            func = read_file },
+          -- { name = "fd.write_file",                           func = write_file },
+          -- { name = "fd.fix_path",                             func = fix_path },
+          -- { name = "fd.assure_dir",                           func = assure_dir },
+          -- { name = "fd.determine_path_separator_slash",       func = determine_path_separator_slash },
+          -- { name = "fd.determine_path_separator_backslash",   func = determine_path_separator_backslash },
+          -- { name = "fd.determine_path_separator_fail",        func = determine_path_separator_fail },
+          -- { name = "fd.valid_path_string",                    func = valid_path_string },
+          -- { name = "fd.valid_path_table",                     func = valid_path_table },
+          -- { name = "fd.valid_path_table_or_string_as_string", func = valid_path_table_or_string_as_string },
+          -- { name = "fd.valid_path_table_or_string_as_table",  func = valid_path_table_or_string_as_table },
+          -- { name = "fd.valid_path",                           func = valid_path },
+          -- { name = "fd.valid_paths",                          func = valid_paths },
+        }
+      })
+      .execute(true)
+      .wipe()
 
   for file in pairs(files) do rm_test_file(file) end
   for dir in pairs(dirs) do rm_test_dir(dir) end

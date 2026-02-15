@@ -73,7 +73,7 @@ local StringClass = Glu.glass.register({
     --- ```
     function self.strip_linebreaks(str)
       ___.v.type(str, "string", 1, false)
-      local result, found, subbed = rex.gsub(str, "[\\r\\n]", "")
+      local result = str:gsub("[\r\n]", "")
       return result or str
     end
 
@@ -367,7 +367,7 @@ local StringClass = Glu.glass.register({
           if from and to then
             if not nearest_from or from < nearest_from then
               nearest_from, nearest_match, nearest_token =
-              from, work:sub(from, to), tokens[i] or default_token
+                  from, work:sub(from, to), tokens[i] or default_token
             end
           end
         end
@@ -377,10 +377,11 @@ local StringClass = Glu.glass.register({
         local match = nearest_match or work
         nearest_from = nearest_from or #work
         prematch = work:sub(1, nearest_from - 1 or nil)
-        print("Prematch = `" .. tostring(prematch) .. "` with token `" .. tostring(token) .. "` and match `" .. tostring(match) .. "`")
+        print("Prematch = `" ..
+        tostring(prematch) .. "` with token `" .. tostring(token) .. "` and match `" .. tostring(match) .. "`")
 
         work = work:sub(nearest_from + #match) or ""
---[[
+        --[[
         if nearest_from then
           token = nearest_token or default_token
           match = nearest_match or work

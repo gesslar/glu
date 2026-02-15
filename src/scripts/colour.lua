@@ -1,7 +1,7 @@
 local ColourClass = Glu.glass.register({
   class_name = "ColourClass",
   name = "colour",
-  dependencies = {"number"},
+  dependencies = { "number" },
   setup = function(___, self)
     local v = self.v
     --- Interpolates between two RGB colours based on a step value. Functionally,
@@ -50,8 +50,8 @@ local ColourClass = Glu.glass.register({
       local valid_methods = table.keys(lerps)
       local lerp_func = lerps[method]
       ___.v.test(lerp_func ~= nil,
-        f"Invalid interpolation method: {method}. Must be one of: " ..
-          table.concat(valid_methods, ", "), 4, false)
+        f "Invalid interpolation method: {method}. Must be one of: " ..
+        table.concat(valid_methods, ", "), 4, false)
 
       local hsl1 = self.rgb_to_hsl(rgb1)
       local hsl2 = self.rgb_to_hsl(rgb2)
@@ -60,14 +60,17 @@ local ColourClass = Glu.glass.register({
       -- Special handling for hue to ensure we take shortest path around the color wheel
       local h1, h2 = hsl1[1], hsl2[1]
       local diff = h2 - h1
-      if diff > 180 then h2 = h2 - 360
-      elseif diff < -180 then h2 = h2 + 360 end
+      if diff > 180 then
+        h2 = h2 - 360
+      elseif diff < -180 then
+        h2 = h2 + 360
+      end
 
       local h = lerp_func(h1, h2, t) % 360
       local s = lerp_func(hsl1[2], hsl2[2], t)
       local l = lerp_func(hsl1[3], hsl2[3], t)
 
-      return self.hsl_to_rgb({h, s, l})
+      return self.hsl_to_rgb({ h, s, l })
     end
 
     function self.rgb_to_hsl(rgb)
@@ -227,15 +230,15 @@ local ColourClass = Glu.glass.register({
     end
 
     --- Darkens a colour by a given amount.
-      ---
-      --- @param rgb table - The RGB colour as a table with three elements: red, green, and blue.
-      --- @param amount number - The amount to darken the colour by. (Optional, defaults to 30)
-      --- @return table - The darkened RGB colour as a table with three elements: red, green, and blue.
-      ---
-      --- @example
-      --- ```lua
-      --- colour.darken({100,100,100},50)
-      --- -- {50, 50, 50}
+    ---
+    --- @param rgb table - The RGB colour as a table with three elements: red, green, and blue.
+    --- @param amount number - The amount to darken the colour by. (Optional, defaults to 30)
+    --- @return table - The darkened RGB colour as a table with three elements: red, green, and blue.
+    ---
+    --- @example
+    --- ```lua
+    --- colour.darken({100,100,100},50)
+    --- -- {50, 50, 50}
     --- ```
     function self.darken(rgb, amount)
       return self.adjust_colour(rgb, amount, false)

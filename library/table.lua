@@ -8,7 +8,6 @@
 table = {}
 
 if false then -- ensure that functions do not get defined
-
   ---Adds a second associative table to a first associative table, merging the
   ---second table into the first.
   ---
@@ -190,7 +189,6 @@ if false then -- ensure that functions do not get defined
   ---@param fn function - The predicate function to satisfy.
   ---@return number|nil # The index of the first element that satisfies the predicate function, or nil if no element satisfies the predicate.
   function table.find(tbl, fn) end
-
 
   ---Returns the index of the last element in a table that satisfies a
   ---predicate function.
@@ -640,5 +638,4 @@ if false then -- ensure that functions do not get defined
   ---@param ... table - The tables to zip together.
   ---@return table # A new table containing the zipped tables.
   function table.zip(...) end
-
 end

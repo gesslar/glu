@@ -8,7 +8,6 @@
 preferences = {}
 
 if false then -- ensure that functions do not get defined
-
   ---Loads preferences from a file. If a package name is provided, it will be
   ---used to construct the path. Otherwise, the file will be loaded from the
   ---profile directory.
@@ -39,5 +38,4 @@ if false then -- ensure that functions do not get defined
   ---@param file string - The file name.
   ---@param prefs table - The preferences to save.
   function preferences.save(pkg, file, prefs) end
-
 end

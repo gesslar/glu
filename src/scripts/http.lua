@@ -130,7 +130,7 @@ local HttpClass = Glu.glass.register({
     --- - `headers` (`table`) - The headers to send with the request.
     ---
     --- @param options table - The options for the request.
-    --- @param cb function|nil - The callback function.
+    --- @param cb function - The callback function.
     --- @return table - The HTTP request object.
     --- @example
     --- ```lua
