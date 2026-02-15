@@ -2,9 +2,10 @@ local TestRunnerClass = Glu.glass.register({
   name = "test_runner",
   class_name = "TestRunnerClass",
   call = "new_runner",
-  dependencies = { "table" },
+  dependencies = { "table", "conditions", "colour" },
   setup = function(___, self)
     function self.new_runner(opts, owner)
+      opts = opts or {}
       self.id = ___.id()
       self.tests = {}
       self.colours = {
@@ -25,6 +26,8 @@ local TestRunnerClass = Glu.glass.register({
       local resets = { passes = 0, fails = 0, total = 0 }
 
       function self.add(name, test)
+        ___.v.type(name, "string", 1, false)
+        ___.v.type(test, "function", 2, false)
         table.insert(self.tests, {
           name = name,
           test = test,
@@ -49,12 +52,11 @@ local TestRunnerClass = Glu.glass.register({
       end
 
       if opts.tests then
-        repeat
-          local name, test = unpack(
-            ___.table.values(table.remove(opts.tests, 1))
-          )
+        for _, entry in ipairs(opts.tests) do
+          local name = entry.name or entry[1]
+          local test = entry.func or entry.test or entry[2]
           self.add(name, test)
-        until table.size(opts.tests) == 0
+        end
       end
 
       function self.print()
@@ -76,8 +78,8 @@ local TestRunnerClass = Glu.glass.register({
       end
 
       function self.wipe()
-        for _, v in pairs(self.tests) do
-          v = nil
+        for i in pairs(self.tests) do
+          self.tests[i] = nil
         end
 
         return self

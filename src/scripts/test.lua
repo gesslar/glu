@@ -7,6 +7,7 @@ local TestClass = Glu.glass.register({
     local testers = {}
 
     function self.runner(opts)
+      opts = opts or {}
       local runner = ___.test_runner(opts, self)
 
       testers[runner.id] = runner

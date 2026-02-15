@@ -1,7 +1,7 @@
 local FdClass = Glu.glass.register({
   class_name = "FdClass",
   name = "fd",
-  dependencies = { "table"},
+  dependencies = { "table" },
   setup = function(___, self)
     --- Splits a path into a directory and file.
     ---
@@ -25,7 +25,7 @@ local FdClass = Glu.glass.register({
       path, _ = self.fix_path(path)
 
       local dir, file = rex.match(path, "^(.*)/(.*)$")
-      if #{dir, file} == 2 then
+      if #{ dir, file } == 2 then
         return dir, file
       end
 
@@ -264,7 +264,7 @@ local FdClass = Glu.glass.register({
 
       path, _ = self.fix_path(path)
 
-      local parts = {rex.match(path, "^([a-zA-Z]:(\\\\{1,2}|/{1,2})|/{1,2})(?:.*)$")}
+      local parts = { rex.match(path, "^([a-zA-Z]:(\\\\{1,2}|/{1,2})|/{1,2})(?:.*)$") }
       if not parts then return nil end
 
       local root, slash = parts[1], parts[2] or ""
@@ -387,7 +387,7 @@ local FdClass = Glu.glass.register({
 
         assert(self.valid_path_string(path), "Invalid value. " ..
           "Expected valid path string, got " .. path .. " in\n" ..
-            ___.get_last_traceback_line())
+          ___.get_last_traceback_line())
       end,
 
       path_table = function(paths, argument_index, allow_nil)
@@ -399,7 +399,7 @@ local FdClass = Glu.glass.register({
 
         assert(self.valid_path_table(paths), "Invalid value. " ..
           "Expected valid path table, got " .. ___.table.to_string(paths) ..
-            " in\n" .. ___.get_last_traceback_line())
+          " in\n" .. ___.get_last_traceback_line())
       end
     }
   end

@@ -63,21 +63,25 @@ local ConditionsClass = Glu.glass.register({
       assert(type(message) == "string" or message == nil, "Expected a string or nil as the second argument")
       assert(type(check) == "function" or check == nil, "Expected a function or nil as the third argument")
 
-      local test_success, test_err = pcall(func)
-      local error_success, error_err
+      local ok, err = pcall(func)
+      if ok then
+        return self.is(false,
+          message or "Expected function to throw an error but it did not.")
+      end
 
-      if not test_success then
-        if(check) then
-          error_success, error_err = pcall(check, test_err, self)
-        else
-          error_success, error_err = true, nil
+      if check then
+        local check_ok, check_result = pcall(check, err, self)
+        if not check_ok then
+          return self.is(false,
+            message or ("Error checker failed: " .. tostring(check_result)))
+        end
+        if check_result == false then
+          return self.is(false,
+            message or "Error checker rejected the error message.")
         end
       end
 
-      -- If `pcall` fails (returns false), we know the function threw an error
-      return self.is(not error_success,
-        message or f "Expected function to throw an error but it did not. Error: {error_err}"
-      )
+      return self.is(true)
     end
 
     --- Checks if two values are equal.

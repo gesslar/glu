@@ -24,15 +24,15 @@ local NumberClass = Glu.glass.register({
     end
 
     --- Clamps a number within a range.
-      --- @param num number - The number to clamp.
-      --- @param min number - The minimum allowed value.
-      --- @param max number - The maximum allowed value.
-      --- @return number - The clamped number.
-      --- @example
-      --- ```lua
-      --- number.clamp(10, 1, 100)
-      --- -- 10
-      --- ```
+    --- @param num number - The number to clamp.
+    --- @param min number - The minimum allowed value.
+    --- @param max number - The maximum allowed value.
+    --- @return number - The clamped number.
+    --- @example
+    --- ```lua
+    --- number.clamp(10, 1, 100)
+    --- -- 10
+    --- ```
     function self.clamp(num, min, max)
       ___.v.type(num, "number", 1, false)
       ___.v.type(min, "number", 2, false)
@@ -42,15 +42,15 @@ local NumberClass = Glu.glass.register({
     end
 
     --- Linearly interpolates between two numbers.
-      --- @param a number - The starting value.
-      --- @param b number - The ending value.
-      --- @param t number - The interpolation factor (between 0 and 1).
-      --- @return number - The interpolated value.
-      --- @example
-      --- ```lua
-      --- number.lerp(0, 100, 0.5)
-      --- -- 50
-      --- ```
+    --- @param a number - The starting value.
+    --- @param b number - The ending value.
+    --- @param t number - The interpolation factor (between 0 and 1).
+    --- @return number - The interpolated value.
+    --- @example
+    --- ```lua
+    --- number.lerp(0, 100, 0.5)
+    --- -- 50
+    --- ```
     function self.lerp(a, b, t)
       ___.v.type(a, "number", 1, false)
       ___.v.type(b, "number", 2, false)

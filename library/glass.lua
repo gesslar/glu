@@ -8,7 +8,6 @@
 Glass = {}
 
 if false then -- ensure that functions do not get defined
-
   ---Register a class with the Glu framework.
   ---
   ---The following options are available:
@@ -25,5 +24,4 @@ if false then -- ensure that functions do not get defined
   ---@param class_opts table - The class options.
   ---@return Glass # The class.
   function Glass.register(class_opts) end
-
 end

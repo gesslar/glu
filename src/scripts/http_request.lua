@@ -22,7 +22,7 @@ local HttpRequestClass = Glu.glass.register({
         local ob_id = response_data.id
         local ob = owner.find_request(ob_id)
 
-        ___.v.type(ob, "table", 0, "HTTP request not found")
+        assert(ob, "HTTP request not found")
 
         local result = {}
         if self.options.saveTo and not response_data.error then
@@ -72,11 +72,11 @@ local HttpRequestClass = Glu.glass.register({
             }
 
             local result
-            arg = only_indexed(arg)
+            local args = only_indexed({ ... })
             if rex.match(e, "sys(?:\\w+)HttpError$") then
-              result = ___.table.allocate({ "error", "url", "server" }, arg)
+              result = ___.table.allocate({ "error", "url", "server" }, args)
             elseif rex.match(e, "sys(?:\\w+)HttpDone$") then
-              result = ___.table.allocate({ "url", "data", "server" }, arg)
+              result = ___.table.allocate({ "url", "data", "server" }, args)
             else
               error("Unknown event: " .. e)
             end
@@ -90,12 +90,12 @@ local HttpRequestClass = Glu.glass.register({
 
       self.method_lc = lc
       self.method_uc = uc
-      self.custom = self.options.method == "CUSTOM"
+      self.custom = lc == "custom"
 
       local func_name = string.format("%sHTTP", lc)
       local func = _G[func_name]
 
-      ___.v.type(func, "function", 0, "HTTP method " .. func_name .. " not found")
+      assert(type(func) == "function", "HTTP method " .. func_name .. " not found")
 
       local ok, err, result = pcall(
         self.custom and

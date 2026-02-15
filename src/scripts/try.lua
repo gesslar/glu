@@ -27,6 +27,9 @@ local TryClass = Glu.glass.register({
         result = success and try_result or nil,
         caught = not success
       }
+      result.result = success and try_result or nil
+      self.result = result
+      self.caught = not success
 
       return self
     end
@@ -38,6 +41,7 @@ local TryClass = Glu.glass.register({
         error = success and nil or catch_result,
         result = not success and catch_result or nil
       }
+      self.result = result
       return self
     end
 
@@ -49,6 +53,7 @@ local TryClass = Glu.glass.register({
       if not success then
         error("Error in finally block: " .. finally_result)
       end
+      self.result = result
       return self
     end
   end

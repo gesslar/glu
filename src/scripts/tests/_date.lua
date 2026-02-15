@@ -39,14 +39,14 @@ function run_date_tests()
   end
 
   local runner = test.runner({
-    name = testing.name,
-    tests = {
-      { name = "date.shms", func = shms },
-      { name = "date.shms_as_string", func = shms_as_string },
-      { name = "date.shms_zero", func = shms_zero },
-      { name = "date.shms_negative", func = shms_negative }
-    }
-  })
-  .execute(true)
-  .wipe()
+        name = testing.name,
+        tests = {
+          { name = "date.shms",           func = shms },
+          { name = "date.shms_as_string", func = shms_as_string },
+          { name = "date.shms_zero",      func = shms_zero },
+          { name = "date.shms_negative",  func = shms_negative }
+        }
+      })
+      .execute(true)
+      .wipe()
 end

@@ -17,8 +17,9 @@ local DependencyQueueClass = Glu.glass.register({
         return
       end
 
+      local id = ___.id()
       local this = {
-        id = ___.id(),
+        id = id,
         cb = cb,
         queue = self.new_queue(),
         packages = not_installed,

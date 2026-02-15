@@ -449,6 +449,7 @@ if not _G["Glu"] then
           setmetatable(self, { __index = parent_instance })
         else
           self.__index = self
+          setmetatable(self, {})
         end
 
         -- Handle adoptions
