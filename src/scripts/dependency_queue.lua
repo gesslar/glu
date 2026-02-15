@@ -3,7 +3,7 @@ local DependencyQueueClass = Glu.glass.register({
   name = "dependency_queue",
   extends = "queue",
   call = "new_dependency_queue",
-  dependencies = {"queue", "table",},
+  dependencies = { "queue", "table", },
   setup = function(___, self)
     function self.new_dependency_queue(packages, cb)
       local installed = getPackages()

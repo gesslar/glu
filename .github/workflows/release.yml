@@ -19,6 +19,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Delete Tests from Build
+        run: |
+          rm -rf src/scripts/tests
+
       - name: Determine Version
         id: version_check
         uses: gesslar/new-version-questionmark@main

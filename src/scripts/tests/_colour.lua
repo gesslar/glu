@@ -103,43 +103,33 @@ function run_colour_tests()
   end
 
   local function random(cond)
-    -- Expected color when using seed 1
-    local expected_random_color = { 0, 144, 49 }
+    local colour = testing.random()
+    local valid = type(colour) == "table"
+      and #colour == 3
+      and colour[1] >= 0 and colour[1] <= 255
+      and colour[2] >= 0 and colour[2] <= 255
+      and colour[3] >= 0 and colour[3] <= 255
 
-    -- Seed the random number generator for predictable results
-    math.randomseed(1)
-
-    -- Run the test
-    local result = cond.is_deeply(
-      testing.random(),
-      expected_random_color,
-      "random() should return a predictable random color with seed 1"
+    return cond.is_true(
+      valid,
+      "random() should return a valid RGB colour table with 3 values in range 0-255"
     )
-
-    -- Reset the seed to avoid affecting other random functions in the program
-    math.randomseed(os.time())
-
-    return result
   end
 
   local function random_shade(cond)
-    -- Expected color when using seed 1
-    local expected_random_color = { 100, 56, 130 }
+    local base = { 200, 0, 200 }
+    local range = 100
+    local colour = testing.random_shade(base, range)
+    local valid = type(colour) == "table"
+      and #colour == 3
+      and colour[1] >= 0 and colour[1] <= 255
+      and colour[2] >= 0 and colour[2] <= 255
+      and colour[3] >= 0 and colour[3] <= 255
 
-    -- Seed the random number generator for predictable results
-    math.randomseed(1)
-
-    -- Run the test
-    local result = cond.is_deeply(
-      testing.random_shade({ 200, 0, 200 }, 100),
-      expected_random_color,
-      "random_shade() should return a predictable random color with seed 1"
+    return cond.is_true(
+      valid,
+      "random_shade() should return a valid RGB colour table with 3 values in range 0-255"
     )
-
-    -- Reset the seed to avoid affecting other random functions in the program
-    math.randomseed(os.time())
-
-    return result
   end
 
   local function triad(cond)

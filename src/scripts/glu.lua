@@ -93,7 +93,7 @@ if not _G["Glu"] then
       -- If the class has a parent, make sure it is instantiated first
       if glu_class.extends then
         local parent_name = glu_class.extends
-        local parent = into.get_glass(parent_name)
+        local parent = into.get_object(parent_name)
 
         if not parent then
           local parent_class = Glu.get_glass(parent_name)
@@ -437,7 +437,7 @@ if not _G["Glu"] then
         -- Set the __index for extension if this class extends another
         if class_opts.extends then
           local extends_class = class_opts.extends
-          local parent_instance = ___.get_glass(extends_class)
+          local parent_instance = ___.get_object(extends_class)
 
           if not parent_instance then
             error("Instance of parent class `" .. extends_class .. "` not " ..
