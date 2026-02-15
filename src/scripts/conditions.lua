@@ -155,8 +155,8 @@ local ConditionsClass = Glu.glass.register({
     --- @param message string|nil - The message to return if the values are not of the specified type
     --- @return boolean - The condition
     --- @return string|nil - The message
-    function self.is_type(value, type, message)
-      return self.is(type(value) == type, message or f "Expected `{value}` to be of type `{type}`\n")
+    function self.is_type(value, expected_type, message)
+      return self.is(type(value) == expected_type, message or f "Expected `{value}` to be of type `{expected_type}`\n")
     end
 
     --- Checks if two values are deeply equal.
