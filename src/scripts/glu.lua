@@ -273,6 +273,15 @@ if not _G["Glu"] then
       not_nil = function(value, argument_index)
         local last = instance.get_last_traceback_line()
         assert(value ~= nil, "value must not be nil for argument " .. argument_index .. " in\n" .. last)
+      end,
+      same_type = function(value1, value2, argument_index1, argument_index2)
+        argument_index1 = argument_index1 or 1
+        argument_index2 = argument_index2 or 2
+        local last = instance.get_last_traceback_line()
+        assert(type(value1) == type(value2),
+          "Type mismatch: argument " .. argument_index1 .. " is " ..
+          type(value1) .. " but argument " .. argument_index2 .. " is " ..
+          type(value2) .. " in\n" .. last)
       end
     }
 

@@ -9,10 +9,10 @@ local VersionClass = Glu.glass.register({
         return 0
       end
 
-      if type(one) == "number" then
-        return one < two and -1 or 1
-      elseif type(one) == "string" then
-        return one < two and -1 or 1
+      -- Try numeric comparison first so "9" < "10" works correctly
+      local n1, n2 = tonumber(one), tonumber(two)
+      if n1 and n2 then
+        return n1 < n2 and -1 or 1
       end
 
       return one < two and -1 or 1

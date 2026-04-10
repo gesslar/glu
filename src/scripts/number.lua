@@ -244,7 +244,7 @@ local NumberClass = Glu.glass.register({
     function self.sum(...)
       local args = ___.table.n_cast(...)
       ___.v.n_uniform(args, "number", 1, false)
-      return ___.table.n_reduce(args, function(acc, num) return acc + num end, 0)
+      return ___.table.reduce(args, function(acc, num) return acc + num end, 0)
     end
 
     --- Returns a random number between a minimum and maximum value.
@@ -303,17 +303,7 @@ local NumberClass = Glu.glass.register({
     --- -- 2
     --- ```
     function self.average(...)
-      local args = ___.table.n_cast(...)
-      local values
-
-      if #args == 1 and type(args[1]) == "table" then
-        values = args[1]
-      elseif #args > 1 then
-        values = args
-      else
-        error("Invalid argument type: expected a table or multiple numbers")
-      end
-
+      local values = ___.table.n_cast(...)
       ___.v.n_uniform(values, "number", 1, false)
       return self.sum(values) / #values
     end
@@ -403,17 +393,7 @@ local NumberClass = Glu.glass.register({
     --- -- 2
     --- ```
     function self.mean(...)
-      local args = ___.table.n_cast(...)
-      local values
-
-      if #args == 1 and type(args[1]) == "table" then
-        values = args[1]
-      elseif #args > 1 then
-        values = args
-      else
-        error("Invalid argument type: expected a table or multiple numbers")
-      end
-
+      local values = ___.table.n_cast(...)
       ___.v.n_uniform(values, "number", 1, false)
       return self.sum(values) / #values
     end

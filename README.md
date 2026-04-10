@@ -67,14 +67,4 @@ documentation, guides, and examples.
 
 ## License
 
-[IDGAF License](LICENSE.md) - Do whatever you want with this code. Seriously.
-
-- Use it ✅
-- Modify it ✅
-- Copy it ✅
-- Translate it to Klingon ✅
-- Turn it into a interpretive dance routine ✅
-
-Just have fun and make cool stuff! 🚀
-
-[Liquid glue icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/liquid-glue)
+`glu` is released under the [0BSD](LICENSE.txt).

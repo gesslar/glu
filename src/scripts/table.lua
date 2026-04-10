@@ -164,9 +164,9 @@ local TableClass = Glu.glass.register({
       ___.v.indexed(t, 1, false)
       ___.v.type(start, "number", 2, false)
       ___.v.type(stop, "number", 3, true)
-      ___.v.test(start >= 1, 2, false)
-      ___.v.test(table.size(t) >= start, 2, false)
-      ___.v.test(stop and stop >= start, 3, true)
+      ___.v.test(start >= 1, start, 2, false)
+      ___.v.test(table.size(t) >= start, start, 2, false)
+      ___.v.test(stop and stop >= start, stop, 3, true)
 
       if not stop then
         stop = #t
@@ -183,9 +183,9 @@ local TableClass = Glu.glass.register({
       ___.v.indexed(t, 1, false)
       ___.v.type(start, "number", 2, false)
       ___.v.type(stop, "number", 3, true)
-      ___.v.test(start >= 1, 2, false)
-      ___.v.test(table.size(t) >= start, 2, false)
-      ___.v.test(stop and stop >= start, 3, true)
+      ___.v.test(start >= 1, start, 2, false)
+      ___.v.test(table.size(t) >= start, start, 2, false)
+      ___.v.test(stop and stop >= start, stop, 3, true)
 
       local snipped = {}
       if not stop then stop = start end
@@ -202,7 +202,7 @@ local TableClass = Glu.glass.register({
 
       local result = {}
       for i = 1, #t, size do
-        result[#result + 1] = ___.slice(t, i, i + size - 1)
+        result[#result + 1] = self.slice(t, i, math.min(i + size - 1, #t))
       end
       return result
     end
@@ -228,15 +228,15 @@ local TableClass = Glu.glass.register({
     function self.drop(tbl, n)
       ___.v.indexed(tbl, 1, false)
       ___.v.type(n, "number", 2, false)
-      ___.v.test(n >= 1, 2, false)
-      return self.slice(___, tbl, n + 1)
+      ___.v.test(n >= 1, n, 2, false)
+      return self.slice(tbl, n + 1)
     end
 
     function self.drop_right(tbl, n)
       ___.v.indexed(tbl, 1, false)
       ___.v.type(n, "number", 2, false)
-      ___.v.test(n >= 1, 2, false)
-      return self.slice(___, tbl, 1, #tbl - n)
+      ___.v.test(n >= 1, n, 2, false)
+      return self.slice(tbl, 1, #tbl - n)
     end
 
     function self.fill(tbl, value, start, stop)
@@ -244,8 +244,8 @@ local TableClass = Glu.glass.register({
       ___.v.type(value, "any", 2, false)
       ___.v.type(start, "number", 3, true)
       ___.v.type(stop, "number", 4, true)
-      ___.v.test(start and start >= 1, value, 3, true)
-      ___.v.test(stop and stop >= start, value, 4, true)
+      if start then ___.v.test(start >= 1, start, 3, false) end
+      if stop then ___.v.test(stop >= (start or 1), stop, 4, false) end
 
       for i = start or 1, stop or #tbl do
         tbl[i] = value
@@ -283,7 +283,7 @@ local TableClass = Glu.glass.register({
       local result = {}
       for _, v in ipairs(tbl) do
         if type(v) == "table" then
-          ___.concat(result, v)
+          self.concat(result, v)
         else
           table.insert(result, v)
         end
@@ -309,7 +309,8 @@ local TableClass = Glu.glass.register({
 
     function self.initial(tbl)
       ___.v.indexed(tbl, 1, false)
-      return self.slice(___, tbl, 1, #tbl - 1)
+      if #tbl <= 1 then return {} end
+      return self.slice(tbl, 1, #tbl - 1)
     end
 
     function self.pull(tbl, ...)
@@ -391,16 +392,16 @@ local TableClass = Glu.glass.register({
     end
 
     function self.new_weak(opt)
-      ___.v.test(rex.match(opt, "^(k?v?|v?k?)$"), opt, 1, true)
-
       opt = opt or "v"
+      ___.v.test(rex.match(opt, "^(k?v?|v?k?)$"), opt, 1, false)
 
       return setmetatable({}, { __mode = opt })
     end
 
     function self.weak(tbl)
       ___.v.type(tbl, "table", 1, false)
-      return getmetatable(tbl) and getmetatable(tbl).__mode ~= nil
+      local mt = getmetatable(tbl)
+      return mt ~= nil and mt.__mode ~= nil
     end
 
     function self.zip(...)
@@ -571,7 +572,8 @@ local TableClass = Glu.glass.register({
 
     local assure_equality_function = function(condition)
       if type(condition) ~= "function" then
-        condition = function(_, k) return k == condition end
+        local target = condition
+        condition = function(element) return element == target end
       end
       return condition
     end
@@ -598,7 +600,7 @@ local TableClass = Glu.glass.register({
 
       condition = assure_equality_function(condition)
 
-      return table.n_filter(tbl, condition) ~= nil
+      return #table.n_filter(tbl, condition) > 0
     end
 
     function self.none(tbl, condition)
@@ -607,7 +609,7 @@ local TableClass = Glu.glass.register({
 
       condition = assure_equality_function(condition)
 
-      return table.n_filter(tbl, condition) == nil
+      return #table.n_filter(tbl, condition) == 0
     end
 
     function self.one(tbl, condition)
@@ -616,7 +618,7 @@ local TableClass = Glu.glass.register({
 
       condition = assure_equality_function(condition)
 
-      return table.n_filter(tbl, condition) ~= nil and #table.n_filter(tbl, condition) == 1
+      return #table.n_filter(tbl, condition) == 1
     end
 
     function self.count(tbl, condition)
@@ -629,7 +631,6 @@ local TableClass = Glu.glass.register({
     end
 
     function self.natural_sort(tble)
-      print("We here")
       ___.v.indexed(tble, 1, false)
 
       local sorted = {}

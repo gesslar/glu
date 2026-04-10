@@ -59,7 +59,7 @@ local StringClass = Glu.glass.register({
     --- ```
     function self.rtrim(str)
       ___.v.type(str, "string", 1, false)
-      return str:match("^.-%s*$")
+      return str:match("^(.-)%s*$")
     end
 
     --- Strips line breaks from a string.
@@ -174,7 +174,7 @@ local StringClass = Glu.glass.register({
     --- @param decimal string - The decimal separator (optional, defaults to ".")
     --- @return string - The formatted number
     function self.format_number(number, thousands, decimal)
-      ___.v.type(number, { "number|string" }, 1, false)
+      ___.v.type(number, "number|string", 1, false)
       ___.v.type(thousands, "string", 2, true)
       ___.v.type(decimal, "string", 3, true)
 
@@ -183,7 +183,7 @@ local StringClass = Glu.glass.register({
       decimal = decimal or "."
 
       number = tonumber(number) or 0
-      local is_negative = not ___.number.positive(number)
+      local is_negative = number < 0
       number = math.abs(number)
 
       -- Convert to string if needed
@@ -197,7 +197,7 @@ local StringClass = Glu.glass.register({
       local length = #intPart
 
       for i = 1, length do
-        if i > 1 and (length - i + 1) % 3 == 0 then
+        if i > 1 and (i - 1) % 3 == 0 then
           formatted = thousands .. formatted
         end
         formatted = intPart:sub(length - i + 1, length - i + 1) .. formatted
@@ -233,12 +233,12 @@ local StringClass = Glu.glass.register({
       thousands = thousands or ","
       decimal = decimal or "."
 
-      -- Remove thousands separators
-      str = str:gsub(thousands, "") or str
+      -- Remove thousands separators (escape for pattern matching)
+      str = str:gsub(thousands:gsub("([%.%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1"), "") or str
 
       -- Convert decimal separator to period if different
       if decimal ~= "." then
-        str = str:gsub(decimal, ".") or str
+        str = str:gsub(decimal:gsub("([%.%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1"), ".") or str
       end
 
       -- Convert to number
@@ -300,8 +300,8 @@ local StringClass = Glu.glass.register({
     function self.contains(str, pattern)
       ___.v.type(str, "string", 1, false)
       ___.v.type(pattern, "string", 2, false)
-      ___.v.test(not self.starts_with(pattern, "^"), "Expected pattern to not start with ^", 2)
-      ___.v.test(not self.ends_with(pattern, "$"), "Expected pattern to not end with $", 2)
+      ___.v.test(string.sub(pattern, 1, 1) ~= "^", "Expected pattern to not start with ^", 2)
+      ___.v.test(string.sub(pattern, -1) ~= "$", "Expected pattern to not end with $", 2)
 
       return rex.match(str, pattern) ~= nil
     end
@@ -352,145 +352,140 @@ local StringClass = Glu.glass.register({
     --- -- {"foo", "bar"}
     --- ```
     function self.reg_assoc(text, patterns, tokens, default_token)
+      ___.v.type(text, "string", 1, false)
+      ___.v.type(patterns, "table", 2, false)
+      ___.v.type(tokens, "table", 3, false)
+
       default_token = default_token or -1
       local work = text
-
       local results = {}
       local token_list = {}
 
-
       while #work > 0 do
-        local nearest_from, nearest_match, nearest_token = nil, nil, nil
+        local nearest_from, nearest_to, nearest_token = nil, nil, nil
 
         for i, pattern in ipairs(patterns) do
           local from, to = rex.find(work, pattern)
           if from and to then
             if not nearest_from or from < nearest_from then
-              nearest_from, nearest_match, nearest_token =
-                  from, work:sub(from, to), tokens[i] or default_token
+              nearest_from = from
+              nearest_to = to
+              nearest_token = tokens[i] or default_token
             end
           end
         end
 
-        local prematch = ""
-        local token = nearest_token or default_token
-        local match = nearest_match or work
-        nearest_from = nearest_from or #work
-        prematch = work:sub(1, nearest_from - 1 or nil)
-        print("Prematch = `" ..
-        tostring(prematch) .. "` with token `" .. tostring(token) .. "` and match `" .. tostring(match) .. "`")
-
-        work = work:sub(nearest_from + #match) or ""
-        --[[
         if nearest_from then
-          token = nearest_token or default_token
-          match = nearest_match or work
-          prematch = ""
+          -- Add pre-match text (if any) with default token
+          if nearest_from > 1 then
+            table.insert(results, work:sub(1, nearest_from - 1))
+            table.insert(token_list, default_token)
+          end
+
+          -- Add the match with its associated token
+          table.insert(results, work:sub(nearest_from, nearest_to))
+          table.insert(token_list, nearest_token)
+
+          -- Continue with remaining text
+          work = work:sub(nearest_to + 1)
         else
-          token = default_token
-          nearest_from = #work
-          match = work
-          work = ""
+          -- No match found — remaining text gets default token
+          table.insert(results, work)
+          table.insert(token_list, default_token)
           break
-        end
-
-        -- The text between 1 and the nearest match
-        local pre_match = work:sub(1, nearest_from - 1 or nil)
---]]
-        -- Add it to the results
-        table.insert(results, pre_match)
-        table.insert(token_list, default_token)
-
-        if #match > 0 then
-          table.insert(results, match)
-          table.insert(token_list, token)
         end
       end
 
       return results, token_list
     end
 
-    function is_alpha(char)
+    function self.is_alpha(char)
       ___.v.type(char, "string", 1, false)
       ___.v.test(#char == 1, "Expected a single character", 1)
 
       return rex.match(char, "^[a-zA-Z]$") ~= nil
     end
 
-    function is_numeric(char)
+    function self.is_numeric(char)
       ___.v.type(char, "string", 1, false)
       ___.v.test(#char == 1, "Expected a single character", 1)
 
       return rex.match(char, "^[0-9]$") ~= nil
     end
 
-    function is_alphanumeric(char)
+    function self.is_alphanumeric(char)
       ___.v.type(char, "string", 1, false)
       ___.v.test(#char == 1, "Expected a single character", 1)
 
       return rex.match(char, "^[a-zA-Z0-9]$") ~= nil
     end
 
-    function is_whitespace(char)
+    function self.is_whitespace(char)
       ___.v.type(char, "string", 1, false)
       ___.v.test(#char == 1, "Expected a single character", 1)
 
-      return rex.match(char, "^%s$") ~= nil
+      return rex.match(char, "^\\s$") ~= nil
     end
 
-    function is_punctuation(char)
+    function self.is_punctuation(char)
       ___.v.type(char, "string", 1, false)
       ___.v.test(#char == 1, "Expected a single character", 1)
 
-      return rex.match(char, "^[^a-zA-Z0-9%s]$") ~= nil
+      return rex.match(char, "^[^a-zA-Z0-9\\s]$") ~= nil
     end
 
-    function is_uppercase(char)
+    function self.is_uppercase(char)
       ___.v.type(char, "string", 1, false)
       ___.v.test(#char == 1, "Expected a single character", 1)
 
       return rex.match(char, "^[A-Z]$") ~= nil
     end
 
-    -- TODO: handle 1 or more
-    function is_lowercase(char)
+    function self.is_lowercase(char)
       ___.v.type(char, "string", 1, false)
       ___.v.test(#char == 1, "Expected a single character", 1)
 
       return rex.match(char, "^[a-z]$") ~= nil
     end
 
-    function split_natural(str)
+    function self.split_natural(str)
       ___.v.type(str, "string", 1, false)
 
-      local resulit, current, is_numeric = {}, {}, false
+      local result = {}
+      local current = {}
+      local curr_is_num = false
 
-      local chars = {}
-      for c in self.walk(str) do
+      for i = 1, #str do
+        local c = str:sub(i, i)
         local new_is_num = self.is_numeric(c)
 
-        if i > 1 and new_is_num ~= is_num then
+        if i > 1 and new_is_num ~= curr_is_num then
           local chunk = table.concat(current)
-          if is_num then
-            table.push(result, tonumber(chunk))
+          if curr_is_num then
+            table.insert(result, tonumber(chunk))
           else
             table.insert(result, chunk)
           end
           current = {}
         end
 
-        if #current > 0 then
-          local chunk = table.concat(current)
-          if is_num then
-            self.push(result, tonumber(chunk))
-          else
-            table.insert(result, chunk)
-          end
+        table.insert(current, c)
+        curr_is_num = new_is_num
+      end
+
+      if #current > 0 then
+        local chunk = table.concat(current)
+        if curr_is_num then
+          table.insert(result, tonumber(chunk))
+        else
+          table.insert(result, chunk)
         end
       end
+
+      return result
     end
 
-    function natural_compare(a, b)
+    function self.natural_compare(a, b)
       local a_parts = self.split_natural(a)
       local b_parts = self.split_natural(b)
 

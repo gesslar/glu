@@ -13,7 +13,11 @@ local ConditionsClass = Glu.glass.register({
       assert(type(message) == "string" or message == nil, "Expected a string or nil as the second argument")
 
       raiseEvent("condition_is", condition)
-      return condition, condition and nil or message
+      if condition then
+        return true, nil
+      end
+
+      return false, message
     end
 
     --- Checks if a condition is true.

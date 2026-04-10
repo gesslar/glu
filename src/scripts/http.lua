@@ -7,7 +7,7 @@ local HttpClass = Glu.glass.register({
       ___.v.type(options, "table", 1, false)
       ___.v.not_empty(options, 1, false)
       ___.v.type(options.method, "string", 2, false)
-      ___.v.regex(options.url, ___.regex.http_url, "url", 1, false)
+      ___.v.regex(options.url, ___.regex.http_url, 1, false)
       ___.v.type(options.callback, "function", 1, false)
     end
 

@@ -52,8 +52,7 @@ local SameClass = Glu.glass.register({
         if value1 ~= value1 and value2 ~= value2 then -- Check if both x and y are NaN
           return true
         elseif value1 == 0 and value2 == 0 then
-          -- Handle +0 and -0 (they are considered different)
-          return 1 / value1 == 1 / value2 -- +0 and -0 have different reciprocals
+          return true
         elseif value1 == value2 then
           return true
         else

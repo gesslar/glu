@@ -149,14 +149,11 @@ local FdClass = Glu.glass.register({
     function self.fix_path(path)
       ___.v.type(path, "string", 1, false)
 
-      local result, num = rex.gsub(rex.gsub(path, "\\\\", "/"), "//", "/")
-      if not result or num == 0 then return path, 0 end
+      local step1, num1 = rex.gsub(path, "\\\\", "/")
+      local result, num2 = rex.gsub(step1, "//", "/")
+      local num = num1 + num2
+      if num == 0 then return path, 0 end
 
-      if result:sub(-1) == "/" then
-        result = result:sub(1, -2) or ""
-      end
-
-      ---@diagnostic disable-next-line: return-type-mismatch
       return result, num
     end
 

@@ -105,27 +105,29 @@ local ColourClass = Glu.glass.register({
 
     --- Converts an RGB colour to a hex string.
     --- @param rgb table - The RGB colour as a table with three elements: red, green, and blue.
-    --- @param include_background boolean - Whether to include a background colour. (Optional, defaults to false)
+    --- @param background table - An optional background RGB colour as a table with three elements: red, green, and blue.
     --- @return string - The hex string.
     ---
     --- @example
     --- ```lua
     --- colour.to_hex({255, 255, 255})
     --- -- "#ffffff"
+    --- colour.to_hex({255, 255, 255}, {0, 0, 0})
+    --- -- "#ffffff,000000"
     --- ```
-    function self.to_hex(rgb, include_background)
+    function self.to_hex(rgb, background)
       ___.v.rgb_table(rgb, 1, false)
-      ___.v.type(include_background, "boolean", 2, true)
+      ___.v.rgb_table(background, 2, true)
 
       -- Convert RGB to hex format
       local function to_hex_part(r, g, b)
         return string.format("%02x%02x%02x", r, g, b)
       end
 
-      if include_background then
+      if background then
         -- If there's a background color, return format for "fg,bg"
         return "#" .. to_hex_part(rgb[1], rgb[2], rgb[3]) .. "," ..
-            to_hex_part(bg[1], bg[2], bg[3])
+            to_hex_part(background[1], background[2], background[3])
       else
         -- Just foreground color
         return "#" .. to_hex_part(rgb[1], rgb[2], rgb[3])
@@ -539,6 +541,8 @@ local ColourClass = Glu.glass.register({
   valid = function(___, self)
     return {
       rgb_table = function(colour, argument_index, nil_allowed)
+        if nil_allowed and colour == nil then return end
+
         local last = ___.v.get_last_traceback_line()
 
         ___.v.type(colour, "table", argument_index, nil_allowed)
@@ -565,6 +569,8 @@ local ColourClass = Glu.glass.register({
           argument_index .. ". Expected number between 0 and 255, got " .. colour[3] .. " in\n" .. last)
       end,
       hsl_table = function(hsl, argument_index, nil_allowed)
+        if nil_allowed and hsl == nil then return end
+
         local last = ___.v.get_last_traceback_line()
 
         ___.v.type(hsl, "table", argument_index, nil_allowed)

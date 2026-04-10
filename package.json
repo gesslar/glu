@@ -1,18 +1,23 @@
 {
   "name": "glu",
-  "version": "1.18.0",
+  "version": "1.19.0",
   "description": "![Y2K Compliant](https://img.shields.io/badge/Y2K-Compliant-success?style=flat&logo=data:...)",
   "main": "index.js",
   "scripts": {
-    "build": "(\nset -e pipefail\nmuddle\nnpm run build:single\nnpm run build:min\n)",
+    "build": "(\nset -e pipefail\nnpx @gesslar/muddy\nnpm run build:single\nnpm run build:min\n)",
     "build:single": "python unify.py src/scripts build/Glu-single.lua",
     "build:min": "python unify.py src/scripts build/tmp/Glu-unified.lua && python mini.py build/tmp/Glu-unified.lua build/Glu-min.lua",
     "clean": "rm -rf build/Glu-*.lua build/filtered build/tmp",
     "release": "gh workflow run release.yml",
     "docs": "gh workflow run wiki_documentation.yml",
-    "watch": "pnpx @gesslar/muddy -w"
+    "watch": "npx @gesslar/muddy -w",
+    "test": "docker run --rm -v \"$PWD\":/workspace gesslardev/mudlet-busted",
+    "docker:update": "docker pull gesslardev/mudlet-busted"
   },
   "keywords": [],
   "author": "gesslar",
-  "license": "Unlicense"
+  "license": "0BSD",
+  "devDependencies": {
+    "@gesslar/bedoc": "^1.11.0"
+  }
 }

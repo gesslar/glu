@@ -54,9 +54,9 @@ local UrlClass = Glu.glass.register({
     function self.decode_params(query_string)
       local params = {}
       for key_value in rex.gmatch(query_string, "([^&]+)") do
-        local key, value = rex.match(key_value, "([^=]+)=([^=]+)")
-        if key and value then
-          params[self.decode(key)] = self.decode(value)
+        local key, value = rex.match(key_value, "([^=]+)=(.*)")
+        if key then
+          params[self.decode(key)] = self.decode(value or "")
         end
       end
       return params
@@ -101,8 +101,11 @@ local UrlClass = Glu.glass.register({
     function self.parse(url)
       ___.v.type(url, "string", 1, false)
 
-      local protocol, host, port, path, query_string = rex.match(url, "^(https?)://([^/:]+)(?::(\\d+))?/([^?]*)\\??(.*)")
-      local file = (rex.match(path, "([^/]+)$") or path)
+      local protocol, host, port, path, query_string = rex.match(url, "^(https?)://([^/:?]+)(?::(\\d+))?(?:/([^?]*))?(?:\\?(.*))?$")
+      -- rex.match returns false for unmatched optional captures
+      path = path or nil
+      query_string = query_string or nil
+      local file = path and (rex.match(path, "([^/]+)$") or path) or nil
       local params = self.decode_params(query_string or "")
 
       protocol = protocol and protocol or "http"

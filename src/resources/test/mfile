@@ -5,8 +5,5 @@
   "author": "gesslar",
   "icon": "liquid-glue.png",
   "dependencies": "",
-  "outputFile": true,
-  "ignore": [
-    "resources/test/*"
-  ]
+  "outputFile": true
 }
