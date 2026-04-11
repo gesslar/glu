@@ -1,0 +1,16 @@
+name: Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true
+    uses: gesslar/Maint/.github/workflows/ReleaseMudlet.yaml@main
+    secrets: inherit
+    permissions:
+      contents: write
+    with:
+      quality_check: Quality

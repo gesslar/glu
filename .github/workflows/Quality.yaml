@@ -1,0 +1,15 @@
+name: Quality
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  Quality:
+    uses: gesslar/Maint/.github/workflows/QualityMudlet.yaml@main
+    secrets: inherit
+    with:
+      perform_testing: "${{ vars.PERFORM_TESTING || 'yes' }}"
