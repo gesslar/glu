@@ -4,12 +4,31 @@
 
 A modular utility library for Mudlet that just works. No fuss, no muss.
 
+## Installation
+
+Glu ships in two forms, depending on how you use it.
+
+### For package authors (recommended)
+
+Bundle `Glu-single.lua` in your package and `require` it. Each package gets
+its own isolated copy — no globals, no version collisions between packages.
+
+```lua
+local glu = require("__PKGNAME__/Glu-single")("__PKGNAME__")
+```
+
+### For personal use
+
+Install the `Glu.mpackage` directly in Mudlet. Glu is available globally
+from the script editor for ad-hoc scripting without needing to manage files.
+
+```lua
+local glu = Glu("MyPackage")
+```
+
 ## Quick Start
 
 ```lua
--- Get some Glu in your life
-local glu = Glu("MyPackage")
-
 -- Iterate over a string? Easy.
 for i, part in glu.string.walk("hello world") do
   if math.random() > 0.5 then
@@ -45,8 +64,6 @@ local just_values = glu.table.values(data)         -- {1, 2, 3}
 Want to add your own stuff? Register your own glasses on a Glu instance:
 
 ```lua
-local glu = Glu("MyPackage")
-
 glu.register({
   name = "awesome",
   class_name = "AwesomeClass",

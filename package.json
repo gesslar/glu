@@ -1,6 +1,6 @@
 {
   "name": "glu",
-  "version": "1.19.0",
+  "version": "1.20.0",
   "description": "![Y2K Compliant](https://img.shields.io/badge/Y2K-Compliant-success?style=flat&logo=data:...)",
   "main": "index.js",
   "scripts": {
