@@ -42,10 +42,12 @@ local just_values = glu.table.values(data)         -- {1, 2, 3}
 
 ## Extend It
 
-Want to add your own stuff? Glu's got you covered:
+Want to add your own stuff? Register your own glasses on a Glu instance:
 
 ```lua
-Glu.glass.register({
+local glu = Glu("MyPackage")
+
+glu.register({
   name = "awesome",
   class_name = "AwesomeClass",
   setup = function(___, self)

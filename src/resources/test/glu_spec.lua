@@ -369,6 +369,418 @@ describe("glu core framework", function()
   end)
 
   -- ========================================================================
+  -- instance.register (post-construction registration)
+  -- ========================================================================
+
+  describe("instance.register", function()
+    it("should have a register function on the instance", function()
+      assert.are.equal("function", type(g.register))
+    end)
+
+    it("should register and instantiate a simple glass", function()
+      g.register({
+        name = "post_reg_simple",
+        class_name = "PostRegSimpleClass",
+        dependencies = {},
+        setup = function(___, self)
+          function self.greet(name)
+            return "hello " .. name
+          end
+        end
+      })
+
+      assert.is_truthy(g.post_reg_simple)
+      assert.are.equal("hello world", g.post_reg_simple.greet("world"))
+    end)
+
+    it("should return the registered glass class", function()
+      local glass = g.register({
+        name = "post_reg_returns",
+        class_name = "PostRegReturnsClass",
+        dependencies = {},
+        setup = function(___, self) end
+      })
+
+      assert.is_truthy(glass)
+      assert.are.equal("post_reg_returns", glass.name)
+      assert.are.equal("PostRegReturnsClass", glass.class_name)
+    end)
+
+    it("should make the glass available via has_object", function()
+      g.register({
+        name = "post_reg_has_obj",
+        class_name = "PostRegHasObjClass",
+        dependencies = {},
+        setup = function(___, self) end
+      })
+
+      assert.is_true(g.has_object("post_reg_has_obj"))
+    end)
+
+    it("should make the glass available via get_object", function()
+      g.register({
+        name = "post_reg_get_obj",
+        class_name = "PostRegGetObjClass",
+        dependencies = {},
+        setup = function(___, self) end
+      })
+
+      local obj = g.get_object("post_reg_get_obj")
+      assert.is_truthy(obj)
+    end)
+
+    it("should also register in the global glass registry", function()
+      g.register({
+        name = "post_reg_global",
+        class_name = "PostRegGlobalClass",
+        dependencies = {},
+        setup = function(___, self) end
+      })
+
+      assert.is_true(Glu.has_glass("post_reg_global"))
+    end)
+
+    it("should give the glass access to the glu instance via ___", function()
+      g.register({
+        name = "post_reg_glu_access",
+        class_name = "PostRegGluAccessClass",
+        dependencies = {},
+        setup = function(___, self)
+          function self.get_package_name()
+            return ___.getPackageName()
+          end
+        end
+      })
+
+      assert.are.equal("Glu", g.post_reg_glu_access.get_package_name())
+    end)
+
+    it("should resolve dependencies on existing glasses", function()
+      g.register({
+        name = "post_reg_with_deps",
+        class_name = "PostRegWithDepsClass",
+        dependencies = { "table" },
+        setup = function(___, self)
+          function self.get_values(t)
+            return ___.table.values(t)
+          end
+        end
+      })
+
+      local vals = g.post_reg_with_deps.get_values({ a = 1, b = 2 })
+      assert.are.equal(2, #vals)
+    end)
+
+    it("should support callable glasses via call option", function()
+      g.register({
+        name = "post_reg_callable",
+        class_name = "PostRegCallableClass",
+        dependencies = {},
+        call = "create",
+        setup = function(___, self)
+          function self.create(value)
+            return { value = value, doubled = value * 2 }
+          end
+        end
+      })
+
+      local result = g.post_reg_callable(21)
+      assert.are.equal(21, result.value)
+      assert.are.equal(42, result.doubled)
+    end)
+
+    it("should not re-register an already registered glass", function()
+      local first = g.register({
+        name = "post_reg_idempotent",
+        class_name = "PostRegIdempotentClass",
+        dependencies = {},
+        setup = function(___, self)
+          self.marker = "first"
+        end
+      })
+
+      local second = g.register({
+        name = "post_reg_idempotent",
+        class_name = "PostRegIdempotentClass",
+        dependencies = {},
+        setup = function(___, self)
+          self.marker = "second"
+        end
+      })
+
+      assert.are.equal(first, second)
+    end)
+
+    it("should error on missing name", function()
+      assert.has_error(function()
+        g.register({
+          class_name = "NoNameClass",
+          setup = function() end
+        })
+      end)
+    end)
+
+    it("should error on missing class_name", function()
+      assert.has_error(function()
+        g.register({
+          name = "post_reg_no_class",
+          setup = function() end
+        })
+      end)
+    end)
+
+    it("should error on missing setup", function()
+      assert.has_error(function()
+        g.register({
+          name = "post_reg_no_setup",
+          class_name = "NoSetupClass"
+        })
+      end)
+    end)
+
+    it("should error on non-table opts", function()
+      assert.has_error(function()
+        g.register("not a table")
+      end)
+    end)
+
+    it("should support valid function for custom validators", function()
+      g.register({
+        name = "post_reg_valid",
+        class_name = "PostRegValidClass",
+        dependencies = {},
+        setup = function(___, self) end,
+        valid = function(___, self)
+          return {
+            is_positive = function(value, argument_index)
+              assert(type(value) == "number" and value > 0,
+                "value must be a positive number for argument " .. argument_index)
+            end
+          }
+        end
+      })
+
+      assert.is_truthy(g.v.is_positive)
+      assert.has_no.errors(function()
+        g.v.is_positive(5, 1)
+      end)
+      assert.has_error(function()
+        g.v.is_positive(-1, 1)
+      end)
+    end)
+  end)
+
+  -- ========================================================================
+  -- instance.register edge cases
+  -- ========================================================================
+
+  describe("instance.register edge cases", function()
+    it("should error when extending an unregistered parent", function()
+      assert.has_error(function()
+        g.register({
+          name = "edge_orphan_child",
+          class_name = "EdgeOrphanChildClass",
+          extends = "edge_nonexistent_parent",
+          dependencies = {},
+          setup = function(___, self) end
+        })
+      end)
+    end)
+
+    it("should support extends when parent is registered post-construction", function()
+      g.register({
+        name = "edge_late_parent",
+        class_name = "EdgeLateParentClass",
+        dependencies = {},
+        setup = function(___, self)
+          function self.parent_method()
+            return "from parent"
+          end
+        end
+      })
+
+      g.register({
+        name = "edge_late_child",
+        class_name = "EdgeLateChildClass",
+        extends = "edge_late_parent",
+        dependencies = {},
+        setup = function(___, self)
+          function self.child_method()
+            return "from child"
+          end
+        end
+      })
+
+      assert.is_truthy(g.edge_late_child)
+      assert.are.equal("from child", g.edge_late_child.child_method())
+      assert.are.equal("from parent", g.edge_late_child.parent_method())
+    end)
+
+    it("should error when dependency does not exist", function()
+      assert.has_error(function()
+        g.register({
+          name = "edge_bad_dep",
+          class_name = "EdgeBadDepClass",
+          dependencies = { "totally_nonexistent_module" },
+          setup = function(___, self) end
+        })
+      end)
+    end)
+
+    it("should error when adopting from a non-existent class", function()
+      assert.has_error(function()
+        g.register({
+          name = "edge_bad_adopt",
+          class_name = "EdgeBadAdoptClass",
+          dependencies = {},
+          adopts = {
+            nonexistent_class = {
+              methods = { "some_method" }
+            }
+          },
+          setup = function(___, self) end
+        })
+      end)
+    end)
+
+    it("should not clobber state when registering same glass twice", function()
+      g.register({
+        name = "edge_double_reg",
+        class_name = "EdgeDoubleRegClass",
+        dependencies = {},
+        setup = function(___, self)
+          self.counter = (self.counter or 0) + 1
+          function self.get_counter()
+            return self.counter
+          end
+        end
+      })
+
+      local first_counter = g.edge_double_reg.get_counter()
+
+      -- Register again with same name - should be idempotent
+      g.register({
+        name = "edge_double_reg",
+        class_name = "EdgeDoubleRegClass",
+        dependencies = {},
+        setup = function(___, self)
+          self.counter = 999
+        end
+      })
+
+      -- Counter should not have changed
+      assert.are.equal(first_counter, g.edge_double_reg.get_counter())
+    end)
+
+    it("should make post-registered glass available to a new instance", function()
+      -- Register on g first
+      g.register({
+        name = "edge_cross_instance",
+        class_name = "EdgeCrossInstanceClass",
+        dependencies = {},
+        setup = function(___, self)
+          function self.ping()
+            return "pong"
+          end
+        end
+      })
+
+      -- New instance should have it since it's now in registeredGlasses
+      local g2 = Glu("Glu")
+      assert.is_truthy(g2.edge_cross_instance)
+      assert.are.equal("pong", g2.edge_cross_instance.ping())
+    end)
+
+    it("should support a post-registered glass using another post-registered glass", function()
+      g.register({
+        name = "edge_provider",
+        class_name = "EdgeProviderClass",
+        dependencies = {},
+        setup = function(___, self)
+          function self.get_value()
+            return 42
+          end
+        end
+      })
+
+      g.register({
+        name = "edge_consumer",
+        class_name = "EdgeConsumerClass",
+        dependencies = { "edge_provider" },
+        setup = function(___, self)
+          function self.get_doubled()
+            return ___.edge_provider.get_value() * 2
+          end
+        end
+      })
+
+      assert.are.equal(84, g.edge_consumer.get_doubled())
+    end)
+
+    it("should support callable glass that returns complex objects", function()
+      g.register({
+        name = "edge_factory",
+        class_name = "EdgeFactoryClass",
+        dependencies = {},
+        call = "create",
+        setup = function(___, self)
+          function self.create(name, value)
+            local obj = { name = name, value = value }
+            function obj.describe()
+              return obj.name .. "=" .. tostring(obj.value)
+            end
+            return obj
+          end
+        end
+      })
+
+      local thing = g.edge_factory("foo", 123)
+      assert.are.equal("foo=123", thing.describe())
+
+      -- Factory itself is still there
+      local thing2 = g.edge_factory("bar", 456)
+      assert.are.equal("bar=456", thing2.describe())
+    end)
+
+    it("should support extends on an already-instantiated built-in glass", function()
+      g.register({
+        name = "edge_extends_builtin",
+        class_name = "EdgeExtendsBuiltinClass",
+        extends = "queue",
+        dependencies = {},
+        setup = function(___, self)
+          function self.custom_method()
+            return "extended"
+          end
+        end
+      })
+
+      assert.is_truthy(g.edge_extends_builtin)
+      assert.are.equal("extended", g.edge_extends_builtin.custom_method())
+      -- Should have parent's methods via __index
+      assert.is_truthy(g.edge_extends_builtin.push)
+    end)
+
+    it("should support adopts from an existing glass", function()
+      g.register({
+        name = "edge_adopter",
+        class_name = "EdgeAdopterClass",
+        dependencies = {},
+        adopts = {
+          string = {
+            methods = { "trim" }
+          }
+        },
+        setup = function(___, self) end
+      })
+
+      assert.is_truthy(g.edge_adopter)
+      assert.is_truthy(g.edge_adopter.trim)
+      assert.are.equal("hello", g.edge_adopter.trim("  hello  "))
+    end)
+  end)
+
+  -- ========================================================================
   -- handler_name (uninstall event)
   -- ========================================================================
 
