@@ -150,8 +150,11 @@ BuffItem = BuffItem or {
   end
 }
 
+-- Register it with Glu!
+glu.register(BuffItem)
+
 -- Make it real!
-local item = ThreshBuff.glu.buff_item({
+local item = glu.buff_item({
    message = "hi there",
    color = "black",
    fgColor = "white",
