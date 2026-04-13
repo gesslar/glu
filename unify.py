@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import re
 import json
 import argparse
 from pathlib import Path
@@ -55,6 +56,20 @@ class GluUnifier:
             with open(script_path, 'r', encoding='utf-8') as f:
                 content = f.read()
                 total_size += len(content)
+
+            # For single-file distribution, make Glu local to the chunk
+            # so each package gets its own isolated copy via require().
+            # Strip the global guard and its closing end.
+            if script_name == 'glu.lua':
+                content = re.sub(
+                    r'^if not _G\["Glu"\] then\n',
+                    'local Glu\n',
+                    content,
+                    count=1,
+                    flags=re.MULTILINE,
+                )
+                # Remove the final `end` that closes the guard
+                content = re.sub(r'\nend\s*$', '', content)
 
             # Add a comment to mark the start of each file
             processed_content.append(f"\n-- File: {script_name}")
