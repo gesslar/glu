@@ -63,6 +63,8 @@ local just_values = glu.table.values(data)         -- {1, 2, 3}
 
 Want to add your own stuff? Register your own glasses on a Glu instance:
 
+### Simple utility glass
+
 ```lua
 glu.register({
   name = "awesome",
@@ -76,7 +78,86 @@ glu.register({
 })
 
 -- Now use it!
-local doubled = glu.awesome.double_it(21)  -- 42
+local doubled = glu.awesome.double_it(21) -- 42
+```
+
+### A Geyser component
+
+*Warning: Advanced Usage! May cause hysteria!*
+
+```lua
+BuffItem = BuffItem or {
+  name = "buff_item",
+  class_name = "BuffItemClass",
+  call = "new",
+  setup = function(___, self)
+    local function fade(widget, cb)
+      local timer_name = ___.id()
+
+      local curr_fg, curr_bg
+
+      curr_fg = { Geyser.Color.parse(widget.fgColor) }
+      curr_bg = { Geyser.Color.parse(widget.color) }
+
+      widget:echo(nil, "nocolor", nil)
+
+      curr_fg[4] = 255
+      curr_bg[4] = 255
+
+      local steps = 50
+      local duration = 1
+      local delay_per_step = duration / steps
+      local fade_per_step = ___.number.round(255 / steps, 0)
+
+      registerNamedTimer(
+        timer_name,
+        timer_name,
+        delay_per_step,
+        function()
+          curr_fg[4] = curr_fg[4] - fade_per_step
+          curr_bg[4] = curr_bg[4] - fade_per_step
+
+          local ss =
+              "color: rgba(" .. table.concat(curr_fg, ",") .. ");"
+              ..
+              "background-color: rgba(" .. table.concat(curr_bg, ",") .. ");"
+
+          widget:setStyleSheet(ss)
+
+          steps = steps - 1
+
+          if steps < 0 then
+            deleteNamedTimer(timer_name, timer_name)
+            cb()
+          end
+        end,
+        true
+      )
+    end
+
+    function self.new(opts, parent)
+      local instance = {}
+      opts = opts or {}
+
+      instance.label = Geyser.Label:new(opts, parent)
+
+      function instance:delete()
+        fade(self.label, function() instance.label:delete() end)
+      end
+
+      return instance
+    end
+  end
+}
+
+-- Make it real!
+local item = ThreshBuff.glu.buff_item({
+   message = "hi there",
+   color = "black",
+   fgColor = "white",
+}, someContainer)
+
+item:delete()
 ```
 
 ## Documentation
