@@ -2,8 +2,8 @@ name: Release
 
 on:
   pull_request:
-    types: [closed]
-    branches: [main]
+    types: [ closed ]
+    branches: [ main ]
 
 jobs:
   release:
@@ -12,5 +12,3 @@ jobs:
     secrets: inherit
     permissions:
       contents: write
-    with:
-      quality_check: Quality
